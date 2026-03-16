@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Pulvion · Operacional</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ── TOKENS ──────────────────────────────────────────────── */
+:root,[data-theme="light"]{
+  --gold:#b8942e;--gold-l:#d9b24c;--gold-dim:rgba(184,148,46,0.10);--gold-bdr:rgba(184,148,46,0.26);
+  --gold-hover:rgba(184,148,46,0.15);
+  --bg:#ede9e0;--card:#faf8f4;--card2:#f5f1e8;--surface:#f0ece3;--input-bg:#f5f1e8;
+  --header-bg:rgba(237,233,224,0.95);--header-bdr:rgba(184,148,46,0.18);
+  --border:rgba(184,148,46,0.18);--border-soft:rgba(0,0,0,0.055);
+  --text:#0f1117;--text2:#2d3340;--muted:#5a6273;--dim:#9ba3b0;
+  --success:#16a34a;--success-dim:rgba(22,163,74,0.10);--success-bdr:rgba(22,163,74,0.24);
+  --info:#0284c7;--info-dim:rgba(2,132,199,0.09);--info-bdr:rgba(2,132,199,0.24);
+  --warn:#d97706;--warn-dim:rgba(217,119,6,0.09);--warn-bdr:rgba(217,119,6,0.26);
+  --sub-bg:#f0ece3;--sub-bdr:rgba(0,0,0,0.055);
+  --sh:0 2px 10px rgba(0,0,0,0.07),0 1px 3px rgba(0,0,0,0.045);
+  --sh-up:0 8px 28px rgba(0,0,0,0.10),0 2px 6px rgba(0,0,0,0.06);
+  --r:14px;--rsm:9px;--rlg:20px;
+}
+[data-theme="dark"]{
+  --gold:#d9b24c;--gold-l:#f0d078;--gold-dim:rgba(217,178,76,0.10);--gold-bdr:rgba(217,178,76,0.24);
+  --gold-hover:rgba(217,178,76,0.14);
+  --bg:#060912;--card:#0c1224;--card2:#0f162c;--surface:#111826;--input-bg:#0b1425;
+  --header-bg:rgba(6,9,18,0.94);--header-bdr:rgba(217,178,76,0.16);
+  --border:rgba(217,178,76,0.16);--border-soft:rgba(255,255,255,0.05);
+  --text:#eceae2;--text2:#c8c4ba;--muted:#8b95a8;--dim:#3f4a5c;
+  --success:#22c55e;--success-dim:rgba(34,197,94,0.10);--success-bdr:rgba(34,197,94,0.26);
+  --info:#38bdf8;--info-dim:rgba(56,189,248,0.10);--info-bdr:rgba(56,189,248,0.26);
+  --warn:#f59e0b;--warn-dim:rgba(245,158,11,0.10);--warn-bdr:rgba(245,158,11,0.26);
+  --sub-bg:#0a1020;--sub-bdr:rgba(255,255,255,0.05);
+  --sh:0 2px 10px rgba(0,0,0,0.35),0 1px 3px rgba(0,0,0,0.22);
+  --sh-up:0 8px 28px rgba(0,0,0,0.48),0 2px 6px rgba(0,0,0,0.28);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:'Barlow',sans-serif;font-size:16px;line-height:1.5;
+  color:var(--text);background:var(--bg);min-height:100vh;
+  display:flex;flex-direction:column;
+  transition:background .28s,color .28s;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--gold-bdr);border-radius:3px}
+
+/* HEADER */
+.header{
+  position:sticky;top:0;z-index:200;
+  background:var(--header-bg);border-bottom:1px solid var(--header-bdr);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  padding:0 16px;height:54px;display:flex;align-items:center;gap:10px;
+}
+.h-logo{display:flex;align-items:center;gap:8px;text-decoration:none}
+.h-mark{
+  width:28px;height:28px;border-radius:7px;border:1px solid var(--gold-bdr);
+  background:var(--gold-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.h-mark svg{width:13px;height:13px;stroke:var(--gold);stroke-width:1.8;fill:none}
+.h-name{
+  font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:900;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--gold);
+}
+.h-pipe{width:1px;height:16px;background:var(--gold-bdr);flex-shrink:0}
+.h-section{
+  font-family:'IBM Plex Mono',monospace;font-size:.56rem;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--dim);
+}
+.h-grow{flex:1}
+.h-toggle{
+  width:32px;height:32px;border-radius:var(--rsm);
+  border:1px solid var(--gold-bdr);background:var(--gold-dim);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--gold);cursor:pointer;transition:all .2s;flex-shrink:0;
+}
+.h-toggle:active{transform:scale(.92)}
+.h-toggle svg{width:13px;height:13px;stroke:currentColor;stroke-width:1.8;fill:none}
+.h-sair{display:flex;align-items:center;gap:5px;text-decoration:none;
+  font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;color:var(--muted);
+  padding:6px 10px;border-radius:var(--rsm);border:1px solid transparent;
+  transition:all .18s}
+.h-sair:hover{color:var(--danger,#dc2626);border-color:rgba(220,38,38,.25);background:rgba(220,38,38,.07)}
+.h-sair svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none}
+
+/* PAGE */
+.page{flex:1;max-width:600px;margin:0 auto;width:100%;padding:16px 14px 36px;display:flex;flex-direction:column;gap:11px}
+
+/* GREETING */
+.greeting{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;border-radius:var(--r);
+  background:var(--card);border:1px solid var(--border);box-shadow:var(--sh);
+  animation:fadeUp .4s ease both;
+}
+.g-icon{
+  width:38px;height:38px;border-radius:10px;flex-shrink:0;
+  border:1px solid var(--gold-bdr);background:var(--gold-dim);
+  display:flex;align-items:center;justify-content:center;color:var(--gold);
+}
+.g-icon svg{width:16px;height:16px;stroke:currentColor;stroke-width:1.7;fill:none}
+.g-text{flex:1;min-width:0}
+.g-main{
+  font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:800;
+  letter-spacing:.03em;text-transform:uppercase;color:var(--text);line-height:1.1;
+}
+.g-sub{
+  font-family:'IBM Plex Mono',monospace;font-size:.55rem;letter-spacing:.07em;
+  color:var(--dim);margin-top:2px;text-transform:capitalize;
+}
+.g-badge{
+  display:inline-flex;align-items:center;gap:5px;flex-shrink:0;
+  font-family:'IBM Plex Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 10px;border-radius:999px;
+  border:1px solid var(--success-bdr);background:var(--success-dim);color:var(--success);
+}
+.g-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--success);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* SEARCH */
+.search-wrap{position:relative;animation:fadeUp .4s .04s ease both}
+.s-icon{
+  position:absolute;left:13px;top:50%;transform:translateY(-50%);
+  width:16px;height:16px;stroke:var(--dim);stroke-width:1.8;fill:none;pointer-events:none;
+}
+#searchInput{
+  width:100%;padding:13px 44px 13px 40px;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  font-family:'Barlow',sans-serif;font-size:.95rem;color:var(--text);outline:none;
+  box-shadow:var(--sh);transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;
+}
+#searchInput::placeholder{color:var(--dim)}
+#searchInput:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim),var(--sh)}
+.s-clear{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  width:22px;height:22px;border-radius:50%;background:var(--gold-dim);border:none;
+  display:none;align-items:center;justify-content:center;cursor:pointer;color:var(--gold);
+}
+.s-clear.show{display:flex}
+.s-clear svg{width:11px;height:11px;stroke:currentColor;stroke-width:2.5;fill:none}
+.s-results{
+  position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:100;
+  background:var(--card);border:1px solid var(--gold-bdr);
+  border-radius:var(--r);box-shadow:var(--sh-up);overflow:hidden;display:none;
+}
+.s-results.show{display:block}
+.s-item{
+  display:flex;align-items:center;gap:11px;padding:13px 14px;
+  cursor:pointer;text-decoration:none;
+  border-bottom:1px solid var(--sub-bdr);transition:background .15s;
+}
+.s-item:last-child{border-bottom:none}
+.s-item:active{background:var(--gold-dim)}
+.si-icon{
+  width:32px;height:32px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.si-icon svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.8;fill:none}
+.si-name{font-weight:600;font-size:.9rem;color:var(--text)}
+.si-sub{font-family:'IBM Plex Mono',monospace;font-size:.55rem;letter-spacing:.06em;color:var(--dim);margin-top:1px}
+.si-arr{margin-left:auto;color:var(--dim)}
+.si-arr svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none}
+.s-empty{padding:18px 14px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.06em;color:var(--dim)}
+
+/* SECTION LABEL */
+.sect{
+  font-family:'IBM Plex Mono',monospace;font-size:.57rem;font-weight:400;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--dim);
+  display:flex;align-items:center;gap:8px;padding:0 2px;margin-top:4px;
+}
+.sect::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* MODULE CARD */
+.mod{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--rlg);box-shadow:var(--sh);overflow:hidden;
+  transition:box-shadow .2s,border-color .2s;
+  animation:fadeUp .4s ease both;
+}
+.mod.open{border-color:var(--gold-bdr);box-shadow:var(--sh-up)}
+
+.mod-head{
+  display:flex;align-items:center;gap:14px;
+  padding:18px 16px 18px 18px;cursor:pointer;
+  user-select:none;transition:background .18s;
+}
+.mod-head:active{background:var(--card2)}
+
+.mod-icon{
+  width:48px;height:48px;border-radius:13px;flex-shrink:0;
+  border:1px solid var(--gold-bdr);background:var(--gold-dim);
+  display:flex;align-items:center;justify-content:center;color:var(--gold);
+  transition:transform .2s,box-shadow .2s;
+}
+.mod-icon svg{width:22px;height:22px;stroke:currentColor;stroke-width:1.6;fill:none}
+.mod.open .mod-icon{transform:scale(1.07);box-shadow:0 4px 14px rgba(184,148,46,0.20)}
+
+.mod-info{flex:1;min-width:0}
+.mod-num{
+  font-family:'IBM Plex Mono',monospace;font-size:.53rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:2px;
+}
+.mod-name{
+  font-family:'Barlow Condensed',sans-serif;font-size:1.22rem;font-weight:800;
+  letter-spacing:.02em;text-transform:uppercase;color:var(--text);line-height:1.1;
+}
+.mod-desc{font-size:.78rem;color:var(--muted);margin-top:3px;line-height:1.45}
+
+.mod-chev{
+  width:32px;height:32px;border-radius:8px;flex-shrink:0;
+  border:1px solid var(--border-soft);background:var(--surface);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--dim);transition:transform .26s ease,background .2s,color .2s,border-color .2s;
+}
+.mod-chev svg{width:14px;height:14px;stroke:currentColor;stroke-width:2.2;fill:none}
+.mod.open .mod-chev{
+  transform:rotate(180deg);
+  background:var(--gold-dim);border-color:var(--gold-bdr);color:var(--gold);
+}
+
+/* ACCORDION BODY */
+.mod-body{max-height:0;overflow:hidden;transition:max-height .32s cubic-bezier(.4,0,.2,1)}
+.mod.open .mod-body{max-height:520px}
+.mod-divider{height:1px;background:var(--border);margin:0 16px}
+
+/* SUB-LINKS */
+.sub-list{padding:10px 14px 14px;display:flex;flex-direction:column;gap:7px}
+.sub-link{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 14px;border-radius:var(--r);text-decoration:none;
+  background:var(--sub-bg);border:1px solid var(--sub-bdr);
+  transition:background .15s,border-color .15s,transform .1s;
+}
+.sub-link:active{transform:scale(.98);background:var(--gold-dim);border-color:var(--gold-bdr)}
+.sub-icon{
+  width:34px;height:34px;border-radius:9px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;border:1px solid;
+}
+.sub-icon svg{width:15px;height:15px;stroke:currentColor;stroke-width:1.8;fill:none}
+.ic-prog  {background:var(--gold-dim);   color:var(--gold);   border-color:var(--gold-bdr)}
+.ic-status{background:var(--info-dim);   color:var(--info);   border-color:var(--info-bdr)}
+.ic-rend  {background:var(--success-dim);color:var(--success);border-color:var(--success-bdr)}
+.ic-upload{background:var(--warn-dim);   color:var(--warn);   border-color:var(--warn-bdr)}
+.sub-text{flex:1;min-width:0}
+.sub-name{
+  font-family:'Barlow Condensed',sans-serif;font-size:.92rem;font-weight:700;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--text);
+}
+.sub-hint{font-family:'IBM Plex Mono',monospace;font-size:.55rem;letter-spacing:.05em;color:var(--dim);margin-top:1px}
+.sub-arr{color:var(--dim);flex-shrink:0}
+.sub-arr svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none}
+
+/* UPLOAD SHORTCUT */
+.upload-link{
+  display:flex;align-items:center;gap:12px;
+  padding:16px 18px;border-radius:var(--rlg);text-decoration:none;
+  background:var(--card);border:1px solid var(--border);box-shadow:var(--sh);
+  transition:background .18s,border-color .18s;
+  animation:fadeUp .4s ease both;
+}
+.upload-link:active{background:var(--warn-dim);border-color:var(--warn-bdr)}
+.ul-icon{
+  width:44px;height:44px;border-radius:12px;flex-shrink:0;
+  border:1px solid var(--warn-bdr);background:var(--warn-dim);
+  display:flex;align-items:center;justify-content:center;color:var(--warn);
+}
+.ul-icon svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.7;fill:none}
+.ul-info{flex:1}
+.ul-name{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--text)}
+.ul-sub{font-family:'IBM Plex Mono',monospace;font-size:.55rem;letter-spacing:.06em;color:var(--dim);margin-top:2px}
+.ul-arr{color:var(--dim)}
+.ul-arr svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <a href="index.html" class="h-logo">
+    <img src="logo_pulvion.png" alt="Pulvion" style="height:28px;width:auto;object-fit:contain;">
+  </a>
+  <div class="h-pipe"></div>
+  <span class="h-section">Operacional</span>
+  <div class="h-grow"></div>
+  <a href="index.html" class="h-sair" title="Sair">
+    <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    <span>Sair</span>
+  </a>
+  <button class="h-toggle" id="thToggle" title="Alternar tema">
+    <svg id="thIcon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+  </button>
+</header>
+
+<main class="page">
+
+  <!-- Greeting -->
+  <div class="greeting">
+    <div class="g-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+    <div class="g-text">
+      <div class="g-main" id="gMain">Bom dia, Piloto</div>
+      <div class="g-sub" id="gDate">—</div>
+    </div>
+    <span class="g-badge">Online</span>
+  </div>
+
+
+
+  <!-- Section label -->
+  <div class="sect">Módulos operacionais</div>
+
+  <!-- PULVERIZAÇÃO -->
+  <div class="mod" id="mod-pulv" data-modulo="aplicacao" style="animation-delay:.06s">
+    <div class="mod-head" onclick="toggleMod('mod-pulv')">
+      <div class="mod-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2c-2.2 0-4 1.8-4 4v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-2V6c0-2.2-1.8-4-4-4z"/><circle cx="12" cy="15" r="2.5"/><line x1="12" y1="17.5" x2="12" y2="20"/></svg>
+      </div>
+      <div class="mod-info">
+        <div class="mod-num">⬡ Módulo 01</div>
+        <div class="mod-name">Pulverização</div>
+        <div class="mod-desc">Programação, status e rendimento das operações aéreas</div>
+      </div>
+      <div class="mod-chev"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
+    </div>
+    <div class="mod-body">
+      <div class="mod-divider"></div>
+      <div class="sub-list">
+        <a href="programacao_aplicacao.html" class="sub-link">
+          <div class="sub-icon ic-prog"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+          <div class="sub-text"><div class="sub-name">Programação</div><div class="sub-hint">Inserir e gerenciar programações</div></div>
+          <div class="sub-arr"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></div>
+        </a>
+        <a href="status_operacional_aplicacao.html" class="sub-link">
+          <div class="sub-icon ic-status"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <div class="sub-text"><div class="sub-name">Status Operacional</div><div class="sub-hint">Acompanhar operações em andamento</div></div>
+          <div class="sub-arr"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></div>
+        </a>
+        <a href="rendimento_aplicacao.html" class="sub-link">
+          <div class="sub-icon ic-rend"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+          <div class="sub-text"><div class="sub-name">Rendimento</div><div class="sub-hint">Informe diário de área aplicada</div></div>
+          <div class="sub-arr"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- COTÉSIA -->
+  <div class="mod" id="mod-cot" data-modulo="cotesia" style="animation-delay:.11s">
+    <div class="mod-head" onclick="toggleMod('mod-cot')">
+      <div class="mod-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 22c-4 0-7-3-7-7 0-2.5 1.5-4.8 3.5-6.2"/><path d="M12 22c4 0 7-3 7-7 0-2.5-1.5-4.8-3.5-6.2"/><circle cx="12" cy="5.5" r="2.5"/><path d="M9.5 8.5c-.8 1.8-.8 3.8 0 5.5M14.5 8.5c.8 1.8.8 3.8 0 5.5"/></svg>
+      </div>
+      <div class="mod-info">
+        <div class="mod-num">⬡ Módulo 02</div>
+        <div class="mod-name">Cotésia</div>
+        <div class="mod-desc">Programação, status e rendimento do controle biológico</div>
+      </div>
+      <div class="mod-chev"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
+    </div>
+    <div class="mod-body">
+      <div class="mod-divider"></div>
+      <div class="sub-list">
+        <a href="programacao_cotesia.html" class="sub-link">
+          <div class="sub-icon ic-prog"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+          <div class="sub-text"><div class="sub-name">Programação</div><div class="sub-hint">Inserir e gerenciar programações</div></div>
+          <div class="sub-arr"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></div>
+        </a>
+        <a href="status_operacional_cotesia.html" class="sub-link">
+          <div class="sub-icon ic-status"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <div class="sub-text"><div class="sub-name">Status Operacional</div><div class="sub-hint">Acompanhar operações em andamento</div></div>
+          <div class="sub-arr"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></div>
+        </a>
+        <a href="rendimento_cotesia.html" class="sub-link">
+          <div class="sub-icon ic-rend"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+          <div class="sub-text"><div class="sub-name">Rendimento</div><div class="sub-hint">Informe diário de liberações</div></div>
+          <div class="sub-arr"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAPEAMENTO -->
+  <div class="mod" id="mod-map" data-modulo="mapeamento" style="animation-delay:.16s">
+    <div class="mod-head" onclick="toggleMod('mod-map')">
+      <div class="mod-icon">
+        <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+      </div>
+      <div class="mod-info">
+        <div class="mod-num">⬡ Módulo 03</div>
+        <div class="mod-name">Mapeamento</div>
+        <div class="mod-desc">Programação, status e rendimento das operações de mapeamento</div>
+      </div>
+      <div class="mod-chev"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
+    </div>
+    <div class="mod-body">
+      <div class="mod-divider"></div>
+      <div class="sub-list">
+        <a href="programacao_mapeamento.html" class="sub-link">
+          <div class="sub-icon ic-prog"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+          <div class="sub-text"><div class="sub-name">Programação</div><div class="sub-hint">Inserir e gerenciar programações</div></div>
+          <div class="sub-arr"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></div>
+        </a>
+        <a href="status_operacional_mapeamento.html" class="sub-link">
+          <div class="sub-icon ic-status"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <div class="sub-text"><div class="sub-name">Status Operacional</div><div class="sub-hint">Acompanhar operações em andamento</div></div>
+          <div class="sub-arr"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></div>
+        </a>
+        <a href="rendimento_mapeamento.html" class="sub-link">
+          <div class="sub-icon ic-rend"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+          <div class="sub-text"><div class="sub-name">Rendimento</div><div class="sub-hint">Informe diário de área mapeada</div></div>
+          <div class="sub-arr"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Histórico -->
+  <div class="sect" id="sectHistorico" style="margin-top:4px;display:none">Histórico</div>
+
+  <a href="historico_rendimentos.html" id="linkHistCotesia" data-modulo-hist="cotesia"
+     class="upload-link" style="display:none;animation-delay:.20s;border-color:var(--success-bdr)">
+    <div class="ul-icon" style="border-color:var(--success-bdr);background:var(--success-dim);color:var(--success)">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    </div>
+    <div class="ul-info">
+      <div class="ul-name">Histórico · Cotésia</div>
+      <div class="ul-sub">Rendimentos de controle biológico</div>
+    </div>
+    <div class="ul-arr"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></div>
+  </a>
+
+  <a href="historico_rendimentos_aplicacao.html" id="linkHistAplic" data-modulo-hist="aplicacao"
+     class="upload-link" style="display:none;animation-delay:.22s;border-color:var(--info-bdr,rgba(2,132,199,0.26))">
+    <div class="ul-icon" style="border-color:var(--info-bdr,rgba(2,132,199,0.26));background:var(--info-dim,rgba(2,132,199,0.09));color:var(--info,#0284c7)">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    </div>
+    <div class="ul-info">
+      <div class="ul-name">Histórico · Rendimentos</div>
+      <div class="ul-sub">Rendimentos de aplicação aérea</div>
+    </div>
+    <div class="ul-arr"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></div>
+  </a>
+
+  <a href="historico_rendimentos_mapeamento.html" id="linkHistMap" data-modulo-hist="mapeamento"
+     class="upload-link" style="display:none;animation-delay:.24s;border-color:var(--warn-bdr,rgba(217,119,6,0.25))">
+    <div class="ul-icon" style="border-color:var(--warn-bdr,rgba(217,119,6,0.25));background:var(--warn-dim,rgba(217,119,6,0.08));color:var(--warn,#d97706)">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    </div>
+    <div class="ul-info">
+      <div class="ul-name">Histórico · Mapeamento</div>
+      <div class="ul-sub">Rendimentos de operações de mapeamento</div>
+    </div>
+    <div class="ul-arr"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></div>
+  </a>
+
+  <!-- Arquivos -->
+  <div class="sect" style="margin-top:4px">Arquivos</div>
+  <a href="enc_kml_uplo.html" class="upload-link" style="animation-delay:.25s">
+    <div class="ul-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+    <div class="ul-info">
+      <div class="ul-name">Buscar Fazendas</div>
+      <div class="ul-sub">Consultar e localizar fazendas no sistema</div>
+    </div>
+    <div class="ul-arr"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></div>
+  </a>
+
+  <!-- Administração (visível só para admin) -->
+  <div class="sect" id="sectAdmin" style="display:none;margin-top:4px">Administração</div>
+  <a href="usuarios.html" class="upload-link" id="linkUsuarios" style="display:none;animation-delay:.30s;border-color:var(--info-bdr,rgba(2,132,199,0.26))">
+    <div class="ul-icon" style="border-color:var(--info-bdr,rgba(2,132,199,0.26));background:var(--info-dim,rgba(2,132,199,0.09));color:var(--info,#0284c7)">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </div>
+    <div class="ul-info">
+      <div class="ul-name">Gestão de Usuários</div>
+      <div class="ul-sub">Cadastrar, editar e desativar pilotos</div>
+    </div>
+    <div class="ul-arr"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></div>
+  </a>
+
+</main>
+
+<script>
+/* THEME */
+(function(){
+  const h=document.documentElement;
+  const t=localStorage.getItem('pulvion_theme')||'light';
+  h.setAttribute('data-theme',t);
+  function apply(t){
+    h.setAttribute('data-theme',t);
+    localStorage.setItem('pulvion_theme',t);
+    const ic=document.getElementById('thIcon');
+    if(ic) ic.innerHTML=t==='dark'
+      ?'<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>'
+      :'<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>';
+  }
+  apply(t);
+  document.addEventListener('DOMContentLoaded',()=>{
+    const b=document.getElementById('thToggle');
+    if(b) b.addEventListener('click',()=>apply(h.getAttribute('data-theme')==='dark'?'light':'dark'));
+  });
+})();
+
+/* GREETING */
+document.addEventListener('DOMContentLoaded',()=>{
+  const now=new Date();
+  const hr=now.getHours();
+  const g=hr<12?'Bom dia':hr<18?'Boa tarde':'Boa noite';
+  const gm=document.getElementById('gMain');
+  const gd=document.getElementById('gDate');
+  // Pega primeiro nome da sessão, fallback para "Piloto"
+  let nome = 'Piloto';
+  try {
+    const s = JSON.parse(localStorage.getItem('pulvion_session') || '{}');
+    if (s.nome) nome = s.nome.split(' ')[0]; // só o primeiro nome
+  } catch(_) {}
+  if(gm) gm.textContent=g+', '+nome;
+  if(gd) gd.textContent=now.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+});
+
+/* ACCORDION */
+function toggleMod(id){
+  const m=document.getElementById(id);
+  if(!m) return;
+  const wasOpen=m.classList.contains('open');
+  document.querySelectorAll('.mod.open').forEach(x=>x.classList.remove('open'));
+  if(!wasOpen) m.classList.add('open');
+}
+
+
+
+// Mostra seção admin se o usuário logado for admin
+(function checkAdmin(){
+  try {
+    const s = JSON.parse(localStorage.getItem('pulvion_session') || '{}');
+    if(s.role === 'admin'){
+      const sa = document.getElementById('sectAdmin');
+      const la = document.getElementById('linkUsuarios');
+      if(sa) sa.style.display = 'flex';
+      if(la) la.style.display = 'flex';
+    }
+  } catch(_){}
+})();
+
+// Controla visibilidade de módulos e históricos por permissão
+(function applyModuloAccess(){
+  try {
+    const s = JSON.parse(localStorage.getItem('pulvion_session') || '{}');
+
+    const allowed = (s && s.role === 'admin')
+      ? ['aplicacao','cotesia','mapeamento']
+      : String(s.modulos || 'aplicacao,cotesia,mapeamento')
+          .split(',').map(m => m.trim().toLowerCase()).filter(Boolean);
+
+    // ── Módulos operacionais ──
+    // Admin vê todos; piloto só vê os autorizados
+    if(!s || !s.username || s.role !== 'admin') {
+      document.querySelectorAll('.mod[data-modulo]').forEach(el => {
+        if(!allowed.includes(el.dataset.modulo)) el.style.display = 'none';
+      });
+      // Oculta seção se nenhum módulo visível
+      const vis = document.querySelectorAll('.mod[data-modulo]:not([style*="display: none"]):not([style*="display:none"])');
+      if(vis.length === 0) {
+        const sectMod = document.querySelector('.sect');
+        if(sectMod && sectMod.textContent.includes('Módulos')) sectMod.style.display = 'none';
+      }
+    }
+
+    // ── Históricos — mostra somente os módulos autorizados ──
+    const histLinks = document.querySelectorAll('[data-modulo-hist]');
+    let histCount = 0;
+    histLinks.forEach(el => {
+      if(allowed.includes(el.dataset.moduloHist)) {
+        el.style.display = 'flex';
+        histCount++;
+      }
+    });
+    // Mostra a seção "Histórico" se ao menos um link visível
+    const sectH = document.getElementById('sectHistorico');
+    if(sectH && histCount > 0) sectH.style.display = 'flex';
+
+    window._allowedModulos = allowed;
+  } catch(_){}
+})();
+</script>
+
+</body>
+</html>

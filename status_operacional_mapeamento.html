@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Status · Mapeamento · Top Gun</title>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root,[data-theme="light"]{--gold:#b8942e;--gold-light:#d9b24c;--gold-dim:rgba(184,148,46,.10);--gold-border:rgba(184,148,46,.28);--bg:#f0ede6;--card:#fff;--surface:#f5f2eb;--input-bg:#f8f6f1;--input-ro:#ede9e0;--header-bg:rgba(240,237,230,.97);--header-bdr:rgba(184,148,46,.22);--text:#0d1117;--text-muted:#4b5563;--text-label:#94a3b8;--success:#16a34a;--success-dim:rgba(22,163,74,.10);--success-bdr:rgba(22,163,74,.28);--warning:#d97706;--warning-dim:rgba(217,119,6,.10);--warning-bdr:rgba(217,119,6,.32);--danger:#dc2626;--shadow-sm:0 2px 8px rgba(0,0,0,.06);--shadow-md:0 4px 20px rgba(0,0,0,.07);--radius:12px;--radius-sm:8px;}
+[data-theme="dark"]{--gold:#d9b24c;--gold-light:#f0d078;--gold-dim:rgba(217,178,76,.10);--gold-border:rgba(217,178,76,.28);--bg:#060912;--card:#0c1224;--surface:#0f1628;--input-bg:#0b1425;--input-ro:#0f182c;--header-bg:rgba(10,15,31,.97);--header-bdr:rgba(217,178,76,.22);--text:#f0ece4;--text-muted:#9ca3af;--text-label:#6b7280;--success:#22c55e;--success-dim:rgba(34,197,94,.10);--success-bdr:rgba(34,197,94,.28);--warning:#f59e0b;--warning-dim:rgba(245,158,11,.12);--warning-bdr:rgba(245,158,11,.35);--danger:#ef4444;--shadow-sm:0 2px 8px rgba(0,0,0,.20);--shadow-md:0 8px 28px rgba(0,0,0,.30);--radius:12px;--radius-sm:8px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Barlow',sans-serif;font-size:15px;color:var(--text);background:var(--bg);padding-bottom:32px;transition:background .3s}
+[data-theme="light"] body{background-image:radial-gradient(ellipse 70% 40% at 5% 0%,rgba(184,148,46,.06) 0%,transparent 55%)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--gold-border);border-radius:4px}
+.site-header{position:sticky;top:0;z-index:50;background:var(--header-bg);border-bottom:1px solid var(--header-bdr);backdrop-filter:blur(12px);box-shadow:var(--shadow-sm)}
+.header-inner{display:flex;align-items:center;gap:12px;padding:0 16px;height:60px;max-width:600px;margin:0 auto}
+.header-title{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--gold)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;border-radius:var(--radius-sm);padding:10px 16px;border:1px solid var(--gold-border);background:var(--gold-dim);color:var(--gold);transition:all .2s;white-space:nowrap}
+.btn:hover{background:rgba(184,148,46,.18);border-color:var(--gold)}
+.btn-primary{background:var(--gold);border-color:var(--gold);color:#fff}[data-theme="dark"] .btn-primary{color:#0b0f1f}
+.btn-success-soft{background:var(--success-dim);border-color:var(--success-bdr);color:var(--success)}
+.btn-sm{padding:7px 12px;font-size:.82rem}
+.btn-full{width:100%}
+.theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:var(--radius-sm);border:1px solid var(--gold-border);background:var(--gold-dim);color:var(--gold);cursor:pointer;transition:all .2s;flex-shrink:0}
+.theme-toggle:hover{background:rgba(184,148,46,.2);transform:rotate(20deg)}
+.wrap{max-width:600px;margin:0 auto;padding:18px 16px;display:flex;flex-direction:column;gap:14px}
+.card{background:var(--card);border:1px solid var(--gold-border);border-radius:var(--radius);box-shadow:var(--shadow-md);overflow:hidden}
+.card-header{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--gold-border);background:var(--gold-dim)}
+.card-header-icon{width:32px;height:32px;border-radius:8px;border:1px solid var(--gold-border);background:var(--card);display:flex;align-items:center;justify-content:center;color:var(--gold);flex-shrink:0}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text);flex:1}
+.card-badge{font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.12em;color:var(--text-label);padding:3px 8px;border-radius:999px;border:1px solid var(--gold-border);background:var(--card)}
+.card-body{padding:18px}
+.field-group{display:flex;flex-direction:column;gap:12px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-family:'IBM Plex Mono',monospace;font-size:.65rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text-label)}
+input,select{width:100%;background:var(--input-bg);color:var(--text);border:1px solid var(--gold-border);border-radius:var(--radius-sm);padding:11px 14px;font-family:'Barlow',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s;-webkit-appearance:none}
+input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim)}
+input[readonly],input[readonly]:focus{background:var(--input-ro);color:var(--text-muted);border-color:rgba(0,0,0,.06);box-shadow:none;cursor:default}
+select{cursor:pointer}
+.fields-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* OS lookup */
+.os-lookup-wrap{display:flex;gap:8px}
+.os-lookup-wrap input{flex:1;font-family:'IBM Plex Mono',monospace}
+.lookup-status{font-family:'IBM Plex Mono',monospace;font-size:.7rem;min-height:20px;padding:2px 0;letter-spacing:.04em;color:var(--text-label)}
+.lookup-status.ok{color:var(--success)}.lookup-status.warn{color:var(--warning)}.lookup-status.err{color:var(--danger)}
+/* Info cells */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.info-cell{background:var(--surface);border:1px solid var(--gold-border);border-radius:8px;padding:9px 11px}
+.i-label{font-family:'IBM Plex Mono',monospace;font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-label);margin-bottom:3px}
+.i-val{font-size:.9rem;font-weight:600;color:var(--text);word-break:break-word}
+/* Status opts */
+.status-group{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media(min-width:400px){.status-group{grid-template-columns:repeat(3,1fr)}}
+.status-opt{position:relative;cursor:pointer}
+.status-opt input{position:absolute;opacity:0;width:0;height:0}
+.status-opt-label{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 6px;border-radius:10px;border:2px solid transparent;background:var(--surface);transition:all .2s;text-align:center;cursor:pointer;user-select:none}
+.s-emoji{font-size:1.5rem;line-height:1}
+.s-text{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-muted)}
+.status-opt input:checked~.status-opt-label{border-color:var(--gold-border);background:var(--gold-dim)}
+.status-opt input:checked~.status-opt-label .s-text{color:var(--gold)}
+/* preview */
+.preview-box{white-space:pre-wrap;background:var(--input-bg);border:1px solid var(--gold-border);border-radius:var(--radius-sm);padding:16px;min-height:160px;max-height:260px;font-family:'IBM Plex Mono',monospace;font-size:.82rem;line-height:1.75;overflow:auto;color:var(--text)}
+.status-badge{display:none;align-items:center;justify-content:center;padding:5px 14px;border-radius:999px;font-family:'IBM Plex Mono',monospace;font-size:.65rem;border:1px solid var(--gold-border);background:var(--gold-dim);color:var(--text-label)}
+.status-badge.ok{display:inline-flex;color:var(--success);border-color:var(--success-bdr);background:var(--success-dim)}
+.status-badge.warn{display:inline-flex;color:var(--warning);border-color:var(--warning-bdr);background:var(--warning-dim)}
+@media(max-width:520px){.fields-2col{grid-template-columns:1fr}.status-group{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="btn btn-sm" href="operacional.html"><i data-lucide="arrow-left" width="14" height="14"></i> Voltar</a>
+    <div class="header-title"><i data-lucide="map" width="17" height="17"></i> Status · Mapeamento</div>
+    <button class="theme-toggle" id="themeToggle"><i data-lucide="moon" width="15" height="15" id="themeIcon"></i></button>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- Identificação -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon"><i data-lucide="user" width="16" height="16"></i></div>
+      <span class="card-title">Identificação</span>
+      <span class="card-badge">Etapa 1</span>
+    </div>
+    <div class="card-body">
+      <div class="field-group">
+        <div class="fields-2col">
+          <div class="field"><label>Frente</label>
+            <select id="selFrente">
+              <option value="">Selecione…</option>
+              <option value="01">01</option><option value="02">02</option>
+              <option value="03">03</option><option value="04">04</option>
+              <option value="05">05</option><option value="06">06</option>
+              <option value="07">07</option>
+            </select>
+          </div>
+          <div class="field"><label>Piloto</label><input type="text" id="txtPiloto" placeholder="Auto" readonly></div>
+        </div>
+        <div class="fields-2col">
+          <div class="field"><label>Data</label><input type="date" id="dtData"></div>
+          <div class="field"><label>Horário</label><input type="time" id="txtHora"></div>
+        </div>
+        <div class="field"><label>Drone</label><input type="text" id="txtDrone" value="DJI Mavic 3M"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OS / Fazenda -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon"><i data-lucide="map-pin" width="16" height="16"></i></div>
+      <span class="card-title">Fazenda / OS</span>
+      <span class="card-badge">Etapa 2</span>
+    </div>
+    <div class="card-body">
+      <div class="field-group">
+        <div class="field">
+          <label>Número da OS</label>
+          <div class="os-lookup-wrap">
+            <input type="text" id="txtOS" placeholder="Ex.: 746045" autocomplete="off">
+            <button class="btn btn-sm" id="btnBuscar"><i data-lucide="search" width="13" height="13"></i> Buscar</button>
+          </div>
+          <div class="lookup-status" id="lookupStatus"></div>
+        </div>
+        <div class="info-grid">
+          <div class="info-cell"><div class="i-label">Fazenda</div><div class="i-val" id="dispFaz">—</div><input type="hidden" id="txtFaz"></div>
+          <div class="info-cell"><div class="i-label">Código</div><div class="i-val" id="dispCod">—</div><input type="hidden" id="txtCod"></div>
+          <div class="info-cell" style="grid-column:1/-1"><div class="i-label">Área (ha)</div><div class="i-val" id="dispHa">—</div><input type="hidden" id="txtHa"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon"><i data-lucide="zap" width="16" height="16"></i></div>
+      <span class="card-title">Status da Operação</span>
+      <span class="card-badge">Etapa 3</span>
+    </div>
+    <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+      <div class="status-group" id="statusGroup">
+        <label class="status-opt s-andamento"><input type="radio" name="selStatus" value="🟡 Em andamento" checked onchange="gerarPrevia()"><span class="status-opt-label"><span class="s-emoji">🟡</span><span class="s-text">Em Andamento</span></span></label>
+        <label class="status-opt s-deslocamento"><input type="radio" name="selStatus" value="🚌 Em deslocamento" onchange="gerarPrevia()"><span class="status-opt-label"><span class="s-emoji">🚌</span><span class="s-text">Deslocamento</span></span></label>
+        <label class="status-opt s-pausa"><input type="radio" name="selStatus" value="⏸️ Pausa" onchange="gerarPrevia()"><span class="status-opt-label"><span class="s-emoji">⏸️</span><span class="s-text">Pausa</span></span></label>
+        <label class="status-opt s-finalizado"><input type="radio" name="selStatus" value="✅ Finalizado" onchange="gerarPrevia()"><span class="status-opt-label"><span class="s-emoji">✅</span><span class="s-text">Finalizado</span></span></label>
+        <label class="status-opt s-problema"><input type="radio" name="selStatus" value="⚠️ Problema técnico" onchange="gerarPrevia()"><span class="status-opt-label"><span class="s-emoji">⚠️</span><span class="s-text">Problema</span></span></label>
+        <label class="status-opt s-aguardando"><input type="radio" name="selStatus" value="☁️ Ag. Condições" onchange="gerarPrevia()"><span class="status-opt-label"><span class="s-emoji">☁️</span><span class="s-text">Ag. Condições</span></span></label>
+      </div>
+      <div class="field"><label>Observação</label><input type="text" id="txtObs" placeholder="Detalhe opcional…" oninput="gerarPrevia()"></div>
+    </div>
+  </div>
+
+  <!-- Prévia -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon"><i data-lucide="eye" width="16" height="16"></i></div>
+      <span class="card-title">Prévia WhatsApp</span>
+      <span class="card-badge">Etapa 4</span>
+    </div>
+    <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+      <div class="preview-box" id="preview"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary btn-full" id="btnCopiar"><i data-lucide="copy" width="14" height="14"></i> Copiar</button>
+        <a class="btn btn-success-soft btn-full" id="btnWhats" href="#" target="_blank"><i data-lucide="message-circle" width="14" height="14"></i> WhatsApp</a>
+      </div>
+      <div style="display:flex;justify-content:center;"><span class="status-badge" id="lblInfo"></span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbw2VQUIoe4PHR8MNcJ3dAeSf6gf_XjepYE6XdUvXP4d9MnEZ0yuNKP6uPEGwqN0_1lpUA/exec';
+const SAVE_URL = 'https://script.google.com/macros/s/AKfycbx14Z2vDYHnj9zFyso3Ettl7AfzUf1uNHnQ8iwTm7Dhjunr727oW8t7Eot6cpQsx7feyA/exec';
+const html = document.documentElement;
+function applyTheme(t){html.setAttribute('data-theme',t);localStorage.setItem('pulvion_theme',t);document.getElementById('themeIcon').setAttribute('data-lucide',t==='dark'?'sun':'moon');lucide.createIcons();}
+(function(){applyTheme(localStorage.getItem('pulvion_theme')||'light');})();
+document.getElementById('themeToggle').addEventListener('click',()=>applyTheme(html.getAttribute('data-theme')==='dark'?'light':'dark'));
+lucide.createIcons();
+
+const pad2=n=>String(n).padStart(2,'0');
+function fmtBR(n,d=2){return Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});}
+function getSession(){try{return JSON.parse(localStorage.getItem('pulvion_session')||'{}');}catch(_){return{};}}
+
+function jsonpGet(url,params){
+  return new Promise((res,rej)=>{
+    const cb='_cb'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const qs=Object.entries({...params,callback:cb}).map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
+    const s=document.createElement('script');s.src=url+'?'+qs;
+    let done=false;
+    window[cb]=d=>{done=true;delete window[cb];s.remove();res(d);};
+    s.onerror=()=>{if(!done){delete window[cb];s.remove();rej(new Error('Falha JSONP'));}};
+    setTimeout(()=>{if(!done){delete window[cb];s.remove();rej(new Error('Timeout'));}},12000);
+    document.head.appendChild(s);
+  });
+}
+
+function applySession(){
+  const s=getSession();if(!s||!s.username)return;
+  const pilEl=document.getElementById('txtPiloto');
+  if(pilEl&&s.nome){pilEl.value=s.nome;pilEl.readOnly=true;pilEl.style.opacity='0.75';}
+  if(s.role==='piloto'&&s.frente){
+    const frEl=document.getElementById('selFrente');
+    if(frEl){const inp=document.createElement('input');inp.type='text';inp.id='selFrente';inp.value=String(s.frente).padStart(2,'0');inp.readOnly=true;inp.style.opacity='0.75';inp.style.cursor='not-allowed';inp.className=frEl.className;frEl.parentNode.replaceChild(inp,frEl);}
+  }
+}
+
+function setLookupStatus(msg,type){const el=document.getElementById('lookupStatus');el.textContent=msg;el.className='lookup-status'+(type?' '+type:'');}
+
+function setOsData(faz,cod,ha){
+  document.getElementById('dispFaz').textContent=faz||'—';document.getElementById('txtFaz').value=faz||'';
+  document.getElementById('dispCod').textContent=cod||'—';document.getElementById('txtCod').value=cod||'';
+  document.getElementById('dispHa').textContent=ha?fmtBR(parseFloat(String(ha).replace(',','.'))||0)+' ha':'—';document.getElementById('txtHa').value=ha||'';
+  gerarPrevia();
+}
+
+async function buscarOS(){
+  const os=document.getElementById('txtOS').value.trim();
+  if(!os){setLookupStatus('Informe o número da OS.','warn');return;}
+  setLookupStatus('Buscando…');
+  try{
+    const _res=await fetch(`${API_URL}?action=lookup&os=${encodeURIComponent(os)}`);
+    if(!_res.ok) throw new Error('HTTP '+_res.status);
+    const data=await _res.json();
+    if(data&&data.ok&&data.found){const it=data.items[0];setOsData(it.fazenda||'',it.codigo||'',it.area||it.ha||'');setLookupStatus('✓ OS carregada com sucesso','ok');}
+    else{setLookupStatus('OS não encontrada.','warn');}
+  }catch(e){setLookupStatus('Falha: '+e.message,'err');}
+}
+
+document.getElementById('btnBuscar').addEventListener('click',buscarOS);
+document.getElementById('txtOS').addEventListener('keydown',e=>{if(e.key==='Enter')buscarOS();});
+document.getElementById('selFrente').addEventListener('change',gerarPrevia);
+['txtDrone','txtObs'].forEach(id=>{document.getElementById(id).addEventListener('input',gerarPrevia);});
+
+function gerarPrevia(){
+  const fr=document.getElementById('selFrente').value||'—';
+  const pi=document.getElementById('txtPiloto').value||'—';
+  const dt=document.getElementById('dtData').value;
+  const hr=document.getElementById('txtHora').value;
+  const dr=document.getElementById('txtDrone').value||'—';
+  const os=document.getElementById('txtOS').value.trim()||'—';
+  const faz=document.getElementById('txtFaz').value||'—';
+  const cod=document.getElementById('txtCod').value||'—';
+  const ha=document.getElementById('txtHa').value||'—';
+  const st=document.querySelector('input[name="selStatus"]:checked')?.value||'—';
+  const obs=document.getElementById('txtObs').value;
+  const dtFmt=dt?dt.split('-').reverse().join('/'):'—';
+  const txt=`🗺️ *Status Mapeamento Top Gun*\n\n*Frente:* ${fr} | *Piloto:* ${pi}\n*Data:* ${dtFmt}${hr?' | *Horário:* '+hr:''}\n*Drone:* ${dr}\n───────────────────\n*OS:* ${os}\n*Fazenda:* ${faz} | *Cód.:* ${cod}\n*Área:* ${ha}${ha!=='—'?' ha':''}\n───────────────────\n*Status:* ${st}${obs?'\n*Obs.:* '+obs:''}`;
+  document.getElementById('preview').textContent=txt;
+  document.getElementById('btnWhats').href='https://wa.me/?text='+encodeURIComponent(txt);
+}
+
+function showStatus(msg,type){const b=document.getElementById('lblInfo');b.textContent=msg;b.className='status-badge '+type;setTimeout(()=>{b.className='status-badge';},3000);}
+document.getElementById('btnCopiar').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(document.getElementById('preview').textContent||'');showStatus('✓ Copiado!','ok');}catch(_){showStatus('Falha','warn');}});
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const now=new Date();
+  document.getElementById('dtData').value=`${now.getFullYear()}-${pad2(now.getMonth()+1)}-${pad2(now.getDate())}`;
+  document.getElementById('txtHora').value=`${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+  applySession();
+  gerarPrevia();
+});
+</script>
+</body>
+</html>

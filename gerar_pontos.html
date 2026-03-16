@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gerar Pontos ao longo de Linhas · Top Gun</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   THEME TOKENS
+============================================================ */
+:root, [data-theme="light"] {
+  --gold:        #b8942e;
+  --gold-light:  #d9b24c;
+  --gold-dim:    rgba(184,148,46,0.10);
+  --gold-border: rgba(184,148,46,0.28);
+
+  --bg:          #f0ede6;
+  --card:        #ffffff;
+  --surface:     #f5f2eb;
+  --surface-2:   #ebe7dd;
+  --input-bg:    #f8f6f1;
+
+  --header-bg:   rgba(240,237,230,0.97);
+  --header-bdr:  rgba(184,148,46,0.22);
+
+  --text:        #0d1117;
+  --text-muted:  #4b5563;
+  --text-label:  #94a3b8;
+
+  --success:     #16a34a;
+  --success-dim: rgba(22,163,74,0.10);
+  --success-bdr: rgba(22,163,74,0.28);
+  --danger:      #dc2626;
+  --danger-dim:  rgba(220,38,38,0.08);
+  --danger-bdr:  rgba(220,38,38,0.28);
+
+  --shadow-sm:   0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md:   0 4px 20px rgba(0,0,0,0.08);
+  --radius:      12px;
+  --radius-sm:   8px;
+}
+[data-theme="dark"] {
+  --gold:        #d9b24c;
+  --gold-light:  #f0d078;
+  --gold-dim:    rgba(217,178,76,0.10);
+  --gold-border: rgba(217,178,76,0.28);
+
+  --bg:          #060912;
+  --card:        #0c1224;
+  --surface:     #0f1628;
+  --surface-2:   rgba(255,255,255,0.04);
+  --input-bg:    #0b1425;
+
+  --header-bg:   rgba(10,15,31,0.97);
+  --header-bdr:  rgba(217,178,76,0.22);
+
+  --text:        #f0ece4;
+  --text-muted:  #9ca3af;
+  --text-label:  #6b7280;
+
+  --success:     #22c55e;
+  --success-dim: rgba(34,197,94,0.10);
+  --success-bdr: rgba(34,197,94,0.28);
+  --danger:      #ef4444;
+  --danger-dim:  rgba(239,68,68,0.10);
+  --danger-bdr:  rgba(239,68,68,0.30);
+
+  --shadow-sm:   0 2px 8px rgba(0,0,0,0.25);
+  --shadow-md:   0 8px 28px rgba(0,0,0,0.35);
+  --radius:      12px;
+  --radius-sm:   8px;
+}
+
+/* ============================================================
+   BASE
+============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Barlow', sans-serif; font-size: 15px; line-height: 1.6;
+  color: var(--text); background: var(--bg); min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+[data-theme="light"] body {
+  background-image: radial-gradient(ellipse 70% 40% at 5% 0%, rgba(184,148,46,0.06) 0%, transparent 55%);
+}
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--gold-border); border-radius: 4px; }
+
+/* ============================================================
+   HEADER
+============================================================ */
+.site-header {
+  position: sticky; top: 0; z-index: 500;
+  background: var(--header-bg); border-bottom: 1px solid var(--header-bdr);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-sm);
+}
+.header-inner {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 16px; height: 58px; max-width: 1500px; margin: 0 auto;
+}
+.header-title {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 1.05rem; font-weight: 800;
+  letter-spacing: 0.05em; text-transform: uppercase; color: var(--gold);
+}
+.header-title svg { flex-shrink: 0; }
+.header-grow { flex: 1; }
+
+/* ============================================================
+   BUTTONS
+============================================================ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+  font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase;
+  text-decoration: none; border-radius: var(--radius-sm); padding: 9px 14px;
+  border: 1px solid var(--gold-border); background: var(--gold-dim); color: var(--gold);
+  transition: all 0.18s ease; -webkit-tap-highlight-color: transparent; white-space: nowrap;
+}
+.btn svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.8; fill: none; flex-shrink: 0; }
+.btn:hover:not(:disabled) { background: rgba(184,148,46,0.18); border-color: var(--gold); }
+.btn:disabled { opacity: 0.38; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--gold); border-color: var(--gold); color: #fff;
+  box-shadow: 0 4px 14px rgba(184,148,46,0.3);
+}
+[data-theme="dark"] .btn-primary { color: #0b0f1f; }
+.btn-primary:hover:not(:disabled) { background: var(--gold-light); border-color: var(--gold-light); }
+
+.btn-ghost {
+  background: var(--surface); border-color: rgba(0,0,0,0.08); color: var(--text-muted);
+}
+[data-theme="dark"] .btn-ghost { border-color: rgba(255,255,255,0.08); }
+.btn-ghost:hover:not(:disabled) { background: var(--surface-2); color: var(--text); border-color: var(--gold-border); }
+
+.btn-danger { background: var(--danger-dim); border-color: var(--danger-bdr); color: var(--danger); }
+.btn-danger:hover:not(:disabled) { background: rgba(220,38,38,0.14); }
+
+.btn-sm { padding: 7px 11px; font-size: 0.78rem; }
+
+.theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: var(--radius-sm);
+  border: 1px solid var(--gold-border); background: var(--gold-dim);
+  color: var(--gold); cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+}
+.theme-toggle:hover { background: rgba(184,148,46,0.2); border-color: var(--gold); transform: rotate(20deg); }
+.theme-toggle svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.8; fill: none; }
+
+/* Export link  */
+a.export-btn-link {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+  font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase;
+  text-decoration: none; border-radius: var(--radius-sm); padding: 9px 14px;
+  background: var(--gold); border: 1px solid var(--gold); color: #fff;
+  box-shadow: 0 4px 14px rgba(184,148,46,0.3); transition: all 0.18s ease; white-space: nowrap;
+}
+[data-theme="dark"] a.export-btn-link { color: #0b0f1f; }
+a.export-btn-link:hover { background: var(--gold-light); border-color: var(--gold-light); }
+a.export-btn-link svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.8; fill: none; flex-shrink: 0; }
+
+/* ============================================================
+   PAGE LAYOUT
+============================================================ */
+.page-wrap {
+  max-width: 1500px; margin: 0 auto; padding: 16px;
+  display: grid; grid-template-columns: minmax(340px, 400px) 1fr;
+  gap: 14px; align-items: start;
+}
+@media (max-width: 1100px) { .page-wrap { grid-template-columns: 1fr; } }
+
+/* ============================================================
+   CARDS
+============================================================ */
+.card {
+  background: var(--card); border: 1px solid var(--gold-border);
+  border-radius: var(--radius); box-shadow: var(--shadow-md); overflow: hidden;
+  transition: background 0.3s, border-color 0.3s;
+}
+.card-header {
+  display: flex; align-items: center; gap: 10px; padding: 12px 18px;
+  border-bottom: 1px solid var(--gold-border); background: var(--gold-dim);
+}
+.card-header-icon {
+  width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--gold-border);
+  background: var(--card); display: flex; align-items: center; justify-content: center;
+  color: var(--gold); flex-shrink: 0;
+}
+.card-header-icon svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.8; fill: none; }
+.card-title {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 0.9rem; font-weight: 800;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); flex: 1;
+}
+.card-badge {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; letter-spacing: 0.12em;
+  color: var(--text-label); padding: 3px 8px; border-radius: 999px;
+  border: 1px solid var(--gold-border); background: var(--card);
+}
+.card-body { padding: 18px; }
+
+/* ============================================================
+   FORM FIELDS
+============================================================ */
+.field-group { display: flex; flex-direction: column; gap: 12px; }
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.63rem; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-label);
+}
+input[type="number"], input[type="text"], select {
+  width: 100%; background: var(--input-bg); color: var(--text);
+  border: 1px solid var(--gold-border); border-radius: var(--radius-sm);
+  padding: 9px 12px; font-family: 'Barlow', sans-serif; font-size: 0.92rem;
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none;
+}
+input[type="number"]:focus, input[type="text"]:focus, select:focus {
+  border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim);
+}
+
+/* Section label divider */
+.section-label {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 0.75rem; font-weight: 800;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted);
+  display: flex; align-items: center; gap: 6px; padding-top: 4px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--gold-border); }
+.section-label svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 1.8; fill: none; flex-shrink: 0; }
+
+/* ============================================================
+   FILE DROP ZONE
+============================================================ */
+#kmlFile { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+.file-drop-zone {
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  padding: 22px 16px; border: 2px dashed var(--gold-border);
+  border-radius: var(--radius-sm); background: var(--surface);
+  cursor: pointer; transition: all 0.2s; text-align: center; position: relative;
+}
+.file-drop-zone:hover,
+.file-drop-zone.dropping { border-color: var(--gold); background: var(--gold-dim); }
+.file-drop-zone.has-file { border-style: solid; border-color: var(--success-bdr); background: var(--success-dim); }
+.file-drop-icon { color: var(--gold); }
+.file-drop-icon svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 1.5; fill: none; }
+.file-drop-zone.has-file .file-drop-icon { color: var(--success); }
+.file-drop-text {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 0.82rem; font-weight: 700;
+  letter-spacing: 0.04em; text-transform: uppercase; color: var(--gold);
+}
+.file-drop-zone.has-file .file-drop-text { color: var(--success); }
+.file-drop-hint {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.05em; color: var(--text-label);
+}
+.file-name-display {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem;
+  color: var(--success); letter-spacing: 0.04em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+}
+
+/* ============================================================
+   CHECKBOXES
+============================================================ */
+.checks-list { display: flex; flex-direction: column; gap: 8px; }
+.check-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--gold-border); background: var(--surface);
+  cursor: pointer; transition: background 0.15s, border-color 0.15s;
+}
+.check-row:hover { background: var(--gold-dim); border-color: var(--gold); }
+.check-row input[type="checkbox"] {
+  width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; cursor: pointer;
+  accent-color: var(--gold);
+}
+.check-label {
+  font-family: 'Barlow', sans-serif; font-size: 0.85rem;
+  color: var(--text); line-height: 1.45; cursor: pointer;
+}
+
+/* ============================================================
+   ACTIONS
+============================================================ */
+.actions-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.actions-grid .span2 { grid-column: 1 / -1; }
+.actions-grid .btn,
+.actions-grid .export-btn-link { width: 100%; justify-content: center; }
+
+/* ============================================================
+   LOG
+============================================================ */
+.log-box {
+  background: var(--input-bg); border: 1px solid var(--gold-border);
+  border-radius: var(--radius-sm); padding: 11px 14px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem;
+  line-height: 1.65; color: var(--text-muted); letter-spacing: 0.02em;
+  min-height: 42px; transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.log-box.success { color: var(--success); border-color: var(--success-bdr); background: var(--success-dim); }
+.log-box.error   { color: var(--danger);  border-color: var(--danger-bdr);  background: var(--danger-dim); }
+
+/* ============================================================
+   MAP CARD
+============================================================ */
+.map-card-wrap { position: sticky; top: 74px; }
+.map-wrap {
+  position: relative; overflow: hidden;
+  height: calc(100vh - 180px); min-height: 420px;
+}
+#map { height: 100%; width: 100%; }
+
+/* drag-over overlay */
+.drop-target.dropping::after {
+  content: 'Solte o KML aqui';
+  position: absolute; inset: 0;
+  background: rgba(184,148,46,0.10);
+  border: 2px dashed var(--gold);
+  border-radius: var(--radius-sm);
+  color: var(--gold); font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200; pointer-events: none;
+}
+
+/* ── Floating toolbar ── */
+.map-floating-actions {
+  position: absolute; top: 12px; left: 52px;
+  display: flex; gap: 8px; z-index: 1100; align-items: center; flex-wrap: wrap;
+}
+.map-floating-actions .btn { box-shadow: var(--shadow-md); }
+
+/* Points count inline */
+.points-inline {
+  display: flex; align-items: center; gap: 0;
+  background: var(--card); border: 1px solid var(--gold-border);
+  border-radius: var(--radius-sm); box-shadow: var(--shadow-md); overflow: hidden;
+}
+.points-inline-label {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 0.78rem; font-weight: 800;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted);
+  padding: 0 10px 0 12px; white-space: nowrap;
+  border-right: 1px solid var(--gold-border);
+}
+.points-inline input[type="number"] {
+  width: 68px; padding: 9px 10px; font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.88rem; text-align: center; border: none !important;
+  background: transparent; border-radius: 0; box-shadow: none !important;
+}
+
+/* ============================================================
+   LEAFLET OVERRIDES
+============================================================ */
+.leaflet-bar a {
+  background-color: var(--card) !important; color: var(--text-muted) !important;
+  border-color: var(--gold-border) !important;
+}
+.leaflet-bar a:hover { background-color: var(--surface) !important; color: var(--gold) !important; }
+.leaflet-control-layers {
+  background: var(--card) !important; border-color: var(--gold-border) !important;
+  color: var(--text) !important; border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+.leaflet-control-layers label { color: var(--text) !important; font-family: 'Barlow', sans-serif; font-size: 0.82rem; }
+/* Draw toolbar: keep original sprite, just style the container */
+.leaflet-draw-toolbar a {
+  background-color: var(--card) !important;
+}
+.leaflet-draw-toolbar a:hover { background-color: var(--surface) !important; }
+.leaflet-draw-toolbar.leaflet-bar { border-color: var(--gold-border) !important; }
+.leaflet-draw-toolbar.leaflet-bar a { border-color: var(--gold-border) !important; }
+.leaflet-draw-tooltip { background: var(--card) !important; color: var(--text) !important; border-color: var(--gold-border) !important; }
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width: 1100px) {
+  .map-card-wrap { position: static; }
+  .map-wrap { height: 62vh; }
+}
+@media (max-width: 640px) {
+  .actions-grid { grid-template-columns: 1fr; }
+  .actions-grid .span2 { grid-column: 1; }
+  .map-floating-actions { left: 44px; flex-wrap: wrap; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ───────────────────────────────────────────── -->
+<header class="site-header">
+  <div class="header-inner">
+    <a class="btn btn-ghost btn-sm" href="gerar_pontos.html" title="Gerar Linhas">
+      <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+      
+    </a>
+    <div class="header-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none">
+        <circle cx="5" cy="12" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+        <line x1="7" y1="12" x2="10" y2="12"/><line x1="14" y1="12" x2="17" y2="12"/>
+        <line x1="12" y1="7" x2="12" y2="10"/><line x1="12" y1="14" x2="12" y2="17"/>
+      </svg>
+      Gerar Pontos ao longo de Linhas
+    </div>
+    <div class="header-grow"></div>
+    <a id="downloadLinkFloating" class="export-btn-link" href="#" download style="display:none;">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Baixar KML
+    </a>
+    <button class="theme-toggle" id="themeToggle" title="Alternar tema">
+      <svg id="themeIcon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ── PAGE ─────────────────────────────────────────────── -->
+<div class="page-wrap">
+
+  <!-- LEFT: Form panels -->
+  <div style="display:flex;flex-direction:column;gap:12px;">
+
+    <!-- 1. Arquivo -->
+    <div class="card drop-target" id="formCard">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <span class="card-title">Arquivo de Entrada</span>
+        <span class="card-badge">Etapa 1</span>
+      </div>
+      <div class="card-body">
+        <input id="kmlFile" type="file" accept=".kml,application/vnd.google-earth.kml+xml">
+        <label for="kmlFile" class="file-drop-zone" id="fileDropZone">
+          <span class="file-drop-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </span>
+          <span class="file-drop-text">Clique ou arraste o KML</span>
+          <span class="file-drop-hint">KML com LineStrings (linhas de voo)</span>
+          <span class="file-name-display" id="fileNameDisplay" style="display:none;"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- 2. Opções -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <span class="card-title">Opções</span>
+        <span class="card-badge">Etapa 2</span>
+      </div>
+      <div class="card-body">
+        <div class="field-group">
+
+          <div class="section-label">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            Distribuição de pontos
+          </div>
+
+          <div class="checks-list">
+            <label class="check-row">
+              <input id="includeEndpoints" type="checkbox" checked>
+              <span class="check-label">Incluir extremidades (0% e 100%)</span>
+            </label>
+            <label class="check-row">
+              <input id="warnSmallLines" type="checkbox" checked>
+              <span class="check-label">Garantir cobertura por linha quando possível</span>
+            </label>
+          </div>
+
+          <div class="section-label">
+            <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+            Áreas de exclusão
+          </div>
+
+          <label class="check-row">
+            <input id="applyExclusions" type="checkbox" checked>
+            <span class="check-label">Aplicar áreas de exclusão desenhadas no mapa</span>
+          </label>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Ações -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>
+        <span class="card-title">Ações</span>
+        <span class="card-badge">Etapa 3</span>
+      </div>
+      <div class="card-body">
+        <div class="actions-grid">
+          <a id="downloadLink" class="export-btn-link span2" href="#" download style="display:none;">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Baixar KML com Pontos
+          </a>
+          <button id="btnGerar" class="btn btn-primary span2" disabled style="display:none;">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4"/></svg>
+            Gerar KML
+          </button>
+          <button id="btnLimparPoligonos" class="btn btn-danger span2" title="Remove todas as áreas de exclusão desenhadas">
+            <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Limpar Áreas de Exclusão
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Log -->
+    <div id="log" class="log-box hint" aria-live="polite">
+      Aguardando arquivo KML...
+    </div>
+
+  </div>
+
+  <!-- RIGHT: Map card -->
+  <div class="map-card-wrap">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        </div>
+        <span class="card-title">Visualização do Mapa</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:var(--text-label);letter-spacing:0.06em;">
+          Use o painel de desenho para marcar áreas de exclusão
+        </span>
+      </div>
+      <div class="card-body" style="padding:0;position:relative;">
+
+        <div class="map-wrap drop-target" id="mapWrap">
+
+          <!-- Leaflet map -->
+          <div id="map"></div>
+
+          <!-- Floating toolbar -->
+          <div class="map-floating-actions">
+            <div class="points-inline">
+              <span class="points-inline-label">Pontos</span>
+              <input id="numPoints" type="number" min="1" step="1" value="10">
+            </div>
+            <button id="btnGerarFloating" class="btn btn-primary" aria-label="Gerar pontos no mapa" disabled>
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+              Gerar Pontos
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<!-- ── THEME ──────────────────────────────────────────────── -->
+<script>
+(function(){
+  const h = document.documentElement;
+  const stored = localStorage.getItem('pulvion_theme') || 'light';
+  h.setAttribute('data-theme', stored);
+  function applyTheme(t){
+    h.setAttribute('data-theme', t);
+    localStorage.setItem('pulvion_theme', t);
+    const icon = document.getElementById('themeIcon');
+    if(icon){
+      if(t==='dark') icon.innerHTML='<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+      else           icon.innerHTML='<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>';
+    }
+    const btn = document.getElementById('themeToggle');
+    if(btn) btn.title = t==='dark' ? 'Modo claro' : 'Modo escuro';
+  }
+  applyTheme(stored);
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const btn = document.getElementById('themeToggle');
+    if(btn) btn.addEventListener('click', ()=>{
+      applyTheme(h.getAttribute('data-theme')==='dark' ? 'light' : 'dark');
+    });
+  });
+})();
+</script>
+
+<!-- ── LIBS ───────────────────────────────────────────────── -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
+<script>
+      const el = (id) => document.getElementById(id);
+      const logEl = el('log');
+      const fileEl = el('kmlFile');
+      const numEl = el('numPoints');
+      const endpointsEl = el('includeEndpoints');
+      const warnSmallLinesEl = el('warnSmallLines');
+      const applyExclusionsEl = el('applyExclusions');
+      const btnEl = el('btnGerar');
+      const dlEl = el('downloadLink');
+      const dlInlineEl = el('downloadLinkInline');
+      const dlFloatingEl = el('downloadLinkFloating');
+      const btnExemplo = el('btnExemplo');
+      const btnLimparPoligonos = el('btnLimparPoligonos');
+      const btnGerarFloating = el('btnGerarFloating');
+
+      let loadedKmlText = '';
+      let loadedKmlName = 'entrada.kml';
+      let currentLines = [];
+      let currentPoints = [];
+
+      let map, baseLayers, overlayLayers;
+      let lineLayer = L.featureGroup();
+      let pointLayer = L.featureGroup();
+      let exclusionLayer = L.featureGroup();
+
+      function initMap() {
+        if (map) return;
+        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' });
+        const esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Imagery © Esri' });
+        map = L.map('map', { center: [-14.235, -51.925], zoom: 4, layers: [esriSat] });
+        baseLayers = { 'Satélite (Esri)': esriSat, 'OSM': osm };
+        overlayLayers = { 'Linhas': lineLayer, 'Pontos': pointLayer, 'Áreas de exclusão': exclusionLayer };
+        L.control.layers(baseLayers, overlayLayers).addTo(map);
+        lineLayer.addTo(map); pointLayer.addTo(map); exclusionLayer.addTo(map);
+
+        const drawControl = new L.Control.Draw({
+          position: 'topleft',
+          draw: {
+            polygon: { allowIntersection: false, showArea: true, shapeOptions: { color: '#f59e0b', weight: 2, fillOpacity: 0.2 } },
+            polyline: false, rectangle: false, circle: false, marker: false, circlemarker: false
+          },
+          edit: { featureGroup: exclusionLayer, remove: true }
+        });
+        map.addControl(drawControl);
+        map.on(L.Draw.Event.CREATED, (e) => exclusionLayer.addLayer(e.layer));
+      }
+
+      async function loadKmlFile(file){
+        if (!file) { btnEl.disabled = true; if (btnGerarFloating) btnGerarFloating.disabled = true; return; }
+        loadedKmlName = file.name || 'entrada.kml';
+        loadedKmlText = await file.text();
+        const { linesCount, placemarks, lines } = scanKmlDetailed(loadedKmlText);
+        if (linesCount === 0) { logMsg('Nenhum LineString encontrado no KML.', true); btnEl.disabled = true; if (btnGerarFloating) btnGerarFloating.disabled = true; return; }
+        currentLines = lines; currentPoints = [];
+        drawLinesOnMap(currentLines); pointLayer.clearLayers();
+        btnEl.disabled = false; if (btnGerarFloating) btnGerarFloating.disabled = false;
+        logMsg(`Arquivo carregado: ${file.name} - ${linesCount} linha(s) em ${placemarks} placemark(s).`);
+      }
+
+      fileEl.addEventListener('change', async (e) => {
+        const f = e.target.files && e.target.files[0];
+        if (f) {
+          const zone = document.getElementById('fileDropZone');
+          const nameEl = document.getElementById('fileNameDisplay');
+          if(zone) zone.classList.add('has-file');
+          if(nameEl){ nameEl.textContent = f.name; nameEl.style.display = ''; }
+        }
+        await loadKmlFile(f);
+      });
+
+      if (btnExemplo) {
+        btnExemplo.addEventListener('click', () => {
+        loadedKmlName = 'exemplo.kml';
+        loadedKmlText = `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Linhas Exemplo</name>
+    <Placemark>
+      <name>Linha A</name>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>-46.7000,-23.6000,0 -46.6900,-23.5900,0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Linha B</name>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>-46.6900,-23.6000,0 -46.6800,-23.6000,0 -46.6700,-23.5900,0</coordinates>
+      </LineString>
+    </Placemark>
+  </Document>
+</kml>`;
+        const { linesCount, placemarks, lines } = scanKmlDetailed(loadedKmlText);
+        currentLines = lines; currentPoints = [];
+        drawLinesOnMap(currentLines); pointLayer.clearLayers();
+        btnEl.disabled = false;
+        logMsg(`Exemplo carregado - ${linesCount} linha(s) em ${placemarks} placemark(s).`);
+        });
+      }
+
+      btnLimparPoligonos.addEventListener('click', () => { exclusionLayer.clearLayers(); logMsg('Áreas de exclusão removidas.'); });
+
+      const triggerGerar = () => {
+        try {
+          if (!loadedKmlText) { logMsg('Nenhum arquivo KML carregado.', true); return; }
+          const N = parseInt(numEl.value, 10); if (!(N >= 1)) { logMsg('Quantidade de pontos deve ser >= 1.', true); return; }
+          const includeEnds = !!endpointsEl.checked;
+          const result = processKml(loadedKmlText, { totalPoints: N, includeEndpoints: includeEnds, prefix: '', warnSmallLines: !!warnSmallLinesEl.checked, applyExclusions: !!applyExclusionsEl.checked });
+          if (!result || !result.kml) { logMsg('Falha ao gerar KML.', true); return; }
+          const outName = suggestOutName(loadedKmlName);
+          const blob = new Blob([result.kml], { type: 'application/vnd.google-earth.kml+xml' });
+          const url = URL.createObjectURL(blob);
+          [dlEl, dlInlineEl, dlFloatingEl].forEach(anchor => {
+            if (!anchor) return;
+            anchor.href = url; anchor.download = outName; anchor.style.display = 'inline-flex';
+          });
+          currentPoints = result.pointsForMap; drawPointsOnMap(currentPoints);
+          const msg = `Gerado com sucesso: ${result.totalPoints} ponto(s) em ${result.linesProcessed} linha(s).` + (result.warn || '');
+          logMsg(msg, false, true);
+        } catch (err) { console.error(err); logMsg('Erro inesperado ao processar o KML.', true); }
+      };
+
+      btnEl.addEventListener('click', triggerGerar);
+      if (btnGerarFloating) btnGerarFloating.addEventListener('click', triggerGerar);
+
+      function suggestOutName(name) { const idx = name.lastIndexOf('.'); return (idx > 0 ? name.slice(0, idx) : name) + '-pontos.kml'; }
+      function logMsg(msg, isError = false, success = false) { logEl.className = 'log-box ' + (isError ? 'error' : success ? 'success' : 'hint'); logEl.textContent = msg; }
+
+      function scanKmlDetailed(kmlText) {
+        try {
+          const doc = new DOMParser().parseFromString(kmlText, 'text/xml');
+          const placemarks = doc.getElementsByTagName('Placemark');
+          let linesCount = 0; const lines = [];
+          for (let i = 0; i < placemarks.length; i++) {
+            const pm = placemarks[i];
+            const nameEl = pm.getElementsByTagName('name')[0];
+            const pmName = nameEl ? nameEl.textContent : `Linha ${i+1}`;
+            const ls = pm.getElementsByTagName('LineString');
+            for (let j = 0; j < ls.length; j++) {
+              const coordsEl = ls[j].getElementsByTagName('coordinates')[0];
+              if (!coordsEl) continue;
+              const coords = parseCoordinates((coordsEl.textContent || ''));
+              if (coords.length >= 2) { lines.push({ name: pmName, coords }); linesCount++; }
+            }
+          }
+          return { linesCount, placemarks: placemarks.length, lines };
+        } catch { return { linesCount: 0, placemarks: 0, lines: [] }; }
+      }
+
+      function parseCoordinates(text) {
+        const tokens = (text || '').trim().split(/\s+/).filter(Boolean);
+        const coords = [];
+        for (const tok of tokens) {
+          const parts = tok.split(',');
+          if (parts.length >= 2) {
+            const lon = parseFloat(parts[0]);
+            const lat = parseFloat(parts[1]);
+            const alt = parts.length >= 3 ? parseFloat(parts[2]) : 0;
+            if (Number.isFinite(lon) && Number.isFinite(lat)) coords.push({ lon, lat, alt });
+          }
+        }
+        return coords;
+      }
+
+      function processKml(kmlText, opts) {
+        const { totalPoints, includeEndpoints, prefix, warnSmallLines, applyExclusions } = opts;
+        const doc = new DOMParser().parseFromString(kmlText, 'text/xml');
+        const lineEntries = [];
+        const placemarks = doc.getElementsByTagName('Placemark');
+        for (let i = 0; i < placemarks.length; i++) {
+          const pm = placemarks[i];
+          const nameEl = pm.getElementsByTagName('name')[0];
+          const pmName = nameEl ? nameEl.textContent : `Linha ${i+1}`;
+          const lines = pm.getElementsByTagName('LineString');
+          for (let j = 0; j < lines.length; j++) {
+            const coordsEl = lines[j].getElementsByTagName('coordinates')[0]; if (!coordsEl) continue;
+            const coords = parseCoordinates(coordsEl.textContent || ''); if (coords.length >= 2) lineEntries.push({ name: pmName, coords });
+          }
+        }
+        if (lineEntries.length === 0) return { kml: null, totalPoints: 0, linesProcessed: 0 };
+
+        const segNet = applyExclusions ? buildSegmentsMergedWithExclusions(lineEntries) : buildSegments(lineEntries);
+        if (segNet.totalLength <= 0 || segNet.segments.length === 0) return { kml: null, totalPoints: 0, linesProcessed: 0 };
+
+        const N = Math.max(1, totalPoints | 0);
+        const perLine = apportionCountsByLine(segNet.segments, N);
+
+        let coveredLines = 0; const points = []; let counter = 1;
+        for (const li of perLine) {
+          const segs = segNet.segments.filter(s => s.lineId === li.lineId);
+          if (!segs.length) continue;
+          if (li.count > 0) coveredLines++;
+          const pts = generatePointsOnSegments(segs, li.count, includeEndpoints);
+          for (const p of pts) { points.push({ name: buildLabel(counter, prefix), lon: p.lon, lat: p.lat, alt: p.alt ?? 0 }); counter++; }
+        }
+
+        const outKml = buildOutputKml(doc, points);
+        const pointsForMap = points.map(p => ({ lat: p.lat, lon: p.lon, name: p.name }));
+        let warn = '';
+        if (warnSmallLines && coveredLines < perLine.length && N >= perLine.length) warn = `
+Aviso: algumas linhas tem comprimento muito pequeno (ou foram totalmente excluidas) e não receberam pontos.`;
+        return { kml: outKml, totalPoints: points.length, linesProcessed: perLine.length, pointsForMap, warn };
+      }
+
+      function buildSegments(lineEntries) {
+        const segments = []; let total = 0;
+        for (let lineId = 0; lineId < lineEntries.length; lineId++) {
+          const entry = lineEntries[lineId]; const cs = entry.coords;
+          for (let i = 0; i < cs.length - 1; i++) { const a = cs[i]; const b = cs[i+1]; const len = haversineMeters(a, b); if (len > 0) { segments.push({ a, b, len, lineId, lineName: entry.name }); total += len; } }
+        }
+        return { segments, totalLength: total };
+      }
+
+      function getExclusionPolygons() {
+        try { const gj = exclusionLayer.toGeoJSON(); const polys = []; if (!gj || !gj.features) return polys; for (const f of gj.features) { if (f && f.geometry && (f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon')) polys.push(f); } return polys; } catch { return []; }
+      }
+
+      function buildSegmentsMergedWithExclusions(lineEntries) {
+        const full = buildSegments(lineEntries);
+        const polys = getExclusionPolygons();
+        if (!polys.length || typeof turf === 'undefined') return full;
+        const excl = buildSegmentsExcluding(lineEntries);
+        if (!excl.segments.length) return full;
+        const present = new Set(excl.segments.map(s => s.lineId));
+        let total = excl.totalLength;
+        const segs = excl.segments.slice();
+        for (let lineId = 0; lineId < lineEntries.length; lineId++) {
+          if (!present.has(lineId)) {
+            for (const s of full.segments) {
+              if (s.lineId === lineId) { segs.push(s); total += s.len; }
+            }
+          }
+        }
+        return { segments: segs, totalLength: total };
+      }
+
+      function buildSegmentsExcluding(lineEntries) {
+        const polys = getExclusionPolygons(); if (!polys.length || typeof turf === 'undefined') return buildSegments(lineEntries);
+        const boundaryCoords = [];
+        for (const pg of polys) { try { const b = turf.polygonToLine(pg); if (b.geometry.type === 'LineString') boundaryCoords.push(b.geometry.coordinates); else if (b.geometry.type === 'MultiLineString') boundaryCoords.push(...b.geometry.coordinates); } catch {} }
+        const splitter = boundaryCoords.length ? turf.multiLineString(boundaryCoords) : null;
+        const segments = []; let total = 0;
+        for (let lineId = 0; lineId < lineEntries.length; lineId++) {
+          const entry = lineEntries[lineId]; const coords = entry.coords.map(c => [c.lon, c.lat]);
+          let line = turf.lineString(coords); let pieces; try { pieces = splitter ? turf.lineSplit(line, splitter) : turf.featureCollection([line]); } catch { pieces = turf.featureCollection([line]); }
+          for (const piece of pieces.features) {
+            const lenKm = turf.length(piece, { units: 'kilometers' }); if (lenKm <= 0) continue;
+            let inside = false; try { const mid = turf.along(piece, lenKm / 2, { units: 'kilometers' }); for (const pg of polys) { if (turf.booleanPointInPolygon(mid, pg)) { inside = true; break; } } } catch {}
+            if (inside) continue;
+            const pcs = piece.geometry.coordinates;
+            for (let i = 0; i < pcs.length - 1; i++) { const a = { lon: pcs[i][0], lat: pcs[i][1], alt: 0 }; const b = { lon: pcs[i+1][0], lat: pcs[i+1][1], alt: 0 }; const m = haversineMeters(a, b); if (m > 0) { segments.push({ a, b, len: m, lineId, lineName: entry.name }); total += m; } }
+          }
+        }
+        return { segments, totalLength: total };
+      }
+
+      function apportionCountsByLine(segments, totalPoints) {
+        const byLine = new Map();
+        for (const s of segments) { let rec = byLine.get(s.lineId); if (!rec) { rec = { lineId: s.lineId, name: s.lineName || `Linha ${s.lineId+1}`, length: 0 }; byLine.set(s.lineId, rec); } rec.length += s.len; }
+        const lines = Array.from(byLine.values()).filter(l => l.length > 0).sort((a,b) => a.lineId - b.lineId);
+        const L = lines.length; if (L === 0) return [];
+        const totalLen = lines.reduce((a,b) => a + b.length, 0);
+        const N = Math.max(0, totalPoints|0);
+        let counts = new Array(L).fill(0);
+        if (N === 0) return lines.map(l => ({ lineId: l.lineId, count: 0 }));
+        if (N < L) { const order = lines.map((l,i)=>({i,len:l.length})).sort((x,y)=>y.len - x.len); for (let k=0;k<N;k++) counts[order[k].i] = 1; }
+        else { counts = counts.map(()=>1); let extras = N - L; if (extras > 0) { const ideals = lines.map(l => (extras * (l.length / totalLen))); const floors = ideals.map(x => Math.floor(x)); let used = floors.reduce((a,b)=>a+b,0); for (let i=0;i<floors.length;i++) counts[i] += floors[i]; let leftover = extras - used; const fracs = ideals.map((x,i)=>({i, frac: x - Math.floor(x)})).sort((a,b)=>b.frac - a.frac); for (let j=0;j<leftover;j++) counts[fracs[j % fracs.length].i] += 1; } }
+        return lines.map((l,i)=>({ lineId: l.lineId, count: counts[i] }));
+      }
+
+      function generatePointsOnSegments(segments, count, includeEndpoints) {
+        if (!segments || segments.length === 0 || count <= 0) return [];
+        const total = segments.reduce((a,s)=>a+s.len,0); if (total <= 0) return [];
+        const targets = [];
+        if (includeEndpoints) { if (count === 1) targets.push(total/2); else for (let i=0;i<count;i++) targets.push((i/(count-1))*total); }
+        else { for (let i=1;i<=count;i++) targets.push((i/(count+1))*total); }
+        const out = [];
+        for (const d of targets) { let acc = 0; for (let i=0;i<segments.length;i++) { const s = segments[i]; if (d <= acc + s.len || i === segments.length - 1) { const remain = d - acc; const t = s.len > 0 ? Math.min(Math.max(remain / s.len, 0), 1) : 0; const p = lerpLonLat(s.a, s.b, t); out.push({ lon: p.lon, lat: p.lat, alt: lerp(s.a.alt ?? 0, s.b.alt ?? 0, t) }); break; } acc += s.len; } }
+        return out;
+      }
+
+      function buildLabel(n, prefix = '') { const s = String(n); const padLen = Math.max(3, s.length); return (prefix || '') + s.padStart(padLen, '0'); }
+      function lerp(a, b, t) { return a + (b - a) * t; }
+      function lerpLonLat(a, b, t) { return { lon: lerp(a.lon, b.lon, t), lat: lerp(a.lat, b.lat, t) }; }
+      function toRad(deg) { return deg * Math.PI / 180; }
+      function haversineMeters(a, b) { const R = 6371000; const dLat = toRad(b.lat - a.lat); const dLon = toRad(b.lon - a.lon); const lat1 = toRad(a.lat); const lat2 = toRad(b.lat); const h = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2; return 2 * R * Math.atan2(Math.sqrt(h), Math.sqrt(1-h)); }
+
+      function buildOutputKml(sourceDoc, points) {
+        const kmlDoc = sourceDoc.implementation.createDocument(null, null);
+        let kmlRoot = sourceDoc.getElementsByTagName('kml')[0];
+        if (kmlRoot) kmlRoot = kmlRoot.cloneNode(true); else { kmlRoot = sourceDoc.createElement('kml'); kmlRoot.setAttribute('xmlns', 'http://www.opengis.net/kml/2.2'); kmlRoot.appendChild(sourceDoc.createElement('Document')); }
+        let documentNode = kmlRoot.getElementsByTagName('Document')[0]; if (!documentNode) { documentNode = sourceDoc.createElement('Document'); kmlRoot.appendChild(documentNode); }
+        const styleId = 'ptStyle';
+        if (!kmlRoot.querySelector(`#${styleId}`)) {
+          const style = sourceDoc.createElement('Style'); style.setAttribute('id', styleId);
+          const iconStyle = sourceDoc.createElement('IconStyle');
+          const color = sourceDoc.createElement('color'); color.textContent = 'ff2f78d8'; // ARGB (little-endian) -> blue-ish
+          const scale = sourceDoc.createElement('scale'); scale.textContent = '1.2';
+          const icon = sourceDoc.createElement('Icon'); const href = sourceDoc.createElement('href');
+          href.textContent = 'http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png';
+          icon.appendChild(href);
+          iconStyle.appendChild(color); iconStyle.appendChild(scale); iconStyle.appendChild(icon);
+          style.appendChild(iconStyle);
+          documentNode.appendChild(style);
+        }
+        const folder = sourceDoc.createElement('Folder'); const fname = sourceDoc.createElement('name'); fname.textContent = 'Pontos Gerados'; folder.appendChild(fname);
+        for (const p of points) { const pm = sourceDoc.createElement('Placemark'); const nm = sourceDoc.createElement('name'); nm.textContent = p.name; pm.appendChild(nm); const styleUrl = sourceDoc.createElement('styleUrl'); styleUrl.textContent = `#${styleId}`; pm.appendChild(styleUrl); const pt = sourceDoc.createElement('Point'); const coords = sourceDoc.createElement('coordinates'); coords.textContent = `${Number(p.lon).toFixed(6)},${Number(p.lat).toFixed(6)},${Number(p.alt ?? 0).toFixed(2)}`; pt.appendChild(coords); pm.appendChild(pt); folder.appendChild(pm); }
+        documentNode.appendChild(folder); kmlDoc.appendChild(kmlRoot);
+        const xml = new XMLSerializer().serializeToString(kmlDoc); return xml.startsWith('<?xml') ? xml : `<?xml version="1.0" encoding="UTF-8"?>
+${xml}`;
+      }
+
+      function drawLinesOnMap(lines) {
+        if (!map) initMap();
+        lineLayer.clearLayers(); const latlngsForBounds = [];
+        for (const ln of lines) { const latlngs = ln.coords.map(c => [c.lat, c.lon]); if (latlngs.length >= 2) { const poly = L.polyline(latlngs, { color: '#c62828', weight: 3 }); poly.bindPopup(ln.name); lineLayer.addLayer(poly); latlngsForBounds.push(...latlngs); } }
+        if (latlngsForBounds.length) map.fitBounds(L.latLngBounds(latlngsForBounds), { padding: [20, 20] });
+      }
+      function drawPointsOnMap(points) {
+        if (!map) initMap();
+        pointLayer.clearLayers(); const latlngsForBounds = [];
+        for (const p of points) { const m = L.circleMarker([p.lat, p.lon], { radius: 5, color: '#168f4b', weight: 2, fillOpacity: 0.8 }); m.bindTooltip(p.name, { permanent: false, direction: 'top' }); pointLayer.addLayer(m); latlngsForBounds.push([p.lat, p.lon]); }
+        if (latlngsForBounds.length) map.fitBounds(L.latLngBounds(latlngsForBounds), { padding: [20, 20] });
+      }
+
+      window.addEventListener('DOMContentLoaded', initMap);
+      // Drag & Drop KML
+      const dropZones = [document.getElementById('formCard'), document.getElementById('mapWrap')];
+      dropZones.forEach(zone => {
+        if (!zone) return;
+        zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('dropping'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('dropping'));
+        zone.addEventListener('drop', async (e) => {
+          e.preventDefault(); zone.classList.remove('dropping');
+          const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+          if (f) {
+            const dz = document.getElementById('fileDropZone');
+            const nm = document.getElementById('fileNameDisplay');
+            if(dz) dz.classList.add('has-file');
+            if(nm){ nm.textContent = f.name; nm.style.display = ''; }
+            await loadKmlFile(f);
+          }
+        });
+      });
+    </script>
+</body>
+</html>

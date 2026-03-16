@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Programação de Aplicação · Top Gun</title>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   THEME TOKENS
+============================================================ */
+:root, [data-theme="light"] {
+  --gold:         #b8942e;
+  --gold-light:   #d9b24c;
+  --gold-dim:     rgba(184,148,46,0.10);
+  --gold-border:  rgba(184,148,46,0.28);
+
+  --bg:           #f0ede6;
+  --card:         #ffffff;
+  --surface:      #f5f2eb;
+  --surface-2:    #ebe7dd;
+  --input-bg:     #f8f6f1;
+  --input-ro:     #ede9e0;
+
+  --header-bg:    rgba(240,237,230,0.97);
+  --header-bdr:   rgba(184,148,46,0.22);
+
+  --text:         #0d1117;
+  --text-muted:   #4b5563;
+  --text-label:   #94a3b8;
+
+  --success:      #16a34a;
+  --success-dim:  rgba(22,163,74,0.10);
+  --success-bdr:  rgba(22,163,74,0.28);
+  --danger:       #dc2626;
+  --danger-dim:   rgba(220,38,38,0.08);
+  --danger-bdr:   rgba(220,38,38,0.28);
+
+  --shadow-sm:    0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md:    0 4px 20px rgba(0,0,0,0.07);
+  --radius:       12px;
+  --radius-sm:    8px;
+}
+
+[data-theme="dark"] {
+  --gold:         #d9b24c;
+  --gold-light:   #f0d078;
+  --gold-dim:     rgba(217,178,76,0.10);
+  --gold-border:  rgba(217,178,76,0.28);
+
+  --bg:           #060912;
+  --card:         #0c1224;
+  --surface:      #0f1628;
+  --surface-2:    rgba(255,255,255,0.04);
+  --input-bg:     #0b1425;
+  --input-ro:     #0f182c;
+
+  --header-bg:    rgba(10,15,31,0.97);
+  --header-bdr:   rgba(217,178,76,0.22);
+
+  --text:         #f0ece4;
+  --text-muted:   #9ca3af;
+  --text-label:   #6b7280;
+
+  --success:      #22c55e;
+  --success-dim:  rgba(34,197,94,0.10);
+  --success-bdr:  rgba(34,197,94,0.28);
+  --danger:       #ef4444;
+  --danger-dim:   rgba(239,68,68,0.10);
+  --danger-bdr:   rgba(239,68,68,0.30);
+
+  --shadow-sm:    0 2px 8px rgba(0,0,0,0.20);
+  --shadow-md:    0 8px 28px rgba(0,0,0,0.30);
+  --radius:       12px;
+  --radius-sm:    8px;
+}
+
+/* ============================================================
+   BASE
+============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Barlow', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+  padding-bottom: 40px;
+  transition: background 0.3s, color 0.3s;
+}
+
+[data-theme="light"] body {
+  background-image: radial-gradient(ellipse 70% 40% at 5% 0%, rgba(184,148,46,0.06) 0%, transparent 55%);
+}
+
+h1, h2, h3 { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gold-border); border-radius: 4px; }
+
+/* ============================================================
+   HEADER
+============================================================ */
+.site-header {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--header-bdr);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-sm);
+  transition: background 0.3s, border-color 0.3s;
+}
+.header-inner {
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 16px; height: 60px;
+  max-width: 1400px; margin: 0 auto;
+}
+.header-title {
+  flex: 1; display: flex; align-items: center;
+  justify-content: center; gap: 8px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.05rem; font-weight: 800;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* ============================================================
+   BUTTONS
+============================================================ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 7px; cursor: pointer;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 0.95rem;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  text-decoration: none; border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  border: 1px solid var(--gold-border);
+  background: var(--gold-dim); color: var(--gold);
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent; white-space: nowrap;
+}
+.btn:hover { background: rgba(184,148,46,0.18); border-color: var(--gold); }
+
+.btn-primary { background: var(--gold); border-color: var(--gold); color: #fff; box-shadow: 0 4px 14px rgba(184,148,46,0.25); }
+[data-theme="dark"] .btn-primary { color: #0b0f1f; }
+.btn-primary:hover { background: var(--gold-light); border-color: var(--gold-light); }
+
+.btn-ghost { background: var(--surface); border-color: rgba(0,0,0,0.08); color: var(--text-muted); }
+[data-theme="dark"] .btn-ghost { border-color: rgba(255,255,255,0.08); }
+.btn-ghost:hover { background: var(--surface-2); color: var(--text); border-color: var(--gold-border); }
+
+.btn-success-soft { background: var(--success-dim); border-color: var(--success-bdr); color: var(--success); }
+.btn-success-soft:hover { background: rgba(22,163,74,0.16); }
+
+.btn-danger-soft { background: var(--danger-dim); border-color: var(--danger-bdr); color: var(--danger); }
+.btn-danger-soft:hover { background: rgba(220,38,38,0.14); }
+
+.btn-sm { padding: 7px 11px; font-size: 0.82rem; }
+.btn-xs { padding: 5px 9px; font-size: 0.75rem; }
+.btn-full { width: 100%; }
+
+.theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: var(--radius-sm);
+  border: 1px solid var(--gold-border); background: var(--gold-dim);
+  color: var(--gold); cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+}
+.theme-toggle:hover { background: rgba(184,148,46,0.2); border-color: var(--gold); transform: rotate(20deg); }
+
+/* ============================================================
+   PAGE LAYOUT — 2-column desktop
+============================================================ */
+.page-wrap {
+  max-width: 1400px; margin: 0 auto;
+  padding: 18px 16px;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 14px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .page-wrap { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   CARDS
+============================================================ */
+.card {
+  background: var(--card); border: 1px solid var(--gold-border);
+  border-radius: var(--radius); box-shadow: var(--shadow-md);
+  overflow: hidden; transition: background 0.3s, border-color 0.3s;
+}
+.card-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 18px; border-bottom: 1px solid var(--gold-border);
+  background: var(--gold-dim);
+}
+.card-header-icon {
+  width: 30px; height: 30px; border-radius: 7px;
+  border: 1px solid var(--gold-border); background: var(--card);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); flex-shrink: 0;
+}
+.card-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.92rem; font-weight: 800;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); flex: 1;
+}
+.card-badge {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.12em; color: var(--text-label);
+  padding: 3px 8px; border-radius: 999px;
+  border: 1px solid var(--gold-border); background: var(--card);
+}
+.card-body { padding: 18px; }
+
+/* ============================================================
+   FORM FIELDS
+============================================================ */
+.field-group { display: flex; flex-direction: column; gap: 12px; }
+.fields-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fields-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem;
+  font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-label);
+}
+
+input, select, textarea {
+  width: 100%; background: var(--input-bg); color: var(--text);
+  border: 1px solid var(--gold-border); border-radius: var(--radius-sm);
+  padding: 10px 13px; font-family: 'Barlow', sans-serif; font-size: 0.93rem;
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none; -webkit-tap-highlight-color: transparent;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim);
+}
+input[readonly], input[readonly]:focus,
+textarea[readonly], textarea[readonly]:focus {
+  background: var(--input-ro); color: var(--text-muted);
+  border-color: rgba(0,0,0,0.06); box-shadow: none; cursor: default;
+}
+[data-theme="dark"] input[readonly],
+[data-theme="dark"] textarea[readonly] { border-color: rgba(255,255,255,0.05); }
+select { cursor: pointer; }
+textarea { resize: vertical; min-height: 64px; }
+
+/* Section divider */
+.section-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 4px 0;
+}
+.section-divider-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.82rem; font-weight: 800;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-muted); white-space: nowrap;
+  display: flex; align-items: center; gap: 6px;
+}
+.section-divider-line { flex: 1; height: 1px; background: var(--gold-border); }
+
+/* ============================================================
+   FARM CARDS
+============================================================ */
+.farm-list { display: flex; flex-direction: column; gap: 10px; }
+
+.farm-card {
+  border: 1px solid var(--gold-border); border-radius: var(--radius-sm);
+  background: var(--surface); overflow: hidden;
+  transition: background 0.2s, border-color 0.2s;
+}
+.farm-card:hover { border-color: var(--gold); }
+
+.farm-card-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 14px; background: var(--gold-dim);
+  border-bottom: 1px solid var(--gold-border);
+}
+.farm-card-num {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem;
+  font-weight: 500; letter-spacing: 0.1em; color: var(--text-label);
+}
+.farm-card-title {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 0.82rem;
+  font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--text-muted); flex: 1;
+}
+.farm-card-actions { display: flex; gap: 6px; }
+
+.farm-card-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+/* OS search row */
+.os-search-row { display: flex; gap: 8px; align-items: flex-end; }
+.os-search-row .field { flex: 1; }
+.os-search-row input { font-family: 'IBM Plex Mono', monospace !important; font-weight: 500 !important; }
+
+/* Farm lookup status */
+.farm-status {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.66rem;
+  letter-spacing: 0.06em; min-height: 16px; color: var(--text-label);
+}
+.farm-status.ok   { color: var(--success); }
+.farm-status.err  { color: var(--danger); }
+.farm-status.load { color: var(--gold); }
+
+/* Auto-filled info grid inside farm */
+.farm-info-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.info-cell {
+  background: var(--card); border: 1px solid var(--gold-border);
+  border-radius: 7px; padding: 8px 10px;
+}
+.info-cell.full { grid-column: 1 / -1; }
+.i-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.57rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-label); margin-bottom: 3px; }
+.i-val { font-size: 0.88rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.i-val.gold { font-family: 'IBM Plex Mono', monospace; color: var(--gold); }
+
+/* Insumos is a textarea info cell */
+.i-val-area { font-size: 0.88rem; color: var(--text); line-height: 1.5; word-break: break-word; white-space: pre-wrap; }
+
+/* ============================================================
+   TOTALS ROW
+============================================================ */
+.totals-row {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  padding: 12px 18px; border-top: 1px solid var(--gold-border);
+  background: var(--gold-dim);
+}
+.total-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 999px;
+  border: 1px solid var(--gold-border); background: var(--card);
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem;
+  font-weight: 500; letter-spacing: 0.06em; color: var(--gold);
+}
+.total-chip i { color: var(--text-label); }
+
+/* ============================================================
+   PREVIEW CARD (sticky on desktop)
+============================================================ */
+.preview-sticky { position: sticky; top: 74px; }
+
+.preview-box {
+  white-space: pre-wrap; background: var(--input-bg);
+  border: 1px solid var(--gold-border); border-radius: var(--radius-sm);
+  padding: 16px; min-height: 300px; max-height: calc(100vh - 280px);
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; line-height: 1.75;
+  overflow: auto; color: var(--text);
+}
+
+/* Action buttons grid */
+.action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.action-grid .span2 { grid-column: 1 / -1; }
+.divider { height: 1px; background: var(--gold-border); margin: 4px 0; }
+
+/* Status toast */
+.status-badge {
+  display: none; align-items: center; justify-content: center;
+  gap: 6px; padding: 5px 14px; border-radius: 999px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem;
+  font-weight: 500; letter-spacing: 0.08em;
+  border: 1px solid var(--gold-border); background: var(--gold-dim); color: var(--text-label);
+}
+.status-badge.ok   { display: inline-flex; color: var(--success); border-color: var(--success-bdr); background: var(--success-dim); }
+.status-badge.warn { display: inline-flex; color: var(--danger);  border-color: var(--danger-bdr);  background: var(--danger-dim); }
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width: 640px) {
+  .fields-3col { grid-template-columns: 1fr 1fr; }
+  .fields-2col { grid-template-columns: 1fr; }
+  .farm-info-grid { grid-template-columns: 1fr; }
+  .action-grid { grid-template-columns: 1fr; }
+  .action-grid .span2 { grid-column: 1; }
+}
+@media (max-width: 400px) {
+  .fields-3col { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <a class="btn btn-sm" href="operacional.html" title="Voltar">
+      <i data-lucide="arrow-left" width="14" height="14"></i>
+      Voltar
+    </a>
+    <div class="header-title">
+      <i data-lucide="calendar-check" width="16" height="16"></i>
+      Programação de Aplicação
+    </div>
+    <button class="theme-toggle" id="themeToggle" title="Alternar tema">
+      <i data-lucide="moon" width="15" height="15" id="themeIcon"></i>
+    </button>
+  </div>
+</header>
+
+<!-- PAGE -->
+<div class="page-wrap">
+
+  <!-- ── LEFT: FORM ──────────────────────────────────────── -->
+  <div style="display:flex;flex-direction:column;gap:14px;">
+
+    <!-- Dados Gerais -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon"><i data-lucide="sliders-horizontal" width="15" height="15"></i></div>
+        <span class="card-title">Dados Gerais</span>
+        <span class="card-badge">Etapa 1</span>
+      </div>
+      <div class="card-body">
+        <div class="field-group">
+
+          <!-- Row 1: Data, Estado, Unidade -->
+          <div class="fields-3col">
+            <div class="field">
+              <label>Data para Aplicação</label>
+              <input type="date" id="dataAplicacao">
+            </div>
+            <div class="field">
+              <label>Estado</label>
+              <select id="estado">
+                <option value="">Selecione…</option>
+                <option value="MG">Minas Gerais (MG)</option>
+                <option value="SP">São Paulo (SP)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Unidade</label>
+              <select id="unidade" disabled>
+                <option value="">Selecione o Estado</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Row 2: Frente, Piloto, Auxiliar -->
+          <div class="fields-3col">
+            <div class="field">
+              <label>Frente</label>
+              <select id="frente">
+                <option value="">Selecione…</option>
+                <option>Frente 1</option><option>Frente 2</option><option>Frente 3</option>
+                <option>Frente 4</option><option>Frente 5</option><option>Frente 6</option>
+                <option>Frente 7</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Piloto</label>
+              <input id="piloto" placeholder="Auto" readonly>
+            </div>
+            <div class="field">
+              <label>Auxiliar</label>
+              <select id="auxiliar">
+                <option value="">Selecione…</option>
+                <option>Thiago Rodrigues</option>
+                <option>Pedro Henrique</option>
+                <option>José Filho</option>
+                <option>Luiz Gustavo</option>
+                <option>Hilton Silva</option>
+                <option>Luis Miguel</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Row 3: Drone, Objetivo, Tipo Produto -->
+          <div class="fields-3col">
+            <div class="field">
+              <label>Drone</label>
+              <select id="drone">
+                <option value="">Selecione…</option>
+                <option>DJI AGRAS T20</option>
+                <option>DJI AGRAS T40</option>
+                <option>DJI AGRAS T70</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Objetivo</label>
+              <select id="objetivo">
+                <option value="">Selecione…</option>
+                <option>Área Total</option>
+                <option>Catação</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Tipo de Produto</label>
+              <select id="tipoProduto">
+                <option value="">Selecione…</option>
+                <option>Herbicida</option>
+                <option>Inseticida</option>
+                <option>Fungicida</option>
+                <option>Fertilizante</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Fazendas -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon"><i data-lucide="tractor" width="15" height="15"></i></div>
+        <span class="card-title">Fazendas por OS</span>
+        <span class="card-badge">Etapa 2</span>
+      </div>
+
+      <div class="card-body" style="padding-bottom:0;">
+        <div class="farm-list" id="fazendasContainer"></div>
+
+        <div style="padding:14px 0 4px;display:flex;align-items:center;gap:10px;">
+          <button class="btn btn-sm" id="btnAddFazenda">
+            <i data-lucide="plus" width="13" height="13"></i>
+            Adicionar fazenda
+          </button>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:0.63rem;color:var(--text-label);">
+            Digite a OS e clique "Buscar"
+          </span>
+        </div>
+      </div>
+
+      <!-- Totals bar -->
+      <div class="totals-row">
+        <span class="total-chip">
+          <i data-lucide="layers" width="11" height="11"></i>
+          <span id="badgeFaz">Fazendas: 0</span>
+        </span>
+        <span class="total-chip">
+          <i data-lucide="maximize-2" width="11" height="11"></i>
+          <span id="badgeArea">Área: 0,00 ha</span>
+        </span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── RIGHT: PREVIEW ──────────────────────────────────── -->
+  <div class="preview-sticky">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon"><i data-lucide="eye" width="15" height="15"></i></div>
+        <span class="card-title">Prévia WhatsApp</span>
+        <span class="card-badge">Etapa 3</span>
+      </div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+
+        <div class="preview-box" id="preview">Preencha os dados e adicione as fazendas. Depois clique em "Gerar Prévia".</div>
+
+        <div class="divider"></div>
+
+        <div class="action-grid">
+          <button class="btn btn-primary span2" id="btnSalvar">
+            <i data-lucide="save" width="14" height="14"></i>
+            Salvar Programação
+          </button>
+          <button class="btn btn-primary span2" id="btnGerar">
+            <i data-lucide="refresh-cw" width="14" height="14"></i>
+            Gerar Prévia
+          </button>
+          <button class="btn btn-ghost" id="btnCopiar">
+            <i data-lucide="copy" width="14" height="14"></i>
+            Copiar
+          </button>
+          <a class="btn btn-success-soft" id="btnWhats" href="#" target="_blank" rel="noopener">
+            <i data-lucide="message-circle" width="14" height="14"></i>
+            WhatsApp
+          </a>
+        </div>
+
+        <div style="display:flex;justify-content:center;">
+          <span class="status-badge" id="lblInfo"></span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<script>
+/* ============================================================
+   THEME
+============================================================ */
+const html = document.documentElement;
+
+function applyThemeToken(t) {
+  html.setAttribute('data-theme', t);
+  localStorage.setItem('pulvion_theme', t);
+}
+applyThemeToken(localStorage.getItem('pulvion_theme') || 'light');
+
+function refreshIcons() {
+  if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+}
+
+function applyTheme(t) {
+  applyThemeToken(t);
+  const icon = document.getElementById('themeIcon');
+  const btn  = document.getElementById('themeToggle');
+  if (icon) icon.setAttribute('data-lucide', t === 'dark' ? 'sun' : 'moon');
+  if (btn)  btn.title = t === 'dark' ? 'Modo claro' : 'Modo escuro';
+  refreshIcons();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  applyTheme(html.getAttribute('data-theme') || 'light');
+  document.getElementById('themeToggle').addEventListener('click', () =>
+    applyTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')
+  );
+});
+
+/* ============================================================
+   CONFIG
+============================================================ */
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0wYo2B8wXXv_SqVwVayNkDtG_UsroXNXfLk970sHff6cIXnayykA3DYqtrt0ldefP/exec'; // OS lookup
+const SAVE_URL  = 'https://script.google.com/macros/s/AKfycbzktOqq9Yn525WTZiD3UdiByB2QOqAWhIWrALKUw3u1xBnD0StX3ecuJtwVD9w94N0ezw/exec'; // ← deployment do Code_Aplicacao.gs
+const AUTH_URL  = 'https://script.google.com/macros/s/AKfycbzqL0jofgg8B4viY7NyqWjaE36AwiK2IEqDWM2A5WXwlJb06p_xqo11TdIu4ubl28pl/exec'; // usuários
+
+/* ── Sessão ── */
+function getSession() {
+  try { return JSON.parse(localStorage.getItem('pulvion_session')||'{}'); } catch(_){ return {}; }
+}
+
+/* ── JSONP padronizado ── */
+function jsonpGet(url, params) {
+  return new Promise((res,rej) => {
+    const cb = '_cb'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const qs = Object.entries({...params,callback:cb}).map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
+    const s  = document.createElement('script');
+    s.src = url+'?'+qs;
+    let done = false;
+    window[cb] = d => { done=true; delete window[cb]; s.remove(); res(d); };
+    s.onerror  = () => { if(!done){ delete window[cb]; s.remove(); rej(new Error('Falha JSONP')); } };
+    setTimeout(()=>{ if(!done){ delete window[cb]; s.remove(); rej(new Error('Timeout')); } },12000);
+    document.head.appendChild(s);
+  });
+}
+
+/* ── Aplica sessão ao formulário ── */
+function applySession() {
+  const s = getSession();
+  if (!s || !s.username) return;
+  // Piloto
+  const pilEl = document.getElementById('piloto');
+  if (pilEl && s.nome) { pilEl.value = s.nome; pilEl.readOnly = true; pilEl.style.opacity='0.75'; }
+  // Frente — trava se piloto
+  if (s.role === 'piloto' && s.frente) {
+    const frEl = document.getElementById('frente');
+    if (frEl) {
+      const inp = document.createElement('input');
+      inp.type='text'; inp.id='frente'; inp.value=String(s.frente).padStart(2,'0');
+      inp.readOnly=true; inp.style.opacity='0.75'; inp.style.cursor='not-allowed';
+      inp.className=frEl.className;
+      frEl.parentNode.replaceChild(inp, frEl);
+    }
+  }
+}
+
+/* ── Carrega clientes (substitui cascata hardcoded) ── */
+var _clientes = [];
+async function loadClientes() {
+  const estadoSel  = document.getElementById('estado');
+  const unidadeSel = document.getElementById('unidade');
+  try {
+    const data = await jsonpGet(AUTH_URL, {action:'getClientes'});
+    if (!data.ok) throw new Error(data.error||'Erro');
+    _clientes = (data.clientes||[]).filter(c => c.ativo !== false);
+    // Preenche UFs únicas no select de estado
+    const ufs = [...new Set(_clientes.map(c=>(c.uf||'').trim()).filter(Boolean))].sort();
+    estadoSel.innerHTML = '<option value="">Selecione…</option>';
+    ufs.forEach(uf => {
+      const o=document.createElement('option'); o.value=uf; o.textContent=uf; estadoSel.appendChild(o);
+    });
+    unidadeSel.disabled = true;
+    unidadeSel.innerHTML = '<option value="">Selecione o Estado</option>';
+  } catch(e) {
+    console.warn('[loadClientes]',e.message);
+  }
+}
+function fillUnidades(uf) {
+  const sel = document.getElementById('unidade');
+  const filtered = _clientes.filter(c=>(c.uf||'').trim()===uf);
+  sel.innerHTML = '<option value="">Selecione…</option>';
+  if (!filtered.length) { sel.disabled=true; return; }
+  // agrupa por grupo
+  const grupos = {};
+  filtered.forEach(c=>{ const g=c.grupo||'Outros'; if(!grupos[g]) grupos[g]=[]; grupos[g].push(c); });
+  Object.entries(grupos).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([g,cls])=>{
+    const og=document.createElement('optgroup'); og.label=g;
+    cls.sort((a,b)=>(a.nomeunidade||'').localeCompare(b.nomeunidade||'')).forEach(c=>{
+      const o=document.createElement('option'); o.value=c.nomeunidade; o.textContent=c.nomeunidade; og.appendChild(o);
+    });
+    sel.appendChild(og);
+  });
+  sel.disabled = false;
+}
+
+/* ============================================================
+   ESTADO → UNIDADE CASCADE
+============================================================ */
+const estadoSel  = document.getElementById('estado');
+const unidadeSel = document.getElementById('unidade');
+
+document.getElementById('estado').addEventListener('change', function() {
+  if (this.value) fillUnidades(this.value);
+  else {
+    const sel=document.getElementById('unidade');
+    sel.innerHTML='<option value="">Selecione o Estado</option>'; sel.disabled=true;
+  }
+  gerarTexto();
+});
+
+/* ============================================================
+   FRENTE → PILOTO
+============================================================ */
+document.getElementById('frente').addEventListener('change', function () {
+  // Piloto livre para admin (piloto já fica travado pela sessão)
+  gerarTexto();
+});
+
+/* ============================================================
+   LIVE PREVIEW on header field change
+============================================================ */
+['dataAplicacao','unidade','auxiliar','drone','objetivo','tipoProduto'].forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', () => gerarTexto());
+});
+
+/* ============================================================
+   JSONP
+============================================================ */
+function jsonp(urlString) {
+  const url = new URL(urlString);
+  const cb  = '__jsonp_' + Math.random().toString(36).slice(2);
+  url.searchParams.set('callback', cb);
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = url.toString();
+    window[cb] = data => { resolve(data); cleanup(); };
+    s.onerror = () => { reject(new Error('Falha no JSONP')); cleanup(); };
+    function cleanup() { delete window[cb]; s.remove(); }
+    document.body.appendChild(s);
+  });
+}
+
+/* ============================================================
+   FARM CARDS
+============================================================ */
+const container = document.getElementById('fazendasContainer');
+let farmSeq = 0;
+
+function addFazenda(prefillOS = '') {
+  farmSeq++;
+  const seq = farmSeq;
+  const idx = Date.now().toString(36) + seq;
+  const el  = document.createElement('div');
+  el.className = 'farm-card';
+  el.dataset.idx = idx;
+
+  el.innerHTML = `
+    <div class="farm-card-header">
+      <span class="farm-card-num">#${String(seq).padStart(2,'0')}</span>
+      <span class="farm-card-title">Fazenda</span>
+      <div class="farm-card-actions">
+        <button class="btn btn-xs" data-add="${idx}" title="Adicionar fazenda">
+          <i data-lucide="plus" width="12" height="12"></i>
+          Adicionar
+        </button>
+        <button class="btn btn-xs btn-danger-soft" data-remove="${idx}" title="Remover">
+          <i data-lucide="trash-2" width="12" height="12"></i>
+          Remover
+        </button>
+      </div>
+    </div>
+
+    <div class="farm-card-body">
+      <!-- OS search -->
+      <div class="os-search-row">
+        <div class="field">
+          <label>Nº OS</label>
+          <input id="os_${idx}" placeholder="Digite a OS…" autocomplete="off">
+        </div>
+        <button class="btn btn-sm" data-buscar="${idx}" title="Buscar OS">
+          <i data-lucide="search" width="13" height="13"></i>
+          Buscar
+        </button>
+      </div>
+      <div class="farm-status" id="status_${idx}"></div>
+
+      <!-- Auto-filled info cells -->
+      <div class="farm-info-grid">
+        <div class="info-cell">
+          <div class="i-label">Código</div>
+          <div class="i-val" id="dCod_${idx}">—</div>
+          <input type="hidden" id="codigo_${idx}">
+        </div>
+        <div class="info-cell">
+          <div class="i-label">Fazenda</div>
+          <div class="i-val" id="dFaz_${idx}">—</div>
+          <input type="hidden" id="fazenda_${idx}">
+        </div>
+        <div class="info-cell">
+          <div class="i-label">Área (ha)</div>
+          <div class="i-val gold" id="dArea_${idx}">—</div>
+          <input type="hidden" id="area_${idx}">
+        </div>
+        <div class="info-cell">
+          <div class="i-label">Operação</div>
+          <div class="i-val" id="dOp_${idx}">—</div>
+          <input type="hidden" id="operacao_${idx}">
+        </div>
+        <div class="info-cell full">
+          <div class="i-label">Insumos</div>
+          <div class="i-val-area" id="dIns_${idx}">—</div>
+          <input type="hidden" id="insumos_${idx}">
+        </div>
+      </div>
+    </div>
+  `;
+
+  container.appendChild(el);
+  refreshIcons();
+
+  // Events
+  el.querySelector(`[data-remove="${idx}"]`).addEventListener('click', () => {
+    el.remove(); updateResumo(); gerarTexto();
+  });
+  el.querySelector(`[data-add="${idx}"]`).addEventListener('click', () => addFazenda());
+  el.querySelector(`[data-buscar="${idx}"]`).addEventListener('click', () => buscarOS(idx));
+
+  const osInput = el.querySelector(`#os_${idx}`);
+  let deb;
+  osInput.addEventListener('input', () => {
+    clearFarmDisplay(idx);
+    clearTimeout(deb);
+    const v = osInput.value.trim();
+    if (!v) { updateResumo(); return; }
+    deb = setTimeout(() => buscarOS(idx), 380);
+  });
+  osInput.addEventListener('keydown', e => { if (e.key === 'Enter') { clearTimeout(deb); buscarOS(idx); } });
+
+  if (prefillOS) { osInput.value = prefillOS; buscarOS(idx); }
+}
+
+function setFarmStatus(idx, msg, type = '') {
+  const el = document.getElementById(`status_${idx}`);
+  if (!el) return;
+  el.textContent = msg;
+  el.className   = 'farm-status' + (type ? ' ' + type : '');
+}
+
+function clearFarmDisplay(idx) {
+  ['dCod','dFaz','dArea','dOp','dIns'].forEach(k => {
+    const d = document.getElementById(`${k}_${idx}`);
+    if (d) d.textContent = '—';
+  });
+  ['codigo','fazenda','area','operacao','insumos'].forEach(k => {
+    const h = document.getElementById(`${k}_${idx}`);
+    if (h) h.value = '';
+  });
+}
+
+function setFarmDisplay(idx, cod, faz, area, op, ins) {
+  const set = (k, val) => { const d = document.getElementById(k); if (d) d.textContent = val || '—'; };
+  const hid = (k, val) => { const d = document.getElementById(k); if (d) d.value = val || ''; };
+
+  set(`dCod_${idx}`,  cod);
+  set(`dFaz_${idx}`,  faz);
+  set(`dArea_${idx}`, area ? area + ' ha' : '—');
+  set(`dOp_${idx}`,   op);
+  set(`dIns_${idx}`,  ins);
+
+  hid(`codigo_${idx}`,   cod);
+  hid(`fazenda_${idx}`,  faz);
+  hid(`area_${idx}`,     area);
+  hid(`operacao_${idx}`, op);
+  hid(`insumos_${idx}`,  ins);
+}
+
+async function buscarOS(idx) {
+  const osInput = document.getElementById(`os_${idx}`);
+  const osVal   = (osInput?.value || '').trim();
+  if (!osVal) { clearFarmDisplay(idx); updateResumo(); return; }
+
+  setFarmStatus(idx, 'Buscando…', 'load');
+
+  try {
+    const js = await jsonp(APPS_SCRIPT_URL + '?os=' + encodeURIComponent(osVal));
+
+    if (!js.ok || !js.rows || !js.rows.length) {
+      clearFarmDisplay(idx);
+      setFarmStatus(idx, 'OS não encontrada na planilha.', 'err');
+      updateResumo(); return;
+    }
+
+    const row = js.rows.find(x => String(x.OS) === String(osVal)) || js.rows[0];
+    const get = k => (row[k] ?? row[k?.toUpperCase()] ?? '').toString().trim();
+
+    const area = (get('AREA (HA)') || '').replace(',', '.');
+    setFarmDisplay(idx, get('CODIGO'), get('FAZENDA'), area, get('OPERACAO'), get('INSUMOS'));
+
+    // Sync objetivo if matches
+    const objetivoSel = document.getElementById('objetivo');
+    const objStr = get('OBJETIVO');
+    if (objStr) {
+      [...objetivoSel.options].forEach(o => {
+        if (o.value.toUpperCase() === objStr.toUpperCase()) objetivoSel.value = o.value;
+      });
+    }
+
+    setFarmStatus(idx, '✓ OS carregada com sucesso', 'ok');
+    updateResumo();
+    gerarTexto();
+
+  } catch (e) {
+    console.error(e);
+    clearFarmDisplay(idx);
+    setFarmStatus(idx, 'Falha ao buscar OS.', 'err');
+    updateResumo();
+  }
+}
+
+/* ============================================================
+   RESUMO (badges)
+============================================================ */
+function updateResumo() {
+  const cards = [...container.querySelectorAll('.farm-card')];
+  let totalFaz = 0, totalArea = 0;
+  cards.forEach(c => {
+    const faz  = (c.querySelector('[id^="fazenda_"]')?.value || '').trim();
+    const aStr = (c.querySelector('[id^="area_"]')?.value   || '').trim();
+    if (faz) totalFaz++;
+    const v = parseFloat(aStr.replace(',', '.'));
+    if (!isNaN(v)) totalArea += v;
+  });
+  document.getElementById('badgeFaz').textContent  = `Fazendas: ${totalFaz}`;
+  document.getElementById('badgeArea').textContent = `Área: ${totalArea.toFixed(2).replace('.', ',')} ha`;
+}
+
+/* ============================================================
+   GERAR TEXTO
+============================================================ */
+function gerarTexto() {
+  const data       = (document.getElementById('dataAplicacao').value || '').split('-').reverse().join('/');
+  const unidade    = document.getElementById('unidade').value    || '-';
+  const frente     = document.getElementById('frente').value     || '-';
+  const piloto     = document.getElementById('piloto').value     || '-';
+  const auxiliar   = document.getElementById('auxiliar').value   || '-';
+  const drone      = document.getElementById('drone').value      || '-';
+  const objetivo   = document.getElementById('objetivo').value   || '-';
+  const tipoProd   = document.getElementById('tipoProduto').value || '-';
+
+  const cards = [...container.querySelectorAll('.farm-card')];
+  let blocos = [], totalFaz = 0, totalArea = 0;
+
+  cards.forEach(c => {
+    const os      = (c.querySelector('[id^="os_"]')?.value       || '').trim();
+    const codigo  = (c.querySelector('[id^="codigo_"]')?.value   || '').trim();
+    const fazenda = (c.querySelector('[id^="fazenda_"]')?.value  || '').trim();
+    const aStr    = (c.querySelector('[id^="area_"]')?.value     || '').trim();
+    const operacao= (c.querySelector('[id^="operacao_"]')?.value || '').trim();
+    const insumos = (c.querySelector('[id^="insumos_"]')?.value  || '').trim();
+
+    if (fazenda) totalFaz++;
+    const v = parseFloat(aStr.replace(',', '.'));
+    if (!isNaN(v)) totalArea += v;
+
+    const areaClean = aStr.replace(/\s*ha$/i, '').trim();
+    const areaFmt   = areaClean ? `${areaClean} ha` : '-';
+
+    blocos.push(
+`*📋 OS:* ${os || '-'}
+*Código:* ${codigo || '-'}
+*Fazenda:* ${fazenda || '-'}
+*Área (ha):* ${areaFmt}
+*Operação:* ${operacao || '-'}
+*Insumos:* ${insumos || '-'}`
+    );
+  });
+
+  const header =
+`📅 *Programação para aplicação:* 🔸 ${data || '-'}
+
+*Unidade:* ${unidade}
+*Frente:* ${frente}
+*Piloto:* ${piloto}
+*Auxiliar:* ${auxiliar}
+*Drone:* ${drone}
+*Objetivo:* ${objetivo}
+*Tipo de Produto:* ${tipoProd}`;
+
+  const resumo =
+`\n*Resumo Geral:*
+*Qtd. Fazendas:* ${totalFaz}
+*Qtd. Área (ha):* ${totalArea.toFixed(2).replace('.', ',')} ha`;
+
+  const sep = '_______';
+  const blocosTexto = blocos.length
+    ? blocos.map(b => b + '\n' + sep).join('\n\n')
+    : '';
+
+  const textoFinal = header + (blocosTexto ? '\n\n' + blocosTexto + '\n\n' : '\n\n') + resumo;
+
+  document.getElementById('preview').textContent = textoFinal;
+  document.getElementById('btnWhats').href = 'https://wa.me/?text=' + encodeURIComponent(textoFinal);
+  updateResumo();
+}
+
+/* ============================================================
+   SALVAR PROGRAMAÇÃO
+============================================================ */
+async function saveProgram() {
+  if (SAVE_URL === 'COLE_AQUI_URL_CODE_APLICACAO') {
+    showStatus('⚠ Configure SAVE_URL', 'warn'); return;
+  }
+  const s = getSession();
+  const cards = [...document.getElementById('fazendasContainer').querySelectorAll('.farm-card')];
+  const fazendas = cards.map(c => ({
+    os:      (c.querySelector('[id^="os_"]')?.value      || '').trim(),
+    codigo:  (c.querySelector('[id^="codigo_"]')?.value  || '').trim(),
+    fazenda: (c.querySelector('[id^="fazenda_"]')?.value || '').trim(),
+    area:    (c.querySelector('[id^="area_"]')?.value    || '').trim(),
+    operacao:(c.querySelector('[id^="operacao_"]')?.value|| '').trim(),
+    insumos: (c.querySelector('[id^="insumos_"]')?.value || '').trim(),
+  })).filter(f => f.fazenda || f.os);
+
+  const payload = {
+    action:      'saveProgram',
+    usuario:     s.username || 'admin',
+    piloto:      document.getElementById('piloto').value    || '',
+    frente:      document.getElementById('frente').value    || '',
+    data:        document.getElementById('dataAplicacao').value || '',
+    drone:       document.getElementById('drone').value     || '',
+    unidade:     document.getElementById('unidade').value   || '',
+    estado:      document.getElementById('estado').value    || '',
+    auxiliar:    document.getElementById('auxiliar').value  || '',
+    objetivo:    document.getElementById('objetivo').value  || '',
+    tipoproduto: document.getElementById('tipoProduto').value|| '',
+    fazendas:    JSON.stringify(fazendas),
+  };
+
+  const btn = document.getElementById('btnSalvar');
+  btn.disabled = true; btn.textContent = 'Salvando…';
+  try {
+    const data = await jsonpGet(SAVE_URL, payload);
+    if (!data.ok) throw new Error(data.error||'Erro');
+    showStatus('✓ Programação salva! ID: '+data.id, 'ok');
+  } catch(e) {
+    showStatus('✗ Erro: '+e.message, 'err');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="save" width="14" height="14"></i> Salvar Programação';
+    refreshIcons();
+  }
+}
+
+/* ============================================================
+   STATUS BADGE
+============================================================ */
+function showStatus(msg, type) {
+  const badge = document.getElementById('lblInfo');
+  badge.textContent = msg;
+  badge.className   = 'status-badge ' + type;
+  setTimeout(() => { badge.className = 'status-badge'; }, 2200);
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  refreshIcons();
+
+  // Default date to today
+  const today = new Date();
+  const pad   = n => String(n).padStart(2,'0');
+  document.getElementById('dataAplicacao').value =
+    `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+
+  // First farm row
+  addFazenda();
+
+  document.getElementById('btnAddFazenda').addEventListener('click', () => addFazenda());
+
+  document.getElementById('btnGerar').addEventListener('click', () => {
+    gerarTexto();
+    showStatus('✓ Prévia atualizada', 'ok');
+  });
+
+  document.getElementById('btnSalvar').addEventListener('click', saveProgram);
+
+  applySession();
+  loadClientes();
+
+  document.getElementById('btnCopiar').addEventListener('click', async () => {
+    const txt = document.getElementById('preview').textContent || '';
+    try {
+      await navigator.clipboard.writeText(txt);
+      showStatus('✓ Copiado!', 'ok');
+    } catch (_) {
+      showStatus('Falha ao copiar', 'warn');
+    }
+  });
+
+  gerarTexto();
+});
+</script>
+</body>
+</html>

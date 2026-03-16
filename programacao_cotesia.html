@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Programação · Cotesia · Top Gun</title>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   THEME TOKENS
+============================================================ */
+:root, [data-theme="light"] {
+  --gold:         #b8942e;
+  --gold-light:   #d9b24c;
+  --gold-dim:     rgba(184,148,46,0.10);
+  --gold-border:  rgba(184,148,46,0.28);
+
+  --bg:           #f0ede6;
+  --card:         #ffffff;
+  --surface:      #f5f2eb;
+  --surface-2:    #ebe7dd;
+  --input-bg:     #f8f6f1;
+  --input-ro:     #ede9e0;
+
+  --header-bg:    rgba(240,237,230,0.97);
+  --header-bdr:   rgba(184,148,46,0.22);
+
+  --text:         #0d1117;
+  --text-muted:   #4b5563;
+  --text-label:   #94a3b8;
+
+  --success:      #16a34a;
+  --warning:      #d97706;
+  --warning-dim:  rgba(217,119,6,0.10);
+  --warning-bdr:  rgba(217,119,6,0.35);
+  --danger:       #dc2626;
+  --danger-dim:   rgba(220,38,38,0.08);
+  --danger-bdr:   rgba(220,38,38,0.28);
+
+  --shadow-sm:    0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md:    0 4px 20px rgba(0,0,0,0.07);
+
+  --radius:       12px;
+  --radius-sm:    8px;
+}
+
+[data-theme="dark"] {
+  --gold:         #d9b24c;
+  --gold-light:   #f0d078;
+  --gold-dim:     rgba(217,178,76,0.10);
+  --gold-border:  rgba(217,178,76,0.28);
+
+  --bg:           #060912;
+  --card:         #0c1224;
+  --surface:      #0f1628;
+  --surface-2:    rgba(255,255,255,0.04);
+  --input-bg:     #0b1425;
+  --input-ro:     #0f182c;
+
+  --header-bg:    rgba(10,15,31,0.97);
+  --header-bdr:   rgba(217,178,76,0.22);
+
+  --text:         #f0ece4;
+  --text-muted:   #9ca3af;
+  --text-label:   #6b7280;
+
+  --success:      #22c55e;
+  --warning:      #f59e0b;
+  --warning-dim:  rgba(245,158,11,0.12);
+  --warning-bdr:  rgba(245,158,11,0.35);
+  --danger:       #ef4444;
+  --danger-dim:   rgba(239,68,68,0.10);
+  --danger-bdr:   rgba(239,68,68,0.30);
+
+  --shadow-sm:    0 2px 8px rgba(0,0,0,0.20);
+  --shadow-md:    0 8px 28px rgba(0,0,0,0.30);
+
+  --radius:       12px;
+  --radius-sm:    8px;
+}
+
+/* ============================================================
+   RESET & BASE
+============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Barlow', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
+  padding-bottom: 32px;
+  transition: background 0.3s, color 0.3s;
+}
+
+[data-theme="light"] body {
+  background-image:
+    radial-gradient(ellipse 70% 40% at 5% 0%, rgba(184,148,46,0.06) 0%, transparent 55%);
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gold-border); border-radius: 4px; }
+
+/* ============================================================
+   HEADER
+============================================================ */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--header-bdr);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-sm);
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  height: 60px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.header-inner h1 {
+  flex: 1;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+/* ============================================================
+   BUTTONS — base system
+============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  cursor: pointer;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  border: 1px solid var(--gold-border);
+  background: var(--gold-dim);
+  color: var(--gold);
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+}
+
+.btn:hover { background: rgba(184,148,46,0.18); border-color: var(--gold); }
+
+.btn-primary {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(184,148,46,0.30);
+}
+[data-theme="dark"] .btn-primary { color: #0b0f1f; }
+.btn-primary:hover { background: var(--gold-light); border-color: var(--gold-light); }
+
+.btn-ghost {
+  background: var(--surface);
+  border-color: rgba(0,0,0,0.08);
+  color: var(--text-muted);
+}
+.btn-save {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+  font-weight: 800;
+}
+.btn-save:hover { filter: brightness(1.10); }
+.log-box {
+  padding: 12px 14px; border-radius: var(--radius-sm);
+  font-family: 'IBM Plex Mono', monospace; font-size: .7rem;
+  letter-spacing: .04em; border: 1px solid; margin-top: 4px;
+}
+.log-box.ok  { background: rgba(22,163,74,0.09);  border-color: rgba(22,163,74,0.30);  color: #15803d; }
+.log-box.err { background: rgba(220,38,38,0.09);  border-color: rgba(220,38,38,0.28);  color: #dc2626; }
+.log-box.loading { background: var(--gold-dim); border-color: var(--gold-border); color: var(--gold); }
+[data-theme="dark"] .log-box.ok { color: #4ade80; }
+[data-theme="dark"] .log-box.err { color: #f87171; }
+[data-theme="dark"] .btn-ghost { border-color: rgba(255,255,255,0.08); }
+.btn-ghost:hover { background: var(--surface-2); color: var(--text); border-color: var(--gold-border); }
+
+.btn-danger {
+  background: var(--danger-dim);
+  border-color: var(--danger-bdr);
+  color: var(--danger);
+}
+.btn-danger:hover { background: rgba(220,38,38,0.15); }
+
+.btn-warning {
+  background: var(--warning-dim);
+  border-color: var(--warning-bdr);
+  color: var(--warning);
+}
+.btn-warning:hover { background: rgba(217,119,6,0.18); }
+
+.btn-full { width: 100%; }
+
+.btn-sm {
+  padding: 7px 12px;
+  font-size: 0.82rem;
+}
+
+/* Theme toggle */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gold-border);
+  background: var(--gold-dim);
+  color: var(--gold);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+.theme-toggle:hover { background: rgba(184,148,46,0.2); border-color: var(--gold); transform: rotate(20deg); }
+
+/* ============================================================
+   MAIN LAYOUT
+============================================================ */
+.wrap {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ============================================================
+   CARDS
+============================================================ */
+.card {
+  background: var(--card);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--gold-border);
+  background: var(--gold-dim);
+}
+
+.card-header-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--gold-border);
+  background: var(--card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+.card-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+  flex: 1;
+}
+
+.card-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  color: var(--text-label);
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--gold-border);
+  background: var(--card);
+}
+
+.card-body { padding: 18px; }
+
+/* ============================================================
+   FORM FIELDS
+============================================================ */
+.field-group { display: flex; flex-direction: column; gap: 12px; }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-label);
+}
+
+.field label.required::after {
+  content: ' *';
+  color: var(--gold);
+}
+
+input, select, textarea {
+  width: 100%;
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-dim);
+}
+
+input[readonly], input[readonly]:focus {
+  background: var(--input-ro);
+  color: var(--text-muted);
+  border-color: rgba(0,0,0,0.08);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+[data-theme="dark"] input[readonly] { border-color: rgba(255,255,255,0.06); }
+
+select { cursor: pointer; }
+
+textarea { resize: vertical; min-height: 80px; }
+
+/* ============================================================
+   TOTALS ROW
+============================================================ */
+.totals-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--gold-border);
+  background: var(--gold-dim);
+}
+
+.total-item { display: flex; flex-direction: column; gap: 4px; }
+
+.total-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-label);
+}
+
+.total-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--gold);
+}
+
+/* ============================================================
+   FARM ROWS
+============================================================ */
+.farm-list { display: flex; flex-direction: column; }
+
+.farm {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--gold-border);
+  transition: background 0.2s;
+}
+
+.farm:last-child { border-bottom: none; }
+.farm:hover { background: var(--gold-dim); }
+
+/* OS row */
+.os-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.os-number {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-label);
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.os-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.os-input {
+  flex: 1;
+  font-family: 'IBM Plex Mono', monospace !important;
+  font-weight: 500 !important;
+}
+
+.farm-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding-left: 32px;
+}
+
+.farm-fields .field-full { grid-column: 1 / -1; }
+
+.farm-msg {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--text-label);
+  min-height: 18px;
+  padding-left: 32px;
+  margin-bottom: 8px;
+}
+
+.farm-msg.ok    { color: var(--success); }
+.farm-msg.warn  { color: var(--warning); }
+.farm-msg.err   { color: var(--danger); }
+
+/* Add farm button row */
+.add-farm-row {
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px dashed var(--gold-border);
+}
+
+.add-hint {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--text-label);
+  letter-spacing: 0.06em;
+}
+
+/* ============================================================
+   PREVIEW
+============================================================ */
+.preview-box {
+  white-space: pre-wrap;
+  background: var(--input-bg);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  min-height: 180px;
+  max-height: 280px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  overflow: auto;
+  color: var(--text);
+}
+
+/* ============================================================
+   ACTION BUTTONS GRID
+============================================================ */
+.action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.action-grid .btn-full-row { grid-column: 1 / -1; }
+
+/* Status badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--gold-border);
+  background: var(--gold-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--text-label);
+  transition: all 0.2s;
+}
+
+.status-badge.ok   { color: var(--success); border-color: rgba(22,163,74,0.3); background: rgba(22,163,74,0.08); }
+.status-badge.warn { color: var(--warning); border-color: var(--warning-bdr);  background: var(--warning-dim); }
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: var(--gold-border);
+  margin: 4px 0;
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width: 520px) {
+  .header-inner h1 { font-size: 0.88rem; }
+  .farm-fields { grid-template-columns: 1fr; }
+  .action-grid { grid-template-columns: 1fr; }
+  .action-grid .btn-full-row { grid-column: 1; }
+  .totals-row { grid-template-columns: 1fr; gap: 8px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     HEADER
+============================================================ -->
+<header class="site-header">
+  <div class="header-inner">
+    <a class="btn btn-sm" href="operacional.html" title="Voltar">
+      <i data-lucide="arrow-left" width="14" height="14"></i>
+      Voltar
+    </a>
+    <h1>
+      <i data-lucide="bug" width="18" height="18"></i>
+      Programação · Cotesia
+    </h1>
+    <button class="theme-toggle" id="themeToggle" title="Alternar tema">
+      <i data-lucide="moon" width="15" height="15" id="themeIcon"></i>
+    </button>
+  </div>
+</header>
+
+<!-- ============================================================
+     MAIN
+============================================================ -->
+<div class="wrap">
+
+  <!-- ── Dados Gerais ─────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon">
+        <i data-lucide="clipboard-list" width="16" height="16"></i>
+      </div>
+      <span class="card-title">Dados Gerais</span>
+      <span class="card-badge">Etapa 1</span>
+    </div>
+    <div class="card-body">
+      <div class="field-group">
+
+        <div class="field">
+          <label class="required">Data</label>
+          <input type="date" id="dtData">
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div class="field">
+            <label class="required">Frente</label>
+            <select id="selFrente">
+              <option value="" selected>Selecione…</option>
+              <option value="01">01</option>
+              <option value="02">02</option>
+              <option value="03">03</option>
+              <option value="04">04</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Piloto</label>
+            <input type="text" id="txtPiloto" placeholder="Auto" readonly title="Preenchido pela Frente">
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="required">Drone</label>
+          <select id="selDrone">
+            <option value="" selected>Selecione…</option>
+            <option value="XFLY X800">XFLY X800</option>
+            <option value="NEXUS NX6">NEXUS NX6</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="required">Unidade</label>
+          <select id="selUnidade">
+            <option value="">Carregando clientes…</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Observação</label>
+          <input type="text" id="txtObjetivo" placeholder="Ex.: Dois voos">
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Fazendas ─────────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon">
+        <i data-lucide="tractor" width="16" height="16"></i>
+      </div>
+      <span class="card-title">Fazendas por OS</span>
+      <span class="card-badge">Etapa 2</span>
+    </div>
+
+    <!-- Farm rows injected here -->
+    <div class="farm-list" id="rows"></div>
+
+    <!-- Add farm -->
+    <div class="add-farm-row">
+      <button class="btn btn-sm" id="btnAdd">
+        <i data-lucide="plus" width="14" height="14"></i>
+        Adicionar fazenda
+      </button>
+      <span class="add-hint">Preencha a OS e clique "Buscar"</span>
+    </div>
+
+    <!-- Totals bar -->
+    <div class="totals-row">
+      <div class="total-item">
+        <span class="total-label">Fazendas</span>
+        <span class="total-val" id="totFazendasDisplay">0</span>
+        <input type="hidden" id="totFazendas">
+      </div>
+      <div class="total-item">
+        <span class="total-label">Hectares</span>
+        <span class="total-val" id="totHaDisplay">0,00</span>
+        <input type="hidden" id="totHa">
+      </div>
+      <div class="total-item">
+        <span class="total-label">Copos</span>
+        <span class="total-val" id="totCoposDisplay">0</span>
+        <input type="hidden" id="totCopos">
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Prévia & Ações ───────────────────────────────────── -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon">
+        <i data-lucide="eye" width="16" height="16"></i>
+      </div>
+      <span class="card-title">Prévia WhatsApp</span>
+      <span class="card-badge">Etapa 3</span>
+    </div>
+    <div class="card-body" style="display:flex; flex-direction:column; gap:14px;">
+
+      <div class="preview-box" id="preview"></div>
+
+      <div class="divider"></div>
+
+      <div class="action-grid">
+        <button class="btn btn-primary btn-full-row" id="btnGerar">
+          <i data-lucide="refresh-cw" width="15" height="15"></i>
+          Gerar Prévia
+        </button>
+
+        <button class="btn btn-ghost" id="btnCopiar">
+          <i data-lucide="copy" width="15" height="15"></i>
+          Copiar
+        </button>
+
+        <button class="btn" id="btnWhats">
+          <i data-lucide="message-circle" width="15" height="15"></i>
+          WhatsApp
+        </button>
+
+        <button class="btn btn-ghost btn-full-row" id="btnReport">
+          <i data-lucide="printer" width="15" height="15"></i>
+          Imprimir Resumo
+        </button>
+
+        <button class="btn btn-save btn-full-row" id="btnSalvar">
+          <i data-lucide="save" width="15" height="15"></i>
+          Salvar Programação no Sistema
+        </button>
+      </div>
+
+      <div style="display:flex; justify-content:center;">
+        <span class="status-badge" id="lblInfo" style="display:none;"></span>
+      </div>
+      <div class="log-box" id="saveLog" style="display:none;"></div>
+
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+/* ============================================================
+   THEME
+============================================================ */
+const html = document.documentElement;
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon   = document.getElementById('themeIcon');
+
+function setThemeIcon(t) {
+  themeIcon.setAttribute('data-lucide', t === 'dark' ? 'sun' : 'moon');
+  lucide.createIcons();
+}
+
+function applyTheme(t) {
+  html.setAttribute('data-theme', t);
+  localStorage.setItem('pulvion_theme', t);
+  setThemeIcon(t);
+  themeToggle.title = t === 'dark' ? 'Modo claro' : 'Modo escuro';
+}
+
+(function initTheme() {
+  applyTheme(localStorage.getItem('pulvion_theme') || 'light');
+})();
+
+themeToggle.addEventListener('click', () => {
+  applyTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+});
+
+/* ============================================================
+   LUCIDE INIT
+============================================================ */
+lucide.createIcons();
+
+/* ============================================================
+   UTILS
+============================================================ */
+const pad2 = n => String(n).padStart(2, '0');
+
+function todaySP() {
+  const now = new Date();
+  return `${now.getFullYear()}-${pad2(now.getMonth()+1)}-${pad2(now.getDate())}`;
+}
+
+function fmtBR(n, d = 2) {
+  return Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+
+function toNumBR(s) {
+  if (typeof s === 'number') return s;
+  const t = String(s || '').replace(/\./g, '').replace(',', '.');
+  const n = parseFloat(t);
+  return isNaN(n) ? 0 : n;
+}
+
+function fmtDateBRfromInput(v) {
+  if (!v) return '';
+  const [y, m, d] = v.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function nowStrSP() {
+  return new Intl.DateTimeFormat('pt-BR', {
+    timeZone: 'America/Sao_Paulo',
+    dateStyle: 'short',
+    timeStyle: 'short'
+  }).format(new Date());
+}
+
+/* ============================================================
+   FRENTE → PILOTO
+============================================================ */
+const PILOTOS = { '01': 'Victor Hugo', '02': 'Pedro', '03': 'Guilherme', '04': 'Erick Frota' };
+
+function setPilotByFrente() {
+  // Não sobrescreve se o piloto já está travado pela sessão
+  const pilEl = document.getElementById('txtPiloto');
+  if (pilEl && pilEl.readOnly) return;
+  const frente = document.getElementById('selFrente').value || '';
+  if (pilEl) pilEl.value = PILOTOS[frente] || '';
+}
+
+/* ============================================================
+   SESSÃO — lê o usuário logado salvo pelo index.html
+============================================================ */
+function getSession() {
+  try { return JSON.parse(localStorage.getItem('pulvion_session') || '{}'); }
+  catch(_) { return {}; }
+}
+
+/* Preenche Frente + Piloto automaticamente pelo login */
+function applySessionToForm() {
+  const s = getSession();
+  if (!s || !s.username) return;
+
+  const pilEl = document.getElementById('txtPiloto');
+
+  // Sempre preenche o nome do piloto
+  if (pilEl && s.nome) {
+    pilEl.value    = s.nome;
+    pilEl.readOnly = true;
+    pilEl.style.opacity = '0.75';
+  }
+
+  // Se piloto tem frente: substitui o <select> por <input readonly>
+  if (s.role === 'piloto' && s.frente) {
+    const frEl = document.getElementById('selFrente');
+    if (frEl) {
+      // Cria input readonly no lugar do select
+      const input = document.createElement('input');
+      input.type      = 'text';
+      input.id        = 'selFrente';        // mantém o mesmo ID para o restante do código
+      input.value     = s.frente;
+      input.readOnly  = true;
+      input.style.opacity = '0.75';
+      input.style.cursor  = 'not-allowed';
+      // copia classes e atributos visuais do select
+      input.className = frEl.className;
+      frEl.parentNode.replaceChild(input, frEl);
+    }
+  }
+}
+
+/* ============================================================
+   API (Apps Script)
+   LOOKUP_URL = URL existente para buscar OS
+   SAVE_URL   = URL do novo deployment para salvar/carregar dados
+                Troque SAVE_URL pelo endereço do seu Apps Script
+                (veja o arquivo Code_Cotesia.gs fornecido)
+============================================================ */
+const API_URL   = 'https://script.google.com/macros/s/AKfycbylamuKlb6-OWIhs4qNfRZ9WB7o_X2pBW7jrRchnnNe5RrKvsOUv7lWhj4JbMqS67OOow/exec';
+const API_TOKEN = '';
+const SAVE_URL  = 'https://script.google.com/macros/s/AKfycbxv7racHVo_fvoVtpyqomokbtanuwPK7jBTMJIDUXnD4RTnUjREzZI-jlqRFFCjRuP4NA/exec'; // ← configurar
+const AUTH_URL  = 'https://script.google.com/macros/s/AKfycbzqL0jofgg8B4viY7NyqWjaE36AwiK2IEqDWM2A5WXwlJb06p_xqo11TdIu4ubl28pl/exec'; // ← mesma URL do login
+
+/* ── JSONP — funciona com file:// (sem CORS) ── */
+function jsonpGet(url, params) {
+  return new Promise((resolve, reject) => {
+    const cbName = '_pcb' + Date.now();
+    const qs = Object.entries({...params, callback: cbName})
+      .map(([k,v]) => encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
+    const script = document.createElement('script');
+    script.src = url + '?' + qs;
+    window[cbName] = (data) => { delete window[cbName]; script.remove(); resolve(data); };
+    script.onerror = () => { delete window[cbName]; script.remove(); reject(new Error('Falha de conexão com o servidor.')); };
+    document.head.appendChild(script);
+  });
+}
+async function lookupOS(os) {
+  const params = new URLSearchParams({ action: 'lookup', os, ...(API_TOKEN ? { token: API_TOKEN } : {}) });
+  const res = await fetch(`${API_URL}?${params}`, { method: 'GET' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+/* ── Carrega clientes da planilha ── */
+async function loadClientes() {
+  const sel = document.getElementById('selUnidade');
+  if (!AUTH_URL || AUTH_URL.includes('COLE_AQUI')) {
+    sel.innerHTML = '<option value="">⚠ Configure AUTH_URL</option>';
+    return;
+  }
+  try {
+    const data = await jsonpGet(AUTH_URL, { action: 'getClientes' });
+    if (!data.ok) throw new Error(data.error || 'Erro');
+    const ativos = (data.clientes || []).filter(c => c.ativo !== false);
+    // Agrupa por grupo
+    const grupos = {};
+    ativos.forEach(c => {
+      const g = c.grupo || 'Outros';
+      if (!grupos[g]) grupos[g] = [];
+      grupos[g].push(c);
+    });
+    sel.innerHTML = '<option value="">Selecione…</option>';
+    Object.entries(grupos).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([g, clientes]) => {
+      const og = document.createElement('optgroup');
+      og.label = g;
+      clientes.sort((a,b)=>(a.nomeunidade||'').localeCompare(b.nomeunidade||'')).forEach(c => {
+        const o = document.createElement('option');
+        o.value = c.nomeunidade;
+        o.textContent = c.nomeunidade;
+        o.dataset.clienteId = c.id;
+        og.appendChild(o);
+      });
+      sel.appendChild(og);
+    });
+  } catch(e) {
+    sel.innerHTML = '<option value="">Erro ao carregar clientes</option>';
+    console.warn('[loadClientes]', e.message);
+  }
+}
+
+/* ============================================================
+   FARM ROW FACTORY
+============================================================ */
+const rowsEl = document.getElementById('rows');
+let farmCount = 0;
+
+function makeRow(prefill = {}) {
+  farmCount++;
+  const num = farmCount;
+  const el  = document.createElement('div');
+  el.className = 'farm';
+
+  el.innerHTML = `
+    <div class="os-row">
+      <span class="os-number">#${String(num).padStart(2,'0')}</span>
+      <div class="os-input-wrap">
+        <input type="text" class="os os-input" placeholder="Nº OS" aria-label="Número OS">
+        <button class="btn btn-sm buscar" title="Buscar OS">
+          <i data-lucide="search" width="13" height="13"></i>
+          Buscar
+        </button>
+      </div>
+      <button class="btn btn-sm btn-danger remover" title="Remover fazenda">
+        <i data-lucide="trash-2" width="13" height="13"></i>
+      </button>
+    </div>
+
+    <div class="farm-msg" role="status"></div>
+
+    <div class="farm-fields">
+      <div class="field">
+        <label>Fazenda</label>
+        <input type="text" class="faz" placeholder="Nome da fazenda">
+      </div>
+      <div class="field">
+        <label>Código</label>
+        <input type="text" class="cod" placeholder="Cód.">
+      </div>
+      <div class="field">
+        <label>Hectares (ha)</label>
+        <input type="text" class="ha" placeholder="0,00" inputmode="decimal">
+      </div>
+      <div class="field">
+        <label>Qtd. Copos</label>
+        <input type="text" class="copos" placeholder="0" inputmode="decimal">
+      </div>
+      <div class="field field-full">
+        <label>Objetivo</label>
+        <input type="text" class="objetivo" placeholder="Opcional">
+      </div>
+    </div>
+  `;
+
+  rowsEl.appendChild(el);
+  lucide.createIcons();
+
+  const $os  = el.querySelector('.os');
+  const $msg = el.querySelector('.farm-msg');
+  const $faz = el.querySelector('.faz');
+  const $cod = el.querySelector('.cod');
+  const $ha  = el.querySelector('.ha');
+  const $cop = el.querySelector('.copos');
+  const $obj = el.querySelector('.objetivo');
+
+  if (prefill.os)     $os.value  = prefill.os;
+  if (prefill.faz)    $faz.value = prefill.faz;
+  if (prefill.cod)    $cod.value = prefill.cod;
+  if (prefill.ha)     $ha.value  = prefill.ha;
+  if (prefill.copos)  $cop.value = prefill.copos;
+
+  el.querySelector('.remover').addEventListener('click', () => {
+    el.remove();
+    recalcTotals();
+    updatePreview(false);
+  });
+
+  el.querySelector('.buscar').addEventListener('click', () => doLookup(el));
+
+  $os.addEventListener('keydown', e => { if (e.key === 'Enter') doLookup(el); });
+
+  [$ha, $cop, $faz, $cod, $obj].forEach(inp => {
+    inp.addEventListener('input', () => { recalcTotals(); updatePreview(false); });
+  });
+
+  return el;
+}
+
+/* ============================================================
+   OS LOOKUP
+============================================================ */
+function setMsg(el, text, type = '') {
+  const $msg = el.querySelector('.farm-msg');
+  $msg.textContent = text;
+  $msg.className   = 'farm-msg' + (type ? ' ' + type : '');
+}
+
+async function doLookup(el) {
+  const $os = el.querySelector('.os');
+  const os  = String($os.value || '').trim();
+
+  if (!os) { setMsg(el, 'Informe o número da OS.', 'warn'); return; }
+
+  setMsg(el, 'Buscando…');
+
+  try {
+    const res = await lookupOS(os);
+
+    if (!res || !res.ok || !res.found || !res.items || res.items.length === 0) {
+      setMsg(el, 'OS não encontrada. Preencha manualmente.', 'warn');
+      return;
+    }
+
+    // Sort by most recent date
+    const items = res.items.slice().sort((a, b) => {
+      const toDate = s => {
+        const p = (s || '').split('/');
+        return p.length === 3 ? new Date(+p[2], +p[1]-1, +p[0]) : new Date(0);
+      };
+      return toDate(b.data) - toDate(a.data);
+    });
+
+    const it = items[0];
+    el.querySelector('.faz').value     = it.fazenda  || '';
+    el.querySelector('.cod').value     = it.codigo   || '';
+    el.querySelector('.ha').value      = it.area     ? String(it.area).replace('.', ',') : '';
+    el.querySelector('.copos').value   = it.copos    ? String(it.copos).replace('.', ',') : '';
+    el.querySelector('.objetivo').value = it.objetivo || '';
+
+    setMsg(el, it.data ? `✓ Carregado — referência: ${it.data}` : '✓ Carregado', 'ok');
+    recalcTotals();
+    updatePreview(false);
+
+  } catch (err) {
+    setMsg(el, `Falha: ${err && err.message ? err.message : err}`, 'err');
+  }
+}
+
+/* ============================================================
+   TOTALS
+============================================================ */
+function recalcTotals() {
+  let tHa = 0, tCop = 0, count = 0;
+
+  rowsEl.querySelectorAll('.farm').forEach(el => {
+    tHa  += toNumBR(el.querySelector('.ha').value);
+    tCop += toNumBR(el.querySelector('.copos').value);
+    count++;
+  });
+
+  document.getElementById('totFazendas').value         = count;
+  document.getElementById('totHa').value               = String(tHa).replace('.', ',');
+  document.getElementById('totCopos').value            = String(tCop).replace('.', ',');
+  document.getElementById('totFazendasDisplay').textContent = count;
+  document.getElementById('totHaDisplay').textContent       = fmtBR(tHa);
+  document.getElementById('totCoposDisplay').textContent    = fmtBR(tCop, 0);
+}
+
+/* ============================================================
+   BUILD MESSAGE (WhatsApp)
+============================================================ */
+function buildMessage() {
+  const dt   = document.getElementById('dtData').value;
+  const fr   = document.getElementById('selFrente').value  || '—';
+  const pil  = document.getElementById('txtPiloto').value  || '—';
+  const dr   = document.getElementById('selDrone').value   || '—';
+  const uni  = document.getElementById('selUnidade').value || '—';
+  const objG = document.getElementById('txtObjetivo').value || '';
+
+  let msg = `*Programação _Cotesia_ Top Gun*\n\nData: ${dt ? fmtDateBRfromInput(dt) : 'Preencher'}\nFrente: ${fr}\nPiloto: ${pil}\nDrone: ${dr}\nUnidade: ${uni}`;
+  if (objG) msg += `\nObservação: ${objG}`;
+  msg += `\n_________`;
+
+  let tHa = 0, tCop = 0;
+
+  rowsEl.querySelectorAll('.farm').forEach(el => {
+    const os  = (el.querySelector('.os').value    || '').trim();
+    const faz = (el.querySelector('.faz').value   || '').trim();
+    const cod = (el.querySelector('.cod').value   || '').trim();
+    const ha  = toNumBR(el.querySelector('.ha').value);
+    const cp  = toNumBR(el.querySelector('.copos').value);
+    const obj = (el.querySelector('.objetivo').value || '').trim();
+
+    tHa += ha; tCop += cp;
+
+    msg += `\n*OS:* ${os || '—'}\n*Faz:* ${faz || '—'}\n*Cod:* ${cod || '—'}\n*Ha:* ${fmtBR(ha)}\n*Qtd. Copos:* ${fmtBR(cp, 0)}`;
+    if (obj) msg += `\nObjetivo: ${obj}`;
+    msg += `\n————————-`;
+  });
+
+  const farmCount = rowsEl.querySelectorAll('.farm').length;
+  msg += `\n*Total de fazendas:* ${farmCount}\n*Total de copos:* ${fmtBR(tCop, 0)}\n*Total hectares:* ${fmtBR(tHa)}\n\nRelatório gerado: ${nowStrSP()}`;
+  return msg;
+}
+
+/* ============================================================
+   PREVIEW
+============================================================ */
+function updatePreview(andScroll = true) {
+  const p = document.getElementById('preview');
+  p.textContent = buildMessage();
+  if (andScroll) p.scrollTop = p.scrollHeight;
+}
+
+/* ============================================================
+   BUILD REPORT HTML (print)
+============================================================ */
+function collectFarms() {
+  const farms = [];
+  rowsEl.querySelectorAll('.farm').forEach(el => {
+    farms.push({
+      os:  (el.querySelector('.os').value   || '').trim(),
+      faz: (el.querySelector('.faz').value  || '').trim(),
+      cod: (el.querySelector('.cod').value  || '').trim(),
+      ha:  toNumBR(el.querySelector('.ha').value),
+      cop: toNumBR(el.querySelector('.copos').value),
+      obj: (el.querySelector('.objetivo').value || '').trim(),
+    });
+  });
+  return farms;
+}
+
+function buildReportHtml() {
+  const farms    = collectFarms();
+  const totalHa  = farms.reduce((s, f) => s + f.ha,  0);
+  const totalCop = farms.reduce((s, f) => s + f.cop, 0);
+  const now      = nowStrSP();
+  const unidade  = document.getElementById('selUnidade').value || 'Unidade não selecionada';
+
+  const rows = farms.map(f => `
+    <tr>
+      <td>${f.os  || '-'}</td>
+      <td>${f.faz || '-'}</td>
+      <td>${f.cod || '-'}</td>
+      <td style="text-align:right">${fmtBR(f.ha)}</td>
+      <td style="text-align:right">${fmtBR(f.cop, 0)}</td>
+      <td>${f.obj || '-'}</td>
+    </tr>
+  `).join('');
+
+  return `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Resumo de Fazendas – Cotesia</title>
+  <style>
+    @page { margin: 12mm; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; padding: 18px 22px; color: #0f172a; background: #f8fafc; }
+    .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #d9b24c; padding-bottom: 10px; margin-bottom: 8px; }
+    .title  { font-size: 15px; font-weight: 800; color: #0f172a; letter-spacing: .02em; }
+    .unit   { font-size: 22px; font-weight: 900; color: #b48f2f; text-transform: uppercase; }
+    .meta   { font-size: 13px; color: #475569; margin-top: 4px; }
+    .totals { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 10px; }
+    table   { width: 100%; border-collapse: collapse; }
+    th, td  { border: 1px solid #d1d5db; padding: 9px 10px; font-size: 13px; }
+    th      { background: rgba(217,178,76,0.12); text-align: left; font-weight: 800; color: #0f172a; }
+    tfoot td { font-weight: 800; background: #f1f5f9; }
+    small   { color: #64748b; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <div class="title">Resumo por Fazenda · Cotesia</div>
+      <div class="unit">${unidade}</div>
+      <div class="meta">Gerado em ${now}</div>
+    </div>
+    <small>Top Gun · Operação</small>
+  </div>
+  <div class="totals">Fazendas: ${farms.length} · Hectares: ${fmtBR(totalHa)} · Copos: ${fmtBR(totalCop, 0)}</div>
+  <table>
+    <thead>
+      <tr><th>OS</th><th>Fazenda</th><th>Código</th><th>Hectares</th><th>Copos</th><th>Objetivo</th></tr>
+    </thead>
+    <tbody>
+      ${rows || '<tr><td colspan="6" style="text-align:center;color:#94a3b8;">Sem fazendas preenchidas.</td></tr>'}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="3">Totais</td>
+        <td style="text-align:right">${fmtBR(totalHa)}</td>
+        <td style="text-align:right">${fmtBR(totalCop, 0)}</td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+</body>
+</html>`;
+}
+
+function printReport() {
+  const htmlStr = buildReportHtml();
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 900;
+
+  if (isMobile) {
+    const blob = new Blob([htmlStr], { type: 'text/html' });
+    const url  = URL.createObjectURL(blob);
+    const win  = window.open(url, '_blank');
+    if (!win) { alert('Permita pop-ups para visualizar o relatório.'); URL.revokeObjectURL(url); return; }
+    win.onload = () => { win.focus(); win.print(); setTimeout(() => URL.revokeObjectURL(url), 2000); };
+  } else {
+    const frame = document.createElement('iframe');
+    Object.assign(frame.style, { position: 'fixed', right: '0', bottom: '0', width: '0', height: '0', border: '0' });
+    document.body.appendChild(frame);
+    frame.contentDocument.open();
+    frame.contentDocument.write(htmlStr);
+    frame.contentDocument.close();
+    frame.onload = () => { frame.contentWindow.focus(); frame.contentWindow.print(); setTimeout(() => frame.remove(), 500); };
+  }
+}
+
+/* ============================================================
+   STATUS BADGE HELPER
+============================================================ */
+function showStatus(msg, type = '') {
+  const badge = document.getElementById('lblInfo');
+  badge.textContent = msg;
+  badge.className   = 'status-badge' + (type ? ' ' + type : '');
+  badge.style.display = 'inline-flex';
+  setTimeout(() => { badge.style.display = 'none'; }, 2200);
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+(function init() {
+  document.getElementById('dtData').value = todaySP();
+  makeRow();
+
+  document.getElementById('btnAdd').addEventListener('click', () => {
+    makeRow();
+    updatePreview(false);
+  });
+
+  document.getElementById('btnGerar').addEventListener('click', () => {
+    updatePreview(true);
+    showStatus('✓ Prévia atualizada', 'ok');
+  });
+
+  document.getElementById('btnCopiar').addEventListener('click', async () => {
+    const txt = buildMessage();
+    try {
+      await navigator.clipboard.writeText(txt);
+      showStatus('✓ Copiado!', 'ok');
+    } catch (_) {
+      showStatus('Falha ao copiar', 'warn');
+    }
+  });
+
+  document.getElementById('btnWhats').addEventListener('click', () => {
+    window.open('https://wa.me/?text=' + encodeURIComponent(buildMessage()), '_blank');
+  });
+
+  document.getElementById('btnReport').addEventListener('click', printReport);
+
+  ['dtData','selFrente','txtPiloto','selDrone','selUnidade','txtObjetivo'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => updatePreview(false));
+  });
+
+  document.getElementById('selFrente').addEventListener('change', () => {
+    setPilotByFrente();
+    updatePreview(false);
+  });
+
+
+/* ============================================================
+   SALVAR PROGRAMAÇÃO → Google Sheets
+============================================================ */
+async function saveProgram() {
+  const logEl = document.getElementById('saveLog');
+  const btn   = document.getElementById('btnSalvar');
+
+  function showLog(msg, cls) {
+    logEl.textContent = msg;
+    logEl.className   = 'log-box ' + cls;
+    logEl.style.display = 'block';
+  }
+
+  // Validação mínima
+  const dt  = document.getElementById('dtData').value;
+  const fr  = document.getElementById('selFrente').value;
+  const pil = document.getElementById('txtPiloto').value;
+  if (!dt || !fr || !pil) {
+    showLog('⚠ Preencha Data, Frente e Piloto antes de salvar.', 'err');
+    return;
+  }
+
+  // Coleta fazendas
+  const farms = [];
+  document.querySelectorAll('#rows .farm').forEach(el => {
+    farms.push({
+      os:      (el.querySelector('.os').value       || '').trim(),
+      fazenda: (el.querySelector('.faz').value      || '').trim(),
+      codigo:  (el.querySelector('.cod').value      || '').trim(),
+      ha:      toNumBR(el.querySelector('.ha').value),
+      copos:   toNumBR(el.querySelector('.copos').value),
+      objetivo:(el.querySelector('.objetivo').value || '').trim(),
+    });
+  });
+
+  const session = getSession();
+  const payload = {
+    action:      'saveProgram',
+    usuario:     session.username || 'piloto',
+    piloto:      pil,
+    frente:      fr,
+    data:        dt,
+    drone:       document.getElementById('selDrone').value   || '',
+    unidade:     document.getElementById('selUnidade').value || '',
+    observacao:  document.getElementById('txtObjetivo').value|| '',
+    fazendas:    JSON.stringify(farms),
+    totalHa:     toNumBR(document.getElementById('totHa').value),
+    totalCopos:  toNumBR(document.getElementById('totCopos').value),
+    totalFazendas: farms.length,
+  };
+
+  if (SAVE_URL === 'COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT') {
+    showLog('⚠ Configure SAVE_URL no código com a URL do seu Apps Script.', 'err');
+    return;
+  }
+
+  btn.disabled = true;
+  showLog('Salvando…', 'loading');
+
+  try {
+    const data = await jsonpGet(SAVE_URL, payload);
+    console.log('[Pulvion] resposta Apps Script:', JSON.stringify(data));
+    if (data && data.ok) {
+      showLog('✓ Programação salva! ID: ' + (data.id || '—'), 'ok');
+    } else {
+      showLog('✗ Erro ao salvar: ' + (data.error || 'resposta inválida'), 'err');
+    }
+  } catch(e) {
+    showLog('✗ Falha de conexão: ' + e.message, 'err');
+  } finally {
+    btn.disabled = false;
+    lucide.createIcons();
+  }
+}
+  applySessionToForm();
+  loadClientes();
+  recalcTotals();
+  updatePreview(false);
+
+  document.getElementById('btnSalvar').addEventListener('click', saveProgram);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Status da Operação · Aplicação · Top Gun</title>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   THEME TOKENS
+============================================================ */
+:root, [data-theme="light"] {
+  --gold:         #b8942e;
+  --gold-light:   #d9b24c;
+  --gold-dim:     rgba(184,148,46,0.10);
+  --gold-border:  rgba(184,148,46,0.28);
+
+  --bg:           #f0ede6;
+  --card:         #ffffff;
+  --surface:      #f5f2eb;
+  --surface-2:    #ebe7dd;
+  --input-bg:     #f8f6f1;
+  --input-ro:     #ede9e0;
+
+  --header-bg:    rgba(240,237,230,0.97);
+  --header-bdr:   rgba(184,148,46,0.22);
+
+  --text:         #0d1117;
+  --text-muted:   #4b5563;
+  --text-label:   #94a3b8;
+
+  --success:      #16a34a;
+  --success-dim:  rgba(22,163,74,0.10);
+  --success-bdr:  rgba(22,163,74,0.28);
+  --warning:      #d97706;
+  --warning-dim:  rgba(217,119,6,0.10);
+  --warning-bdr:  rgba(217,119,6,0.32);
+  --danger:       #dc2626;
+  --danger-dim:   rgba(220,38,38,0.08);
+  --danger-bdr:   rgba(220,38,38,0.28);
+  --info:         #2563eb;
+  --info-dim:     rgba(37,99,235,0.08);
+  --info-bdr:     rgba(37,99,235,0.26);
+
+  --shadow-sm:    0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md:    0 4px 20px rgba(0,0,0,0.07);
+  --radius:       12px;
+  --radius-sm:    8px;
+}
+
+[data-theme="dark"] {
+  --gold:         #d9b24c;
+  --gold-light:   #f0d078;
+  --gold-dim:     rgba(217,178,76,0.10);
+  --gold-border:  rgba(217,178,76,0.28);
+
+  --bg:           #060912;
+  --card:         #0c1224;
+  --surface:      #0f1628;
+  --surface-2:    rgba(255,255,255,0.04);
+  --input-bg:     #0b1425;
+  --input-ro:     #0f182c;
+
+  --header-bg:    rgba(10,15,31,0.97);
+  --header-bdr:   rgba(217,178,76,0.22);
+
+  --text:         #f0ece4;
+  --text-muted:   #9ca3af;
+  --text-label:   #6b7280;
+
+  --success:      #22c55e;
+  --success-dim:  rgba(34,197,94,0.10);
+  --success-bdr:  rgba(34,197,94,0.28);
+  --warning:      #f59e0b;
+  --warning-dim:  rgba(245,158,11,0.12);
+  --warning-bdr:  rgba(245,158,11,0.35);
+  --danger:       #ef4444;
+  --danger-dim:   rgba(239,68,68,0.10);
+  --danger-bdr:   rgba(239,68,68,0.30);
+  --info:         #60a5fa;
+  --info-dim:     rgba(96,165,250,0.10);
+  --info-bdr:     rgba(96,165,250,0.26);
+
+  --shadow-sm:    0 2px 8px rgba(0,0,0,0.20);
+  --shadow-md:    0 8px 28px rgba(0,0,0,0.30);
+  --radius:       12px;
+  --radius-sm:    8px;
+}
+
+/* ============================================================
+   BASE
+============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Barlow', sans-serif;
+  font-size: 15px; line-height: 1.6;
+  color: var(--text); background: var(--bg);
+  min-height: 100vh; padding-bottom: 40px;
+  transition: background 0.3s, color 0.3s;
+}
+[data-theme="light"] body {
+  background-image: radial-gradient(ellipse 70% 40% at 5% 0%, rgba(184,148,46,0.06) 0%, transparent 55%);
+}
+h1, h2, h3 { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gold-border); border-radius: 4px; }
+
+/* ============================================================
+   HEADER
+============================================================ */
+.site-header {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--header-bdr);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-sm);
+  transition: background 0.3s, border-color 0.3s;
+}
+.header-inner {
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 16px; height: 60px;
+  max-width: 1400px; margin: 0 auto;
+}
+.header-title {
+  flex: 1; display: flex; align-items: center;
+  justify-content: center; gap: 8px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.05rem; font-weight: 800;
+  letter-spacing: 0.04em; text-transform: uppercase; color: var(--gold);
+}
+
+/* ============================================================
+   BUTTONS
+============================================================ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 7px; cursor: pointer;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 0.95rem;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  text-decoration: none; border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  border: 1px solid var(--gold-border);
+  background: var(--gold-dim); color: var(--gold);
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent; white-space: nowrap;
+}
+.btn:hover { background: rgba(184,148,46,0.18); border-color: var(--gold); }
+
+.btn-primary { background: var(--gold); border-color: var(--gold); color: #fff; box-shadow: 0 4px 14px rgba(184,148,46,0.25); }
+[data-theme="dark"] .btn-primary { color: #0b0f1f; }
+.btn-primary:hover { background: var(--gold-light); border-color: var(--gold-light); }
+
+.btn-ghost { background: var(--surface); border-color: rgba(0,0,0,0.08); color: var(--text-muted); }
+[data-theme="dark"] .btn-ghost { border-color: rgba(255,255,255,0.08); }
+.btn-ghost:hover { background: var(--surface-2); color: var(--text); border-color: var(--gold-border); }
+
+.btn-success-soft { background: var(--success-dim); border-color: var(--success-bdr); color: var(--success); }
+.btn-success-soft:hover { background: rgba(22,163,74,0.16); }
+
+.btn-danger-soft { background: var(--danger-dim); border-color: var(--danger-bdr); color: var(--danger); }
+.btn-danger-soft:hover { background: rgba(220,38,38,0.14); }
+
+.btn-sm  { padding: 7px 12px; font-size: 0.82rem; }
+.btn-xs  { padding: 5px 9px;  font-size: 0.75rem; }
+
+.theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: var(--radius-sm);
+  border: 1px solid var(--gold-border); background: var(--gold-dim);
+  color: var(--gold); cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+}
+.theme-toggle:hover { background: rgba(184,148,46,0.2); border-color: var(--gold); transform: rotate(20deg); }
+
+/* ============================================================
+   PAGE LAYOUT — 2-column desktop
+============================================================ */
+.page-wrap {
+  max-width: 1400px; margin: 0 auto; padding: 18px 16px;
+  display: grid; grid-template-columns: 1fr 380px; gap: 14px; align-items: start;
+}
+@media (max-width: 1024px) { .page-wrap { grid-template-columns: 1fr; } }
+
+/* ============================================================
+   CARDS
+============================================================ */
+.card {
+  background: var(--card); border: 1px solid var(--gold-border);
+  border-radius: var(--radius); box-shadow: var(--shadow-md);
+  overflow: hidden; transition: background 0.3s, border-color 0.3s;
+}
+.card-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 18px; border-bottom: 1px solid var(--gold-border);
+  background: var(--gold-dim);
+}
+.card-header-icon {
+  width: 30px; height: 30px; border-radius: 7px;
+  border: 1px solid var(--gold-border); background: var(--card);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); flex-shrink: 0;
+}
+.card-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.92rem; font-weight: 800;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); flex: 1;
+}
+.card-badge {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.12em; color: var(--text-label);
+  padding: 3px 8px; border-radius: 999px;
+  border: 1px solid var(--gold-border); background: var(--card);
+}
+.card-body { padding: 18px; }
+
+/* ============================================================
+   FORM FIELDS
+============================================================ */
+.field-group { display: flex; flex-direction: column; gap: 12px; }
+.fields-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fields-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.fields-4col { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem;
+  font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-label);
+}
+
+input, select, textarea {
+  width: 100%; background: var(--input-bg); color: var(--text);
+  border: 1px solid var(--gold-border); border-radius: var(--radius-sm);
+  padding: 10px 13px; font-family: 'Barlow', sans-serif; font-size: 0.93rem;
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none; -webkit-tap-highlight-color: transparent;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim);
+}
+input[readonly], input[readonly]:focus {
+  background: var(--input-ro); color: var(--text-muted);
+  border-color: rgba(0,0,0,0.06); box-shadow: none; cursor: default;
+}
+[data-theme="dark"] input[readonly] { border-color: rgba(255,255,255,0.05); }
+select { cursor: pointer; }
+textarea { resize: vertical; min-height: 68px; }
+
+/* ============================================================
+   OS CARDS
+============================================================ */
+.os-list { display: flex; flex-direction: column; gap: 10px; }
+
+.os-card {
+  border: 1px solid var(--gold-border); border-radius: var(--radius-sm);
+  background: var(--surface); overflow: hidden;
+  transition: border-color 0.2s;
+}
+.os-card:hover { border-color: var(--gold); }
+
+.os-card-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 14px; background: var(--gold-dim);
+  border-bottom: 1px solid var(--gold-border);
+}
+.os-card-num {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem;
+  font-weight: 500; letter-spacing: 0.1em; color: var(--text-label);
+}
+.os-card-title {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 0.82rem;
+  font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--text-muted); flex: 1;
+}
+
+.os-card-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+/* OS search row */
+.os-search-row { display: flex; gap: 8px; align-items: flex-end; }
+.os-search-row .field { flex: 1; }
+.os-search-row input { font-family: 'IBM Plex Mono', monospace !important; font-weight: 500 !important; }
+
+.os-status-msg {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.66rem;
+  min-height: 16px; color: var(--text-label); letter-spacing: 0.04em;
+}
+.os-status-msg.ok   { color: var(--success); }
+.os-status-msg.err  { color: var(--danger); }
+.os-status-msg.load { color: var(--gold); }
+
+/* Info cells (auto-filled readonly) */
+.info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.info-cell {
+  background: var(--card); border: 1px solid var(--gold-border);
+  border-radius: 7px; padding: 8px 10px;
+}
+.i-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.57rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-label); margin-bottom: 3px; }
+.i-val { font-size: 0.88rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.i-val.mono { font-family: 'IBM Plex Mono', monospace; color: var(--gold); }
+
+/* ============================================================
+   STATUS SELECTOR — visual pills per OS card
+============================================================ */
+.status-picker {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+
+.sp-opt { position: relative; cursor: pointer; }
+.sp-opt input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+
+.sp-opt-label {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 13px; border-radius: 999px;
+  border: 1px solid var(--gold-border); background: var(--surface);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.8rem; font-weight: 700;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--text-muted); cursor: pointer;
+  transition: all 0.2s; user-select: none; white-space: nowrap;
+}
+.sp-opt-label:hover { background: var(--gold-dim); color: var(--gold); }
+
+/* Active state per option type */
+.sp-opt.s-deslocamento input:checked ~ .sp-opt-label { background: var(--info-dim);    border-color: var(--info-bdr);    color: var(--info);    box-shadow: 0 0 0 2px rgba(37,99,235,0.08); }
+.sp-opt.s-dosagem     input:checked ~ .sp-opt-label { background: var(--warning-dim);  border-color: var(--warning-bdr); color: var(--warning); box-shadow: 0 0 0 2px rgba(217,119,6,0.08); }
+.sp-opt.s-aguardando  input:checked ~ .sp-opt-label { background: var(--danger-dim);   border-color: var(--danger-bdr);  color: var(--danger);  box-shadow: 0 0 0 2px rgba(220,38,38,0.08); }
+.sp-opt.s-andamento   input:checked ~ .sp-opt-label { background: rgba(251,146,60,0.10); border-color: rgba(251,146,60,0.35); color: #ea580c; }
+.sp-opt.s-finalizada  input:checked ~ .sp-opt-label { background: var(--success-dim);  border-color: var(--success-bdr); color: var(--success); box-shadow: 0 0 0 2px rgba(22,163,74,0.08); }
+
+/* Motivo (obs) box */
+.obs-box { display: none; flex-direction: column; gap: 6px; }
+.obs-box.show { display: flex; }
+.obs-label {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.63rem;
+  font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--danger);
+}
+
+/* ============================================================
+   ADD OS ROW
+============================================================ */
+.add-os-row {
+  padding: 12px 18px 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.add-hint {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.63rem; color: var(--text-label); letter-spacing: 0.05em;
+}
+
+/* ============================================================
+   PREVIEW (sticky)
+============================================================ */
+.preview-sticky { position: sticky; top: 74px; }
+
+.preview-box {
+  white-space: pre-wrap; background: var(--input-bg);
+  border: 1px solid var(--gold-border); border-radius: var(--radius-sm);
+  padding: 16px; min-height: 300px; max-height: calc(100vh - 280px);
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem;
+  line-height: 1.75; overflow: auto; color: var(--text);
+}
+
+.action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.action-grid .span2 { grid-column: 1 / -1; }
+.divider { height: 1px; background: var(--gold-border); margin: 4px 0; }
+
+.status-badge {
+  display: none; align-items: center; justify-content: center;
+  gap: 6px; padding: 5px 14px; border-radius: 999px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem;
+  font-weight: 500; letter-spacing: 0.08em;
+  border: 1px solid var(--gold-border); background: var(--gold-dim); color: var(--text-label);
+}
+.status-badge.ok   { display: inline-flex; color: var(--success); border-color: var(--success-bdr); background: var(--success-dim); }
+.status-badge.warn { display: inline-flex; color: var(--danger);  border-color: var(--danger-bdr);  background: var(--danger-dim); }
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width: 640px) {
+  .fields-4col { grid-template-columns: 1fr 1fr; }
+  .fields-3col { grid-template-columns: 1fr 1fr; }
+  .fields-2col { grid-template-columns: 1fr; }
+  .info-row    { grid-template-columns: 1fr; }
+  .action-grid { grid-template-columns: 1fr; }
+  .action-grid .span2 { grid-column: 1; }
+  .status-picker { gap: 5px; }
+}
+@media (max-width: 380px) {
+  .fields-4col { grid-template-columns: 1fr; }
+  .fields-3col { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <a class="btn btn-sm" href="operacional.html" title="Voltar">
+      <i data-lucide="arrow-left" width="14" height="14"></i>
+      Voltar
+    </a>
+    <div class="header-title">
+      <i data-lucide="activity" width="16" height="16"></i>
+      Status da Operação · Aplicação
+    </div>
+    <button class="theme-toggle" id="themeToggle" title="Alternar tema">
+      <i data-lucide="moon" width="15" height="15" id="themeIcon"></i>
+    </button>
+  </div>
+</header>
+
+<!-- PAGE -->
+<div class="page-wrap">
+
+  <!-- ── LEFT: FORM ──────────────────────────────────────── -->
+  <div style="display:flex;flex-direction:column;gap:14px;">
+
+    <!-- Dados Gerais -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon"><i data-lucide="sliders-horizontal" width="15" height="15"></i></div>
+        <span class="card-title">Dados da Equipe</span>
+        <span class="card-badge">Etapa 1</span>
+      </div>
+      <div class="card-body">
+        <div class="field-group">
+          <div class="fields-4col">
+            <div class="field">
+              <label>Frente</label>
+              <select id="frente">
+                <option value="">Selecione…</option>
+                <option>Frente 1</option><option>Frente 2</option><option>Frente 3</option>
+                <option>Frente 4</option><option>Frente 5</option><option>Frente 6</option>
+                <option>Frente 7</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Piloto</label>
+              <input id="piloto" placeholder="Auto" readonly>
+            </div>
+            <div class="field">
+              <label>Auxiliar</label>
+              <select id="auxiliar">
+                <option value="">Selecione…</option>
+                <option>Thiago Rodrigues</option>
+                <option>Pedro Henrique</option>
+                <option>José Filho</option>
+                <option>Luiz Gustavo</option>
+                <option>Hilton Silva</option>
+                <option>Luis Miguel</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Drone</label>
+              <select id="drone">
+                <option value="">Selecione…</option>
+                <option>DJI AGRAS T20</option>
+                <option>DJI AGRAS T40</option>
+                <option>DJI AGRAS T70</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OS Cards -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon"><i data-lucide="clipboard-list" width="15" height="15"></i></div>
+        <span class="card-title">Ordens de Serviço</span>
+        <span class="card-badge">Etapa 2</span>
+      </div>
+
+      <div class="card-body" style="padding-bottom:4px;">
+        <div class="os-list" id="osContainer"></div>
+      </div>
+
+      <div class="add-os-row">
+        <button class="btn btn-sm" id="btnAdd">
+          <i data-lucide="plus" width="13" height="13"></i>
+          Adicionar OS
+        </button>
+        <span class="add-hint">Digite a OS e clique "Buscar"</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── RIGHT: PREVIEW ──────────────────────────────────── -->
+  <div class="preview-sticky">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon"><i data-lucide="eye" width="15" height="15"></i></div>
+        <span class="card-title">Prévia WhatsApp</span>
+        <span class="card-badge">Etapa 3</span>
+      </div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+
+        <div class="preview-box" id="preview">Preencha os dados e adicione as OS. Depois clique em "Gerar Prévia".</div>
+
+        <div class="divider"></div>
+
+        <div class="action-grid">
+          <button class="btn btn-primary span2" id="btnGerar">
+            <i data-lucide="refresh-cw" width="14" height="14"></i>
+            Gerar Prévia
+          </button>
+          <button class="btn btn-ghost" id="btnCopiar">
+            <i data-lucide="copy" width="14" height="14"></i>
+            Copiar
+          </button>
+          <a class="btn btn-success-soft" id="btnWhats" href="#" target="_blank" rel="noopener">
+            <i data-lucide="message-circle" width="14" height="14"></i>
+            WhatsApp
+          </a>
+        </div>
+
+        <div style="display:flex;justify-content:center;">
+          <span class="status-badge" id="lblInfo"></span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<script>
+/* ============================================================
+   THEME
+============================================================ */
+const html = document.documentElement;
+
+function applyThemeToken(t) {
+  html.setAttribute('data-theme', t);
+  localStorage.setItem('pulvion_theme', t);
+}
+applyThemeToken(localStorage.getItem('pulvion_theme') || 'light');
+
+function refreshIcons() {
+  if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+}
+
+function applyTheme(t) {
+  applyThemeToken(t);
+  const icon = document.getElementById('themeIcon');
+  const btn  = document.getElementById('themeToggle');
+  if (icon) icon.setAttribute('data-lucide', t === 'dark' ? 'sun' : 'moon');
+  if (btn)  btn.title = t === 'dark' ? 'Modo claro' : 'Modo escuro';
+  refreshIcons();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  applyTheme(html.getAttribute('data-theme') || 'light');
+  document.getElementById('themeToggle').addEventListener('click', () =>
+    applyTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')
+  );
+  applySession();
+});
+
+/* ============================================================
+   CONFIG
+============================================================ */
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0wYo2B8wXXv_SqVwVayNkDtG_UsroXNXfLk970sHff6cIXnayykA3DYqtrt0ldefP/exec'; // OS lookup
+const AUTH_URL = 'https://script.google.com/macros/s/AKfycbzqL0jofgg8B4viY7NyqWjaE36AwiK2IEqDWM2A5WXwlJb06p_xqo11TdIu4ubl28pl/exec';
+
+function getSession(){ try{ return JSON.parse(localStorage.getItem('pulvion_session')||'{}'); }catch(_){ return {}; } }
+
+/* ── JSONP padronizado (compatível com file://) ── */
+function jsonpGet(url,params){
+  return new Promise((res,rej)=>{
+    const cb='_cb'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const qs=Object.entries({...params,callback:cb}).map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
+    const s=document.createElement('script'); s.src=url+'?'+qs;
+    let done=false;
+    window[cb]=d=>{done=true;delete window[cb];s.remove();res(d);};
+    s.onerror=()=>{if(!done){delete window[cb];s.remove();rej(new Error('Falha JSONP'));}};
+    setTimeout(()=>{if(!done){delete window[cb];s.remove();rej(new Error('Timeout'));}},12000);
+    document.head.appendChild(s);
+  });
+}
+
+function applySession(){
+  const s=getSession(); if(!s||!s.username) return;
+  const pilEl=document.getElementById('piloto');
+  if(pilEl&&s.nome){pilEl.value=s.nome;pilEl.readOnly=true;pilEl.style.opacity='0.75';}
+  if(s.role==='piloto'&&s.frente){
+    const frEl=document.getElementById('frente');
+    if(frEl){
+      const inp=document.createElement('input');
+      inp.type='text';inp.id='frente';inp.value=String(s.frente).padStart(2,'0');
+      inp.readOnly=true;inp.style.opacity='0.75';inp.style.cursor='not-allowed';
+      inp.className=frEl.className; frEl.parentNode.replaceChild(inp,frEl);
+    }
+  }
+}
+
+/* ============================================================
+   FRENTE → PILOTO
+============================================================ */
+document.getElementById('frente').addEventListener('change', function () {
+  gerarTexto();
+});
+
+['auxiliar', 'drone'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => gerarTexto());
+});
+
+/* jsonpGet já definido acima */
+
+/* ============================================================
+   OS CARD FACTORY
+============================================================ */
+const osContainer = document.getElementById('osContainer');
+let osSeq = 0;
+let debTimer;
+function debounce(fn, d) { clearTimeout(debTimer); debTimer = setTimeout(fn, d); }
+
+function addOS() {
+  osSeq++;
+  const seq = osSeq;
+  const idx  = Date.now().toString(36) + seq;
+  const uid  = `sp_${idx}`; // unique radio group name
+
+  const now  = new Date();
+  const data = now.toLocaleDateString('pt-BR');
+  const hora = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+  const el = document.createElement('div');
+  el.className = 'os-card';
+  el.dataset.idx = idx;
+
+  el.innerHTML = `
+    <div class="os-card-header">
+      <span class="os-card-num">#${String(seq).padStart(2,'0')}</span>
+      <span class="os-card-title">Ordem de Serviço</span>
+      <button class="btn btn-xs btn-danger-soft" data-remove="${idx}">
+        <i data-lucide="trash-2" width="12" height="12"></i>
+        Remover
+      </button>
+    </div>
+
+    <div class="os-card-body">
+
+      <!-- OS search -->
+      <div class="os-search-row">
+        <div class="field">
+          <label>Nº OS</label>
+          <input id="os_${idx}" placeholder="Digite a OS…" autocomplete="off">
+        </div>
+        <button class="btn btn-sm" data-buscar="${idx}">
+          <i data-lucide="search" width="13" height="13"></i>
+          Buscar
+        </button>
+      </div>
+      <div class="os-status-msg" id="osmsg_${idx}"></div>
+
+      <!-- Auto info row -->
+      <div class="info-row">
+        <div class="info-cell">
+          <div class="i-label">Código</div>
+          <div class="i-val" id="dCod_${idx}">—</div>
+          <input type="hidden" id="cod_${idx}">
+        </div>
+        <div class="info-cell">
+          <div class="i-label">Fazenda</div>
+          <div class="i-val" id="dFaz_${idx}">—</div>
+          <input type="hidden" id="faz_${idx}">
+        </div>
+      </div>
+
+      <!-- Data / Hora -->
+      <div class="fields-2col">
+        <div class="field">
+          <label>Data</label>
+          <input id="data_${idx}" value="${data}" readonly>
+        </div>
+        <div class="field">
+          <label>Horário</label>
+          <input id="hora_${idx}" value="${hora}" readonly>
+        </div>
+      </div>
+
+      <!-- Status pills -->
+      <div class="field">
+        <label>Status da Operação</label>
+        <div class="status-picker" id="picker_${idx}">
+          <label class="sp-opt s-deslocamento">
+            <input type="radio" name="${uid}" value="🛻 Deslocamento..." onchange="onOsStatusChange('${idx}')">
+            <span class="sp-opt-label">🛻 Deslocamento</span>
+          </label>
+          <label class="sp-opt s-dosagem">
+            <input type="radio" name="${uid}" value="🛢️ Fila de Dosagem" onchange="onOsStatusChange('${idx}')">
+            <span class="sp-opt-label">🛢️ Dosagem</span>
+          </label>
+          <label class="sp-opt s-aguardando">
+            <input type="radio" name="${uid}" value="⚠️ Ag. Condições" onchange="onOsStatusChange('${idx}')">
+            <span class="sp-opt-label">⚠️ Ag. Condições</span>
+          </label>
+          <label class="sp-opt s-andamento">
+            <input type="radio" name="${uid}" value="🟠 Em andamento" onchange="onOsStatusChange('${idx}')">
+            <span class="sp-opt-label">🟠 Em andamento</span>
+          </label>
+          <label class="sp-opt s-finalizada">
+            <input type="radio" name="${uid}" value="🔵 Finalizada" onchange="onOsStatusChange('${idx}')">
+            <span class="sp-opt-label">🔵 Finalizada</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Obs (visible only when Ag. Condições) -->
+      <div class="obs-box" id="obsBox_${idx}">
+        <span class="obs-label">Motivo</span>
+        <textarea id="obs_${idx}" placeholder="Informe o motivo da paralisação…" oninput="gerarTexto()"></textarea>
+      </div>
+
+    </div>
+  `;
+
+  osContainer.appendChild(el);
+  refreshIcons();
+
+  // Events
+  el.querySelector(`[data-remove="${idx}"]`).addEventListener('click', () => {
+    el.remove(); gerarTexto();
+  });
+
+  el.querySelector(`[data-buscar="${idx}"]`).addEventListener('click', () => buscarOS(idx));
+
+  const osInput = el.querySelector(`#os_${idx}`);
+  osInput.addEventListener('input', () => {
+    clearOsDisplay(idx);
+    const v = osInput.value.trim();
+    if (!v) return;
+    debounce(() => buscarOS(idx), 320);
+  });
+  osInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { clearTimeout(debTimer); buscarOS(idx); }
+  });
+}
+
+/* ============================================================
+   OS STATUS CHANGE
+============================================================ */
+function onOsStatusChange(idx) {
+  const status = getOsStatus(idx);
+  const obsBox = document.getElementById(`obsBox_${idx}`);
+  if (obsBox) {
+    obsBox.classList.toggle('show', status.includes('Ag.'));
+    if (!status.includes('Ag.')) {
+      const obs = document.getElementById(`obs_${idx}`);
+      if (obs) obs.value = '';
+    }
+  }
+  gerarTexto();
+}
+
+function getOsStatus(idx) {
+  const checked = document.querySelector(`input[name="sp_${idx.replace(/[^a-z0-9]/gi,'')}"]:checked`);
+  // find by id pattern since idx has mixed chars
+  const picker = document.getElementById(`picker_${idx}`);
+  if (!picker) return '';
+  const ch = picker.querySelector('input[type="radio"]:checked');
+  return ch ? ch.value : '';
+}
+
+/* ============================================================
+   CLEAR / SET OS DISPLAY
+============================================================ */
+function clearOsDisplay(idx) {
+  const dCod = document.getElementById(`dCod_${idx}`);
+  const dFaz = document.getElementById(`dFaz_${idx}`);
+  const hCod = document.getElementById(`cod_${idx}`);
+  const hFaz = document.getElementById(`faz_${idx}`);
+  if (dCod) dCod.textContent = '—';
+  if (dFaz) dFaz.textContent = '—';
+  if (hCod) hCod.value = '';
+  if (hFaz) hFaz.value = '';
+}
+
+function setOsMsg(idx, msg, type = '') {
+  const el = document.getElementById(`osmsg_${idx}`);
+  if (!el) return;
+  el.textContent = msg;
+  el.className   = 'os-status-msg' + (type ? ' ' + type : '');
+}
+
+/* ============================================================
+   OS LOOKUP
+============================================================ */
+async function buscarOS(idx) {
+  const osInput = document.getElementById(`os_${idx}`);
+  const osVal   = (osInput?.value || '').trim();
+  if (!osVal) { clearOsDisplay(idx); return; }
+
+  setOsMsg(idx, 'Buscando…', 'load');
+
+  try {
+    const js = await jsonp(APPS_SCRIPT_URL + '?os=' + encodeURIComponent(osVal));
+
+    if (!js.ok || !js.rows || !js.rows.length) {
+      clearOsDisplay(idx);
+      setOsMsg(idx, 'OS não encontrada.', 'err');
+      return;
+    }
+
+    const row = js.rows.find(x => String(x.OS) === String(osVal)) || js.rows[0];
+    const get = k => (row[k] ?? row[k?.toUpperCase()] ?? '').toString().trim();
+
+    const cod = get('CODIGO');
+    const faz = get('FAZENDA');
+
+    const dCod = document.getElementById(`dCod_${idx}`);
+    const dFaz = document.getElementById(`dFaz_${idx}`);
+    const hCod = document.getElementById(`cod_${idx}`);
+    const hFaz = document.getElementById(`faz_${idx}`);
+
+    if (dCod) dCod.textContent = cod || '—';
+    if (dFaz) dFaz.textContent = faz || '—';
+    if (hCod) hCod.value = cod;
+    if (hFaz) hFaz.value = faz;
+
+    setOsMsg(idx, '✓ OS carregada', 'ok');
+    gerarTexto();
+
+  } catch (e) {
+    console.error(e);
+    clearOsDisplay(idx);
+    setOsMsg(idx, 'Falha ao buscar OS.', 'err');
+  }
+}
+
+/* ============================================================
+   GERAR TEXTO
+============================================================ */
+function gerarTexto() {
+  const frente  = document.getElementById('frente').value    || '-';
+  const piloto  = document.getElementById('piloto').value    || '-';
+  const aux     = document.getElementById('auxiliar').value  || '-';
+  const drone   = document.getElementById('drone').value     || '-';
+
+  const header =
+`*Status Pulverização* 📌
+
+*Frente:* ${frente}
+*Piloto:* ${piloto}
+*Auxiliar:* ${aux}
+*Drone:* ${drone}
+
+_______________`;
+
+  const cards = [...osContainer.querySelectorAll('.os-card')];
+
+  const blocos = cards.map(c => {
+    const idx    = c.dataset.idx;
+    const os     = (c.querySelector('[id^="os_"]')?.value   || '').trim();
+    const cod    = (c.querySelector('[id^="cod_"]')?.value  || '').trim();
+    const faz    = (c.querySelector('[id^="faz_"]')?.value  || '').trim();
+    const data   = (c.querySelector('[id^="data_"]')?.value || '').trim();
+    const hora   = (c.querySelector('[id^="hora_"]')?.value || '').trim();
+    const status = getOsStatus(idx);
+    const obs    = (c.querySelector('[id^="obs_"]')?.value  || '').trim();
+    const obsTxt = status.includes('Ag.') && obs ? `\n*Motivo:* ${obs}` : '';
+
+    return `
+*OS:* ${os || '-'}
+*Cód.:* ${cod || '-'}
+*Faz:* ${faz || '-'}
+*Data:* ${data || '-'}
+*Horário:* ${hora || '-'}
+
+*Status da operação:* ${status || '-'}${obsTxt}`;
+  });
+
+  const textoFinal = header + '\n' + blocos.join('\n');
+  document.getElementById('preview').textContent = textoFinal;
+  document.getElementById('btnWhats').href = 'https://wa.me/?text=' + encodeURIComponent(textoFinal);
+}
+
+/* ============================================================
+   STATUS BADGE
+============================================================ */
+function showStatus(msg, type) {
+  const badge = document.getElementById('lblInfo');
+  badge.textContent = msg;
+  badge.className   = 'status-badge ' + type;
+  setTimeout(() => { badge.className = 'status-badge'; }, 2200);
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  refreshIcons();
+  addOS();
+
+  document.getElementById('btnAdd').addEventListener('click', () => addOS());
+
+  document.getElementById('btnGerar').addEventListener('click', () => {
+    gerarTexto();
+    showStatus('✓ Prévia atualizada', 'ok');
+  });
+
+  document.getElementById('btnCopiar').addEventListener('click', async () => {
+    const txt = document.getElementById('preview').textContent || '';
+    try {
+      await navigator.clipboard.writeText(txt);
+      showStatus('✓ Copiado!', 'ok');
+    } catch (_) {
+      showStatus('Falha ao copiar', 'warn');
+    }
+  });
+
+  gerarTexto();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload KML · Top Gun</title>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   THEME TOKENS
+============================================================ */
+:root, [data-theme="light"] {
+  --gold:        #b8942e;
+  --gold-light:  #d9b24c;
+  --gold-dim:    rgba(184,148,46,0.10);
+  --gold-border: rgba(184,148,46,0.28);
+
+  --bg:          #f0ede6;
+  --card:        #ffffff;
+  --surface:     #f5f2eb;
+  --surface-2:   #ebe7dd;
+  --input-bg:    #f8f6f1;
+
+  --header-bg:   rgba(240,237,230,0.97);
+  --header-bdr:  rgba(184,148,46,0.22);
+
+  --text:        #0d1117;
+  --text-muted:  #4b5563;
+  --text-label:  #94a3b8;
+
+  --success:     #16a34a;
+  --success-dim: rgba(22,163,74,0.10);
+  --success-bdr: rgba(22,163,74,0.28);
+  --danger:      #dc2626;
+  --danger-dim:  rgba(220,38,38,0.08);
+  --danger-bdr:  rgba(220,38,38,0.28);
+  --info:        #2563eb;
+  --info-dim:    rgba(37,99,235,0.08);
+  --info-bdr:    rgba(37,99,235,0.26);
+
+  --drop-bg:     #f8f6f1;
+  --drop-bdr:    rgba(184,148,46,0.35);
+
+  --shadow-sm:   0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md:   0 6px 24px rgba(0,0,0,0.08);
+  --radius:      12px;
+  --radius-sm:   8px;
+}
+[data-theme="dark"] {
+  --gold:        #d9b24c;
+  --gold-light:  #f0d078;
+  --gold-dim:    rgba(217,178,76,0.10);
+  --gold-border: rgba(217,178,76,0.28);
+
+  --bg:          #060912;
+  --card:        #0c1224;
+  --surface:     #0f1628;
+  --surface-2:   rgba(255,255,255,0.04);
+  --input-bg:    #0b1425;
+
+  --header-bg:   rgba(10,15,31,0.97);
+  --header-bdr:  rgba(217,178,76,0.22);
+
+  --text:        #f0ece4;
+  --text-muted:  #9ca3af;
+  --text-label:  #6b7280;
+
+  --success:     #22c55e;
+  --success-dim: rgba(34,197,94,0.10);
+  --success-bdr: rgba(34,197,94,0.28);
+  --danger:      #ef4444;
+  --danger-dim:  rgba(239,68,68,0.10);
+  --danger-bdr:  rgba(239,68,68,0.30);
+  --info:        #60a5fa;
+  --info-dim:    rgba(96,165,250,0.10);
+  --info-bdr:    rgba(96,165,250,0.26);
+
+  --drop-bg:     rgba(217,178,76,0.04);
+  --drop-bdr:    rgba(217,178,76,0.30);
+
+  --shadow-sm:   0 2px 8px rgba(0,0,0,0.25);
+  --shadow-md:   0 8px 28px rgba(0,0,0,0.35);
+  --radius:      12px;
+  --radius-sm:   8px;
+}
+
+/* ============================================================
+   BASE
+============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Barlow', sans-serif; font-size: 15px; line-height: 1.6;
+  color: var(--text); background: var(--bg); min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+[data-theme="light"] body {
+  background-image: radial-gradient(ellipse 55% 35% at 5% 0%, rgba(184,148,46,0.07) 0%, transparent 55%);
+}
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: var(--gold-border); border-radius: 4px; }
+
+/* ============================================================
+   HEADER
+============================================================ */
+.site-header {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--header-bg); border-bottom: 1px solid var(--header-bdr);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-sm);
+}
+.header-inner {
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 16px; height: 60px; max-width: 680px; margin: 0 auto;
+}
+.header-title {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 1.05rem; font-weight: 800;
+  letter-spacing: 0.04em; text-transform: uppercase; color: var(--gold);
+}
+
+/* ============================================================
+   BUTTONS
+============================================================ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+  font-size: 0.9rem; letter-spacing: 0.06em; text-transform: uppercase;
+  text-decoration: none; border-radius: var(--radius-sm); padding: 10px 16px;
+  border: 1px solid var(--gold-border); background: var(--gold-dim); color: var(--gold);
+  transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; white-space: nowrap;
+}
+.btn:hover:not(:disabled) { background: rgba(184,148,46,0.18); border-color: var(--gold); }
+.btn:disabled { opacity: 0.38; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--gold); border-color: var(--gold); color: #fff;
+  box-shadow: 0 4px 14px rgba(184,148,46,0.30);
+}
+[data-theme="dark"] .btn-primary { color: #0b0f1f; }
+.btn-primary:hover:not(:disabled) { background: var(--gold-light); border-color: var(--gold-light); }
+
+.btn-ghost {
+  background: var(--surface); border-color: rgba(0,0,0,0.08); color: var(--text-muted);
+}
+[data-theme="dark"] .btn-ghost { border-color: rgba(255,255,255,0.08); }
+.btn-ghost:hover:not(:disabled) { background: var(--surface-2); color: var(--text); border-color: var(--gold-border); }
+
+.btn-sm { padding: 7px 11px; font-size: 0.78rem; }
+.btn-full { width: 100%; }
+
+.theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: var(--radius-sm);
+  border: 1px solid var(--gold-border); background: var(--gold-dim);
+  color: var(--gold); cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+}
+.theme-toggle:hover { background: rgba(184,148,46,0.2); border-color: var(--gold); transform: rotate(20deg); }
+
+/* ============================================================
+   PAGE LAYOUT
+============================================================ */
+.page-wrap {
+  max-width: 680px; margin: 0 auto;
+  padding: 20px 16px 40px; display: flex; flex-direction: column; gap: 14px;
+}
+
+/* ============================================================
+   CARD
+============================================================ */
+.card {
+  background: var(--card); border: 1px solid var(--gold-border);
+  border-radius: var(--radius); box-shadow: var(--shadow-md); overflow: hidden;
+}
+.card-header {
+  display: flex; align-items: center; gap: 10px; padding: 13px 18px;
+  border-bottom: 1px solid var(--gold-border); background: var(--gold-dim);
+}
+.card-header-icon {
+  width: 30px; height: 30px; border-radius: 7px; border: 1px solid var(--gold-border);
+  background: var(--card); display: flex; align-items: center; justify-content: center;
+  color: var(--gold); flex-shrink: 0;
+}
+.card-title {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 0.92rem; font-weight: 800;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); flex: 1;
+}
+.card-sub {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem; color: var(--text-label); letter-spacing: 0.08em;
+}
+.card-body { padding: 18px; }
+
+/* ============================================================
+   DROP ZONE
+============================================================ */
+.drop-zone {
+  border: 2px dashed var(--drop-bdr); border-radius: var(--radius);
+  background: var(--drop-bg); padding: 32px 18px;
+  text-align: center; cursor: pointer; transition: all 0.2s ease;
+  position: relative;
+}
+.drop-zone:hover, .drop-zone.dragover {
+  border-color: var(--gold);
+  background: var(--gold-dim);
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 4px var(--gold-dim);
+}
+.drop-zone.dragover { box-shadow: 0 0 0 4px rgba(184,148,46,0.15); }
+
+.drop-icon {
+  width: 48px; height: 48px; border-radius: 12px; margin: 0 auto 12px;
+  border: 1px solid var(--gold-border); background: var(--card);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); box-shadow: var(--shadow-sm);
+}
+.drop-title {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 800;
+  letter-spacing: 0.04em; text-transform: uppercase; color: var(--text); margin-bottom: 5px;
+}
+.drop-hint {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem;
+  color: var(--text-label); letter-spacing: 0.06em;
+}
+.drop-hint b { color: var(--gold); font-weight: 500; }
+#fileInput { display: none; }
+
+/* ============================================================
+   FILE LIST
+============================================================ */
+.file-list { display: flex; flex-direction: column; gap: 0; margin-top: 12px; }
+
+.file-item {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 12px 14px; border-bottom: 1px solid var(--gold-border);
+  transition: background 0.2s;
+}
+.file-item:last-child { border-bottom: none; }
+.file-item:hover { background: rgba(184,148,46,0.03); }
+[data-theme="dark"] .file-item:hover { background: rgba(255,255,255,0.02); }
+
+.file-item-row {
+  display: flex; align-items: center; gap: 10px;
+}
+.file-type-badge {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.55rem; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 7px;
+  border-radius: 5px; flex-shrink: 0; border: 1px solid;
+}
+.file-type-badge.kml { background: var(--success-dim); border-color: var(--success-bdr); color: var(--success); }
+.file-type-badge.pdf { background: var(--info-dim); border-color: var(--info-bdr); color: var(--info); }
+.file-type-badge.other { background: var(--gold-dim); border-color: var(--gold-border); color: var(--gold); }
+
+.file-name {
+  flex: 1; font-size: 0.88rem; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.file-size {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem;
+  color: var(--text-label); flex-shrink: 0; white-space: nowrap;
+}
+.file-status-icon {
+  width: 20px; height: 20px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.file-status-icon.idle    { color: var(--text-label); }
+.file-status-icon.running { color: var(--gold); }
+.file-status-icon.done    { color: var(--success); }
+.file-status-icon.error   { color: var(--danger); }
+
+/* ── Progress bar ── */
+.file-progress-wrap { display: flex; align-items: center; gap: 10px; }
+
+.progress-track {
+  flex: 1; height: 6px; border-radius: 999px;
+  background: var(--surface-2); overflow: hidden;
+}
+[data-theme="dark"] .progress-track { background: rgba(255,255,255,0.08); }
+
+.progress-fill {
+  height: 100%; width: 0%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  transition: width 0.22s ease;
+  position: relative; overflow: hidden;
+}
+/* shimmer while active */
+.progress-fill.running::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 20%, rgba(255,255,255,0.5) 50%, transparent 80%);
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer {
+  0%   { transform: translateX(-200%); }
+  100% { transform: translateX(200%); }
+}
+.progress-fill.done  { background: linear-gradient(90deg, var(--success), #4ade80); }
+.progress-fill.error { background: var(--danger); }
+
+.progress-phase {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem;
+  color: var(--text-label); white-space: nowrap; width: 72px; text-align: right; flex-shrink: 0;
+}
+.progress-phase.running { color: var(--gold); }
+.progress-phase.done    { color: var(--success); }
+.progress-phase.error   { color: var(--danger); }
+
+/* ============================================================
+   ACTION ROW
+============================================================ */
+.action-row { display: flex; gap: 10px; align-items: center; }
+.action-row .btn-primary { flex: 1; }
+
+.summary-msg {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem;
+  min-height: 20px; margin-top: 8px; letter-spacing: 0.04em;
+  color: var(--text-label); transition: color 0.2s;
+}
+.summary-msg.ok    { color: var(--success); }
+.summary-msg.error { color: var(--danger); }
+.summary-msg.info  { color: var(--gold); }
+
+/* Empty state */
+.empty-state {
+  padding: 20px 0 6px; text-align: center;
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem;
+  color: var(--text-label); letter-spacing: 0.06em;
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width: 520px) {
+  .action-row   { flex-direction: column; }
+  .action-row .btn { width: 100%; }
+  .drop-zone    { padding: 24px 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <a class="btn btn-sm" href="upload.kml.html" title="Voltar">
+      <i data-lucide="arrow-left" width="14" height="14"></i>
+     
+    </a>
+    <div class="header-title">
+      <i data-lucide="upload-cloud" width="16" height="16"></i>
+      Upload · KML / PDF
+    </div>
+    <button class="theme-toggle" id="themeToggle" title="Alternar tema">
+      <i data-lucide="moon" width="15" height="15" id="themeIcon"></i>
+    </button>
+  </div>
+</header>
+
+<div class="page-wrap">
+
+  <!-- ── Drop Zone Card ──────────────────────────────────── -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon"><i data-lucide="folder-up" width="15" height="15"></i></div>
+      <span class="card-title">Selecionar arquivos</span>
+      <span class="card-sub">.kml · .pdf · múltiplos</span>
+    </div>
+    <div class="card-body">
+      <div id="dropZone" class="drop-zone" role="button" tabindex="0"
+           aria-label="Clique ou arraste arquivos KML ou PDF aqui">
+        <div class="drop-icon">
+          <i data-lucide="upload-cloud" width="22" height="22"></i>
+        </div>
+        <div class="drop-title">Clique ou arraste aqui</div>
+        <div class="drop-hint">Aceita <b>.kml</b> e <b>.pdf</b> · pode selecionar vários de uma vez</div>
+        <input id="fileInput" type="file" multiple accept=".kml,.pdf">
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Files + Upload Card ─────────────────────────────── -->
+  <div class="card" id="filesCard">
+    <div class="card-header">
+      <div class="card-header-icon"><i data-lucide="list" width="15" height="15"></i></div>
+      <span class="card-title">Fila de envio</span>
+      <span class="card-sub" id="queueLabel">0 arquivos</span>
+    </div>
+
+    <!-- File rows inserted here -->
+    <div id="fileList" class="file-list">
+      <div class="empty-state" id="emptyState">Nenhum arquivo selecionado ainda.</div>
+    </div>
+
+    <div class="card-body" style="padding-top:14px;">
+      <div class="action-row">
+        <button class="btn btn-ghost" id="btnClear" disabled>
+          <i data-lucide="trash-2" width="14" height="14"></i>
+          Limpar
+        </button>
+        <button class="btn btn-primary" id="btnUpload" disabled>
+          <i data-lucide="send" width="14" height="14"></i>
+          Enviar para o Drive
+        </button>
+      </div>
+      <div class="summary-msg" id="summaryMsg"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   THEME
+============================================================ */
+const html = document.documentElement;
+
+function applyThemeToken(t) { html.setAttribute('data-theme', t); localStorage.setItem('pulvion_theme', t); }
+applyThemeToken(localStorage.getItem('pulvion_theme') || 'light');
+
+function refreshIcons() { if (window.lucide && typeof lucide.createIcons === 'function') { try { lucide.createIcons(); } catch (_) {} } }
+
+function applyTheme(t) {
+  applyThemeToken(t);
+  const icon = document.getElementById('themeIcon');
+  const btn  = document.getElementById('themeToggle');
+  if (icon) icon.setAttribute('data-lucide', t === 'dark' ? 'sun' : 'moon');
+  if (btn)  btn.title = t === 'dark' ? 'Modo claro' : 'Modo escuro';
+  refreshIcons();
+}
+
+/* ============================================================
+   CONFIG
+============================================================ */
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvd7CLbTLAM2E_QLBq9sZha4M5H9QhGiL_SGrTPPJerv5yOZptn_OMvix6ZaNuxQNnmw/exec';
+
+/* ============================================================
+   STATE
+============================================================ */
+let selectedFiles = []; // Array of File objects
+let isUploading   = false;
+
+/* ============================================================
+   UTILS
+============================================================ */
+function formatSize(bytes) {
+  if (!bytes) return '0 B';
+  const kb = bytes / 1024;
+  return kb < 1024 ? kb.toFixed(1) + ' KB' : (kb / 1024).toFixed(2) + ' MB';
+}
+
+function fileExt(name) {
+  const m = name.toLowerCase().match(/\.(\w+)$/);
+  return m ? m[1] : 'file';
+}
+
+/* ============================================================
+   DOM REFS
+============================================================ */
+const dropZone   = document.getElementById('dropZone');
+const fileInput  = document.getElementById('fileInput');
+const fileListEl = document.getElementById('fileList');
+const emptyState = document.getElementById('emptyState');
+const queueLabel = document.getElementById('queueLabel');
+const btnClear   = document.getElementById('btnClear');
+const btnUpload  = document.getElementById('btnUpload');
+const summaryMsg = document.getElementById('summaryMsg');
+
+/* ============================================================
+   FILE SELECTION
+============================================================ */
+function addFiles(fileArray) {
+  const incoming = Array.from(fileArray);
+  // Dedup by name+size
+  incoming.forEach(f => {
+    if (!selectedFiles.some(x => x.name === f.name && x.size === f.size)) {
+      selectedFiles.push(f);
+    }
+  });
+  renderFileList();
+  updateButtons();
+  setSummary('', '');
+}
+
+function removeFile(idx) {
+  selectedFiles.splice(idx, 1);
+  renderFileList();
+  updateButtons();
+}
+
+function clearAll() {
+  selectedFiles = [];
+  fileInput.value = '';
+  renderFileList();
+  updateButtons();
+  setSummary('', '');
+}
+
+/* ============================================================
+   RENDER FILE LIST
+============================================================ */
+function renderFileList() {
+  fileListEl.innerHTML = '';
+
+  if (!selectedFiles.length) {
+    fileListEl.appendChild(emptyState);
+    emptyState.style.display = '';
+    queueLabel.textContent = '0 arquivos';
+    return;
+  }
+
+  emptyState.style.display = 'none';
+  queueLabel.textContent = selectedFiles.length + (selectedFiles.length === 1 ? ' arquivo' : ' arquivos');
+
+  selectedFiles.forEach((f, idx) => {
+    const ext = fileExt(f.name);
+    const badgeClass = ext === 'kml' ? 'kml' : ext === 'pdf' ? 'pdf' : 'other';
+
+    const item = document.createElement('div');
+    item.className = 'file-item';
+    item.id = `file-item-${idx}`;
+    item.innerHTML = `
+      <div class="file-item-row">
+        <span class="file-type-badge ${badgeClass}">${ext.toUpperCase()}</span>
+        <span class="file-name" title="${f.name}">${f.name}</span>
+        <span class="file-size">${formatSize(f.size)}</span>
+        <button class="btn btn-sm btn-ghost remove-btn"
+                data-idx="${idx}" title="Remover" style="padding:4px 7px;min-width:0;flex-shrink:0;">
+          <i data-lucide="x" width="12" height="12"></i>
+        </button>
+        <div class="file-status-icon idle" id="status-icon-${idx}">
+          <i data-lucide="clock" width="14" height="14"></i>
+        </div>
+      </div>
+      <div class="file-progress-wrap" id="progress-wrap-${idx}" style="display:none;">
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill-${idx}"></div>
+        </div>
+        <span class="progress-phase" id="progress-phase-${idx}">0%</span>
+      </div>
+    `;
+    fileListEl.appendChild(item);
+  });
+
+  // Remove buttons
+  fileListEl.querySelectorAll('.remove-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const idx = parseInt(e.currentTarget.getAttribute('data-idx'));
+      removeFile(idx);
+    });
+  });
+
+  refreshIcons();
+}
+
+/* ============================================================
+   PROGRESS PER-FILE
+   Two phases:
+     1. Encoding  (FileReader): real progress  0 → 45%
+     2. Uploading (fetch):      simulated     45 → 100%
+============================================================ */
+function setFileProgress(idx, pct, phase, state) {
+  const wrap  = document.getElementById(`progress-wrap-${idx}`);
+  const fill  = document.getElementById(`progress-fill-${idx}`);
+  const label = document.getElementById(`progress-phase-${idx}`);
+  const icon  = document.getElementById(`status-icon-${idx}`);
+  if (!wrap || !fill || !label || !icon) return;
+
+  wrap.style.display = '';
+  fill.style.width   = pct + '%';
+  label.textContent  = phase;
+
+  // Classes
+  fill.className  = 'progress-fill '  + (state === 'done' ? 'done' : state === 'error' ? 'error' : 'running');
+  label.className = 'progress-phase ' + (state === 'done' ? 'done' : state === 'error' ? 'error' : 'running');
+
+  // Status icon
+  const iconMap = {
+    running: 'loader',
+    done:    'check-circle',
+    error:   'x-circle',
+    idle:    'clock'
+  };
+  icon.className = 'file-status-icon ' + state;
+  icon.innerHTML = `<i data-lucide="${iconMap[state] || 'clock'}" width="14" height="14"></i>`;
+  refreshIcons();
+}
+
+/* Encode a file to base64, reporting real progress on the bar */
+function encodeFileWithProgress(file, idx) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const pct = Math.round((e.loaded / e.total) * 45); // 0–45%
+        setFileProgress(idx, pct, `Lendo… ${pct}%`, 'running');
+      }
+    };
+
+    reader.onload = () => {
+      setFileProgress(idx, 45, 'Aguardando…', 'running');
+      const result = reader.result || '';
+      const base64 = String(result).split(',')[1] || '';
+      resolve({
+        nome:    file.name,
+        tipo:    file.type || 'application/vnd.google-earth.kml+xml',
+        conteudo: base64
+      });
+    };
+
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+/* Simulate upload progress 45 → 95%, complete when fetch resolves */
+function simulateUpload(idx, fetchPromise) {
+  return new Promise((resolve, reject) => {
+    let pct = 45;
+    // Advance fast then slow down
+    const phases = [
+      [60,  3],   // 45→65 fast
+      [150, 1.5], // 65→78 medium
+      [350, 0.6], // 78→88 slow
+      [700, 0.2], // 88→95 stall
+    ];
+    let phaseIdx = 0;
+
+    function tick() {
+      const [delay, step] = phases[Math.min(phaseIdx, phases.length - 1)];
+      pct = Math.min(pct + step, 95);
+      setFileProgress(idx, Math.round(pct), `Enviando ${Math.round(pct)}%`, 'running');
+
+      if (pct >= 65  && phaseIdx === 0) phaseIdx = 1;
+      else if (pct >= 78 && phaseIdx === 1) phaseIdx = 2;
+      else if (pct >= 88 && phaseIdx === 2) phaseIdx = 3;
+
+      timer = setTimeout(tick, delay);
+    }
+
+    let timer = setTimeout(tick, 60);
+
+    fetchPromise
+      .then(result => {
+        clearTimeout(timer);
+        setFileProgress(idx, 100, '✓ Enviado', 'done');
+        resolve(result);
+      })
+      .catch(err => {
+        clearTimeout(timer);
+        setFileProgress(idx, Math.round(pct), '✗ Erro', 'error');
+        reject(err);
+      });
+  });
+}
+
+/* ============================================================
+   UPLOAD — sequential, one file at a time
+============================================================ */
+async function doUpload() {
+  if (!selectedFiles.length || isUploading) return;
+
+  isUploading   = true;
+  btnUpload.disabled = true;
+  btnClear.disabled  = true;
+  setSummary('Iniciando envio…', 'info');
+
+  let doneCount = 0;
+  let errCount  = 0;
+
+  for (let idx = 0; idx < selectedFiles.length; idx++) {
+    const file = selectedFiles[idx];
+    setFileProgress(idx, 0, 'Iniciando…', 'running');
+    setSummary(`Enviando arquivo ${idx + 1} de ${selectedFiles.length}: ${file.name}`, 'info');
+
+    try {
+      // Phase 1: encode (real FileReader progress)
+      const payload = await encodeFileWithProgress(file, idx);
+
+      // Phase 2: fetch + animated progress bar
+      const fetchPromise = fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode:   'no-cors',
+        body:   JSON.stringify({ arquivos: [payload] })
+      });
+
+      await simulateUpload(idx, fetchPromise);
+      doneCount++;
+
+    } catch (err) {
+      console.error('Erro ao enviar ' + file.name, err);
+      setFileProgress(idx, 0, '✗ Falhou', 'error');
+      errCount++;
+    }
+  }
+
+  isUploading = false;
+  btnUpload.disabled = false;
+  btnClear.disabled  = false;
+
+  if (errCount === 0) {
+    setSummary(`✓ ${doneCount} arquivo${doneCount !== 1 ? 's' : ''} enviado${doneCount !== 1 ? 's' : ''} com sucesso. Verifique a pasta no Drive.`, 'ok');
+  } else if (doneCount === 0) {
+    setSummary(`✗ Todos os envios falharam. Verifique a conexão e tente novamente.`, 'error');
+  } else {
+    setSummary(`${doneCount} enviado${doneCount !== 1 ? 's' : ''}, ${errCount} com falha.`, 'error');
+  }
+}
+
+/* ============================================================
+   UI HELPERS
+============================================================ */
+function updateButtons() {
+  const has = selectedFiles.length > 0 && !isUploading;
+  btnUpload.disabled = !has;
+  btnClear.disabled  = !has;
+}
+
+function setSummary(text, type) {
+  summaryMsg.textContent = text;
+  summaryMsg.className   = 'summary-msg' + (type ? ' ' + type : '');
+}
+
+/* ============================================================
+   DROP ZONE EVENTS
+============================================================ */
+dropZone.addEventListener('click', () => { if (!isUploading) fileInput.click(); });
+
+dropZone.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (!isUploading) fileInput.click(); }
+});
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); if (!isUploading) dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', e => { e.preventDefault(); dropZone.classList.remove('dragover'); });
+
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  if (!isUploading && e.dataTransfer?.files?.length) addFiles(e.dataTransfer.files);
+});
+
+fileInput.addEventListener('change', () => { if (fileInput.files.length) addFiles(fileInput.files); });
+
+btnClear.addEventListener('click', () => { if (!isUploading) clearAll(); });
+btnUpload.addEventListener('click', doUpload);
+
+/* ============================================================
+   INIT
+============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  applyTheme(html.getAttribute('data-theme') || 'light');
+  refreshIcons();
+
+  document.getElementById('themeToggle').addEventListener('click', () =>
+    applyTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')
+  );
+
+  renderFileList();
+
+  // Lucide retry
+  let attempts = 0;
+  function initLucide() {
+    if (window.lucide && typeof lucide.createIcons === 'function') { try { lucide.createIcons(); } catch (_) {} return; }
+    if (++attempts < 8) setTimeout(initLucide, 200);
+  }
+  initLucide();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pulvion · Sistema de Gestão de Voos Agrícolas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,700;0,800;0,900;1,800&family=Barlow:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════════
+   TOKENS
+════════════════════════════════════════════ */
+:root,[data-theme="light"]{
+  --gold:       #b8942e;
+  --gold-l:     #d9b24c;
+  --gold-xl:    #e8c96a;
+  --gold-dim:   rgba(184,148,46,0.10);
+  --gold-bdr:   rgba(184,148,46,0.28);
+
+  --bg:         #f2efe7;
+  --bg2:        #e9e5db;
+  --card:       #ffffff;
+  --card2:      #faf7f1;
+  --surface:    #f0ece3;
+
+  --nav-bg:     rgba(242,239,231,0.94);
+  --nav-bdr:    rgba(184,148,46,0.18);
+
+  --text:       #0f1117;
+  --text2:      #2d3340;
+  --muted:      #5a6273;
+  --dim:        #94a3b8;
+
+  --border:     rgba(184,148,46,0.20);
+  --border-sm:  rgba(0,0,0,0.065);
+
+  --success:    #16a34a;
+  --success-dim:rgba(22,163,74,0.10);
+  --success-bdr:rgba(22,163,74,0.25);
+
+  --sh-sm:  0 2px 8px rgba(0,0,0,0.06),0 1px 3px rgba(0,0,0,0.04);
+  --sh-md:  0 6px 24px rgba(0,0,0,0.08),0 2px 6px rgba(0,0,0,0.05);
+  --sh-lg:  0 16px 48px rgba(0,0,0,0.10),0 4px 12px rgba(0,0,0,0.06);
+  --sh-xl:  0 28px 72px rgba(0,0,0,0.13),0 8px 20px rgba(0,0,0,0.07);
+
+  --r:   14px;
+  --rsm:  9px;
+  --rlg: 20px;
+  --rxl: 28px;
+}
+[data-theme="dark"]{
+  --gold:       #d9b24c;
+  --gold-l:     #f0d078;
+  --gold-xl:    #f8e090;
+  --gold-dim:   rgba(217,178,76,0.10);
+  --gold-bdr:   rgba(217,178,76,0.26);
+
+  --bg:         #060912;
+  --bg2:        #040710;
+  --card:       #0c1224;
+  --card2:      #0f162c;
+  --surface:    #111826;
+
+  --nav-bg:     rgba(4,6,14,0.92);
+  --nav-bdr:    rgba(217,178,76,0.16);
+
+  --text:       #eceae2;
+  --text2:      #c8c4ba;
+  --muted:      #8b95a8;
+  --dim:        #3f4a5c;
+
+  --border:     rgba(217,178,76,0.16);
+  --border-sm:  rgba(255,255,255,0.05);
+
+  --success:    #22c55e;
+  --success-dim:rgba(34,197,94,0.10);
+  --success-bdr:rgba(34,197,94,0.28);
+
+  --sh-sm:  0 2px 8px rgba(0,0,0,0.35),0 1px 3px rgba(0,0,0,0.22);
+  --sh-md:  0 6px 24px rgba(0,0,0,0.45),0 2px 6px rgba(0,0,0,0.28);
+  --sh-lg:  0 16px 48px rgba(0,0,0,0.55),0 4px 12px rgba(0,0,0,0.32);
+  --sh-xl:  0 28px 72px rgba(0,0,0,0.65),0 8px 20px rgba(0,0,0,0.38);
+}
+
+/* ════════════════════════════════════════════
+   BASE
+════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Barlow',sans-serif;font-size:16px;line-height:1.6;
+  color:var(--text);background:var(--bg);overflow-x:hidden;
+  transition:background .3s,color .3s;
+}
+[data-theme="light"] body{
+  background-image:
+    radial-gradient(ellipse 90% 55% at 50% -5%,rgba(184,148,46,0.07) 0%,transparent 60%);
+}
+[data-theme="dark"] body{
+  background-image:
+    radial-gradient(circle at 8% 8%,rgba(217,178,76,0.06),transparent 30%),
+    radial-gradient(circle at 92% 5%,rgba(56,189,248,0.03),transparent 28%);
+}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--gold-bdr);border-radius:4px}
+
+/* ════════════════════════════════════════════
+   NAV
+════════════════════════════════════════════ */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:400;
+  display:flex;align-items:center;gap:14px;
+  padding:0 32px;height:62px;
+  background:var(--nav-bg);border-bottom:1px solid var(--nav-bdr);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  box-shadow:var(--sh-sm);
+  transition:background .3s,border-color .3s;
+}
+.nav-logo{
+  display:flex;align-items:center;gap:10px;text-decoration:none;
+}
+.nav-logo-img{
+  height:32px;width:auto;display:block;
+  /* fallback if image missing */
+}
+.nav-logo-fallback{
+  display:flex;align-items:center;gap:8px;
+  font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:900;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--gold);
+}
+.nav-logo-mark{
+  width:30px;height:30px;border-radius:7px;
+  border:1px solid var(--gold-bdr);background:var(--gold-dim);
+  display:flex;align-items:center;justify-content:center;
+}
+.nav-logo-mark svg{width:14px;height:14px;stroke:var(--gold);stroke-width:1.8;fill:none}
+.nav-sep{width:1px;height:18px;background:var(--gold-bdr);flex-shrink:0}
+.nav-tagline{
+  font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--dim);
+}
+.nav-grow{flex:1}
+.nav-theme{
+  width:34px;height:34px;border-radius:var(--rsm);
+  border:1px solid var(--gold-bdr);background:var(--gold-dim);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--gold);cursor:pointer;transition:all .2s;flex-shrink:0;
+}
+.nav-theme:hover{background:rgba(184,148,46,0.2);border-color:var(--gold);transform:rotate(20deg)}
+.nav-theme svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.8;fill:none}
+.nav-login-btn{
+  display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.85rem;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:9px 20px;border-radius:var(--rsm);
+  background:var(--gold);border:1px solid var(--gold);color:#050810;
+  box-shadow:0 4px 16px rgba(184,148,46,0.28);
+  transition:all .18s ease;white-space:nowrap;
+}
+.nav-login-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none}
+.nav-login-btn:hover{background:var(--gold-xl);transform:translateY(-1px);box-shadow:0 6px 20px rgba(184,148,46,0.36)}
+
+/* ════════════════════════════════════════════
+   HERO
+════════════════════════════════════════════ */
+.hero{
+  position:relative;min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  padding:100px 32px 80px;overflow:hidden;
+}
+.hero-grid{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(var(--border) 1px,transparent 1px),
+    linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 75% 65% at 50% 50%,black 20%,transparent 78%);
+  opacity:.45;
+}
+[data-theme="light"] .hero-grid{opacity:.55}
+.hero-glow{
+  position:absolute;top:-20%;left:50%;transform:translateX(-50%);
+  width:80%;height:60%;pointer-events:none;
+  background:radial-gradient(ellipse,rgba(184,148,46,0.09) 0%,transparent 65%);
+}
+[data-theme="dark"] .hero-glow{
+  background:radial-gradient(ellipse,rgba(217,178,76,0.07) 0%,transparent 65%);
+}
+
+.hero-inner{
+  position:relative;z-index:1;max-width:780px;
+  text-align:center;display:flex;flex-direction:column;align-items:center;gap:28px;
+}
+
+.hero-pill{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--gold);padding:6px 16px;border-radius:999px;
+  border:1px solid var(--gold-bdr);background:var(--gold-dim);
+  animation:fadeUp .55s ease both;
+}
+.hero-pill::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.hero-h1{
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;
+  font-size:clamp(3rem,8.5vw,5.6rem);line-height:.92;
+  letter-spacing:-.01em;text-transform:uppercase;color:var(--text);
+  animation:fadeUp .55s .08s ease both;
+}
+.hero-h1 em{font-style:normal;color:var(--gold);display:block}
+.hero-logo-wrap{display:block;margin-bottom:4px}
+.hero-logo-img{
+  height:clamp(72px,12vw,110px);width:auto;max-width:100%;
+  display:block;margin:0 auto;
+  filter:drop-shadow(0 4px 24px rgba(184,148,46,0.35));
+}
+.hero-logo-fallback{display:block;color:var(--gold)}
+.hero-h1 .sub{
+  font-weight:300;font-size:.58em;letter-spacing:.09em;
+  color:var(--muted);display:block;margin-top:12px;text-transform:uppercase;
+}
+.hero-desc{
+  font-size:1.02rem;font-weight:300;color:var(--muted);max-width:500px;line-height:1.75;
+  animation:fadeUp .55s .16s ease both;
+}
+.hero-desc strong{color:var(--text2);font-weight:600}
+
+.hero-cta{
+  display:inline-flex;align-items:center;gap:9px;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.95rem;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:16px 36px;border-radius:var(--rsm);
+  background:var(--gold);border:2px solid var(--gold);color:#050810;
+  box-shadow:0 6px 28px rgba(184,148,46,0.32);
+  transition:all .2s ease;animation:fadeUp .55s .24s ease both;
+}
+.hero-cta svg{width:16px;height:16px;stroke:currentColor;stroke-width:2.4;fill:none}
+.hero-cta:hover{background:var(--gold-xl);transform:translateY(-2px);box-shadow:0 10px 36px rgba(184,148,46,0.42)}
+
+/* Hero stats */
+.hero-stats{
+  display:flex;gap:32px;align-items:center;
+  animation:fadeUp .55s .32s ease both;
+}
+.hs{text-align:center}
+.hs-num{
+  font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:900;
+  color:var(--gold);letter-spacing:-.02em;line-height:1;
+}
+.hs-label{
+  font-family:'IBM Plex Mono',monospace;font-size:.55rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--dim);margin-top:4px;
+}
+.hs-div{width:1px;height:36px;background:var(--gold-bdr)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* ════════════════════════════════════════════
+   SECTIONS COMMON
+════════════════════════════════════════════ */
+section{position:relative;z-index:1}
+.s-inner{max-width:1160px;margin:0 auto;padding:80px 32px}
+.s-eye{
+  font-family:'IBM Plex Mono',monospace;font-size:.61rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--gold);
+  display:flex;align-items:center;gap:10px;margin-bottom:14px;
+}
+.s-eye::before{content:'';width:24px;height:1px;background:var(--gold-bdr)}
+.s-title{
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;
+  font-size:clamp(1.9rem,3.8vw,2.8rem);letter-spacing:-.01em;text-transform:uppercase;
+  color:var(--text);line-height:1.05;margin-bottom:10px;
+}
+.s-title em{font-style:normal;color:var(--gold)}
+.s-desc{font-size:.92rem;color:var(--muted);max-width:500px;line-height:1.75}
+
+/* ════════════════════════════════════════════
+   FEATURES SECTION
+════════════════════════════════════════════ */
+.feat-section{border-top:1px solid var(--border);background:var(--bg2)}
+[data-theme="light"] .feat-section{
+  background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);
+}
+.feat-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:44px;
+}
+@media(max-width:860px){.feat-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.feat-grid{grid-template-columns:1fr}}
+
+.feat-card{
+  padding:24px;border-radius:var(--r);
+  background:var(--card);border:1px solid var(--border);box-shadow:var(--sh-sm);
+  display:flex;flex-direction:column;gap:14px;
+  opacity:0;transform:translateY(20px);
+  transition:opacity .5s ease,transform .5s ease,box-shadow .2s,border-color .2s;
+}
+.feat-card.vis{opacity:1;transform:translateY(0)}
+.feat-card:hover{box-shadow:var(--sh-md);border-color:var(--gold-bdr)}
+
+.feat-icon{
+  width:42px;height:42px;border-radius:11px;
+  border:1px solid var(--gold-bdr);background:var(--gold-dim);
+  display:flex;align-items:center;justify-content:center;color:var(--gold);
+}
+.feat-icon svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.7;fill:none}
+.feat-title{
+  font-family:'Barlow Condensed',sans-serif;font-size:.92rem;font-weight:800;
+  letter-spacing:.05em;text-transform:uppercase;color:var(--text);
+}
+.feat-desc{font-size:.82rem;color:var(--muted);line-height:1.68}
+
+/* ════════════════════════════════════════════
+   PREVIEW SECTION — image cards
+════════════════════════════════════════════ */
+.prev-section{border-top:1px solid var(--border)}
+.prev-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:44px;
+}
+@media(max-width:860px){.prev-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.prev-grid{grid-template-columns:1fr}}
+
+.prev-card{
+  border-radius:var(--rlg);background:var(--card);
+  border:1px solid var(--border);box-shadow:var(--sh-md);
+  overflow:hidden;
+  opacity:0;transform:translateY(22px);
+  transition:opacity .5s ease,transform .5s ease,box-shadow .24s,border-color .24s;
+}
+.prev-card.vis{opacity:1;transform:translateY(0)}
+.prev-card:hover{box-shadow:var(--sh-xl);border-color:var(--gold-bdr);transform:translateY(-3px)}
+.prev-card.vis:hover{transform:translateY(-3px)}
+
+/* Image slot */
+.prev-img{
+  width:100%;aspect-ratio:16/10;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.prev-img img{
+  width:100%;height:100%;object-fit:cover;object-position:top;
+  display:block;
+}
+/* Placeholder when no image */
+.prev-img.no-img{
+  background:
+    linear-gradient(135deg,var(--surface) 0%,var(--card2) 100%);
+}
+.prev-img.no-img::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(var(--border) 1px,transparent 1px),
+    linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:18px 18px;opacity:.7;
+}
+.prev-placeholder{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+}
+.prev-placeholder-icon{
+  width:44px;height:44px;border-radius:12px;
+  border:1px dashed var(--gold-bdr);background:var(--gold-dim);
+  display:flex;align-items:center;justify-content:center;color:var(--gold);opacity:.6;
+}
+.prev-placeholder-icon svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.5;fill:none}
+.prev-placeholder-label{
+  font-family:'IBM Plex Mono',monospace;font-size:.57rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--dim);
+}
+
+.prev-body{padding:16px 18px 20px;display:flex;flex-direction:column;gap:6px}
+.prev-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:.54rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--gold);
+}
+.prev-name{
+  font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:800;
+  letter-spacing:.03em;text-transform:uppercase;color:var(--text);line-height:1.1;
+}
+.prev-desc{font-size:.78rem;color:var(--muted);line-height:1.6;margin-top:2px}
+.prev-status{
+  display:inline-flex;align-items:center;gap:5px;margin-top:6px;
+  font-family:'IBM Plex Mono',monospace;font-size:.54rem;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--success);
+}
+.prev-status::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--success)}
+
+/* ════════════════════════════════════════════
+   WHY / ANIMATED PANEL
+════════════════════════════════════════════ */
+.why-section{border-top:1px solid var(--border);background:var(--bg2)}
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;margin-top:44px;align-items:center}
+@media(max-width:760px){.why-grid{grid-template-columns:1fr;gap:32px}}
+
+.why-feats{display:flex;flex-direction:column;gap:14px}
+.wf{
+  display:flex;gap:14px;align-items:flex-start;padding:16px;
+  border-radius:var(--r);border:1px solid var(--border);background:var(--card);
+  box-shadow:var(--sh-sm);
+  opacity:0;transform:translateX(-16px);
+  transition:opacity .5s ease,transform .5s ease,border-color .2s,background .2s;
+}
+.wf.vis{opacity:1;transform:translateX(0)}
+.wf:hover{border-color:var(--gold-bdr);background:var(--gold-dim)}
+.wf-icon{
+  width:36px;height:36px;border-radius:9px;flex-shrink:0;
+  border:1px solid var(--gold-bdr);background:var(--gold-dim);
+  display:flex;align-items:center;justify-content:center;color:var(--gold);
+}
+.wf-icon svg{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none}
+.wf-title{
+  font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:800;
+  letter-spacing:.05em;text-transform:uppercase;color:var(--text);margin-bottom:3px;
+}
+.wf-desc{font-size:.8rem;color:var(--muted);line-height:1.65}
+
+/* SVG drone panel */
+.why-vis{
+  border-radius:var(--rlg);border:1px solid var(--gold-bdr);
+  background:var(--card);overflow:hidden;padding:24px;
+  min-height:280px;display:flex;align-items:center;justify-content:center;
+  position:relative;box-shadow:var(--sh-md);
+  opacity:0;transform:translateX(20px);
+  transition:opacity .6s .2s ease,transform .6s .2s ease;
+}
+.why-vis::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(var(--border) 1px,transparent 1px),
+    linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:26px 26px;opacity:.6;
+}
+[data-theme="light"] .why-vis::before{opacity:.8}
+.why-vis.vis{opacity:1;transform:translateX(0)}
+.vis-svg{width:100%;height:200px;position:relative;z-index:1}
+
+/* ════════════════════════════════════════════
+   CTA BOTTOM
+════════════════════════════════════════════ */
+.cta-section{border-top:1px solid var(--border)}
+.cta-inner{
+  max-width:620px;margin:0 auto;padding:80px 32px;
+  text-align:center;display:flex;flex-direction:column;align-items:center;gap:22px;
+}
+.cta-h{
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;
+  font-size:clamp(2.2rem,5.5vw,3.4rem);letter-spacing:-.01em;text-transform:uppercase;
+  color:var(--text);line-height:1;
+}
+.cta-h em{font-style:normal;color:var(--gold)}
+.cta-desc{font-size:.9rem;color:var(--muted);line-height:1.75;max-width:400px}
+
+/* ════════════════════════════════════════════
+   FOOTER
+════════════════════════════════════════════ */
+footer{
+  border-top:1px solid var(--border);padding:24px 32px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+}
+.foot-brand{
+  font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:900;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--gold);
+}
+.foot-meta{
+  font-family:'IBM Plex Mono',monospace;font-size:.57rem;
+  letter-spacing:.08em;color:var(--dim);
+}
+
+/* ════════════════════════════════════════════
+   LOGIN MODAL
+════════════════════════════════════════════ */
+.modal-overlay{
+  position:fixed;inset:0;z-index:800;
+  background:rgba(15,17,23,0.60);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;
+  padding:16px;
+  opacity:0;pointer-events:none;transition:opacity .25s ease;
+}
+.modal-overlay.open{opacity:1;pointer-events:all}
+
+.modal{
+  background:var(--card);border:1px solid var(--gold-bdr);
+  border-radius:var(--rxl);box-shadow:var(--sh-xl);
+  width:100%;max-width:420px;overflow:hidden;
+  transform:translateY(24px) scale(.97);transition:transform .28s ease;
+}
+.modal-overlay.open .modal{transform:translateY(0) scale(1)}
+
+.modal-header{
+  display:flex;align-items:center;gap:12px;
+  padding:18px 22px;border-bottom:1px solid var(--border);
+  background:var(--gold-dim);
+}
+.modal-logo{
+  height:28px;width:auto;display:block;
+}
+.modal-logo-fallback{
+  font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:900;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--gold);
+}
+.modal-title-block{flex:1}
+.modal-title{
+  font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:800;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--text);
+}
+.modal-sub{
+  font-family:'IBM Plex Mono',monospace;font-size:.56rem;letter-spacing:.07em;
+  color:var(--dim);margin-top:1px;
+}
+.modal-close{
+  width:30px;height:30px;border-radius:var(--rsm);
+  border:1px solid var(--border);background:var(--card);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);cursor:pointer;transition:all .15s;flex-shrink:0;
+}
+.modal-close:hover{background:rgba(220,38,38,0.08);border-color:rgba(220,38,38,0.28);color:#dc2626}
+.modal-close svg{width:13px;height:13px;stroke:currentColor;stroke-width:2.2;fill:none}
+
+.modal-body{padding:24px 22px;display:flex;flex-direction:column;gap:16px}
+
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{
+  font-family:'IBM Plex Mono',monospace;font-size:.62rem;font-weight:500;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--dim);
+}
+.field-wrap{position:relative}
+.field-icon{
+  position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:15px;height:15px;stroke:var(--dim);stroke-width:1.8;fill:none;pointer-events:none;
+}
+.field input{
+  width:100%;padding:12px 12px 12px 38px;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--rsm);
+  font-family:'Barlow',sans-serif;font-size:.95rem;color:var(--text);
+  outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;
+}
+[data-theme="dark"] .field input{background:rgba(255,255,255,0.03)}
+.field input::placeholder{color:var(--dim)}
+.field input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim)}
+
+.eye-btn{
+  position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  width:28px;height:28px;border-radius:6px;border:none;background:transparent;
+  color:var(--dim);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:color .15s;
+}
+.eye-btn:hover{color:var(--gold)}
+.eye-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.8;fill:none}
+
+.login-btn{
+  width:100%;padding:14px;border-radius:var(--rsm);
+  background:var(--gold);border:1px solid var(--gold);
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.9rem;
+  letter-spacing:.08em;text-transform:uppercase;color:#050810;
+  box-shadow:0 4px 16px rgba(184,148,46,0.28);
+  cursor:pointer;transition:all .18s ease;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.login-btn svg{width:15px;height:15px;stroke:currentColor;stroke-width:2;fill:none}
+.login-btn:hover{background:var(--gold-xl);transform:translateY(-1px);box-shadow:0 6px 22px rgba(184,148,46,0.36)}
+.login-btn:active{transform:scale(.98)}
+.login-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* Error message */
+.login-error{
+  display:none;padding:10px 14px;border-radius:var(--rsm);
+  border:1px solid rgba(220,38,38,0.28);background:rgba(220,38,38,0.08);
+  font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:.04em;
+  color:#dc2626;text-align:center;
+}
+.login-error.show{display:block}
+[data-theme="dark"] .login-error{color:#ef4444;border-color:rgba(239,68,68,0.30);background:rgba(239,68,68,0.10)}
+
+/* Loading spinner on button */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{animation:spin .8s linear infinite}
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══════════════════════════════════════ -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo">
+    <!-- Logo image — se o arquivo existir, aparece; caso contrário, fallback texto -->
+    <img src="logo_pulvion.png" alt="Pulvion" class="nav-logo-img"
+      onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+    <div class="nav-logo-fallback" style="display:none">
+      <div class="nav-logo-mark">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      Pulvion
+    </div>
+  </a>
+  <div class="nav-sep"></div>
+  <span class="nav-tagline">Gestão Agrícola de Precisão</span>
+  <div class="nav-grow"></div>
+  <button class="nav-theme" id="themeBtn" title="Alternar tema">
+    <svg id="themeIcon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+  </button>
+  <button class="nav-login-btn" onclick="openModal()">
+    <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+    Entrar
+  </button>
+</nav>
+
+<!-- ══ HERO ══════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="hero-pill">Gestão de voos agrícolas com precisão</div>
+    <h1 class="hero-h1">
+      <em class="hero-logo-wrap">
+        <img src="logo_pulvion.png" alt="Pulvion" class="hero-logo-img"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+        <span class="hero-logo-fallback" style="display:none">Pulvion</span>
+      </em>
+      <span class="sub">Planejamento · Execução · Análise</span>
+    </h1>
+    <p class="hero-desc">
+      Sistema completo para operações com drones agrícolas.
+      <strong>Planeje faixas de voo, gerencie talhões</strong> e acompanhe
+      o desempenho da equipe com dados exportados do DJI.
+    </p>
+    <button class="hero-cta" onclick="openModal()">
+      <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Acessar o Sistema
+    </button>
+    <div class="hero-stats">
+      <div class="hs">
+        <div class="hs-num">100%</div>
+        <div class="hs-label">No Navegador</div>
+      </div>
+      <div class="hs-div"></div>
+      <div class="hs">
+        <div class="hs-num">KML</div>
+        <div class="hs-label">Export DJI</div>
+      </div>
+      <div class="hs-div"></div>
+      <div class="hs">
+        <div class="hs-num">3</div>
+        <div class="hs-label">Módulos Ativos</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FEATURES ══════════════════════════════════ -->
+<section class="feat-section">
+  <div class="s-inner">
+    <div class="s-eye">Funcionalidades</div>
+    <h2 class="s-title">Tudo que a operação<br><em>precisa em campo</em></h2>
+    <p class="s-desc">Cada ferramenta foi desenvolvida para simplificar o trabalho do piloto e dar visibilidade ao gestor.</p>
+
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div class="feat-title">Gestão por Módulo</div>
+        <div class="feat-desc">Pulverização, Cotésia e Mapeamento com programação, status operacional e rendimento diário em cada módulo.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        </div>
+        <div class="feat-title">Planejamento KML</div>
+        <div class="feat-desc">Gere linhas paralelas, pontos de missão e mescle talhões KML com exportação pronta para o DJI Pilot.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="feat-title">Ranking de Pilotos</div>
+        <div class="feat-desc">Importe planilhas DJI e visualize área voada, voos realizados, volume aplicado e eficiência por piloto.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="feat-title">Sem Instalação</div>
+        <div class="feat-desc">100% no navegador. Não precisa instalar nada — funciona em qualquer dispositivo, inclusive no campo.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="feat-title">Acesso em Tempo Real</div>
+        <div class="feat-desc">Status operacional atualizado em tempo real por toda a equipe. Visualize o andamento de cada operação.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div class="feat-title">Upload para o Drive</div>
+        <div class="feat-desc">Envie KML e PDF diretamente para o Google Drive da operação com controle de progresso por arquivo.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PREVIEWS ══════════════════════════════════ -->
+<section class="prev-section">
+  <div class="s-inner">
+    <div class="s-eye">Prévia do Sistema</div>
+    <h2 class="s-title">Veja o sistema<br><em>em funcionamento</em></h2>
+    <p class="s-desc">Interface pensada para o trabalho diário — simples de usar, rápida e responsiva.</p>
+
+    <div class="prev-grid">
+
+      <!-- Card 1 — Operacional -->
+      <div class="prev-card">
+        <div class="prev-img no-img" id="prev-img-1">
+          <!-- Substitua pelo caminho real: <img src="preview_operacional.png" alt="Portal Operacional"> -->
+          <div class="prev-placeholder">
+            <div class="prev-placeholder-icon">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            </div>
+            <span class="prev-placeholder-label">Prévia em breve</span>
+          </div>
+        </div>
+        <div class="prev-body">
+          <div class="prev-tag">Módulo Piloto</div>
+          <div class="prev-name">Portal Operacional</div>
+          <div class="prev-desc">Acesso rápido a todos os módulos por categoria, com busca integrada por fazenda ou talhão.</div>
+          <span class="prev-status">Ativo</span>
+        </div>
+      </div>
+
+      <!-- Card 2 — Programação -->
+      <div class="prev-card">
+        <div class="prev-img no-img" id="prev-img-2">
+          <div class="prev-placeholder">
+            <div class="prev-placeholder-icon">
+              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <span class="prev-placeholder-label">Prévia em breve</span>
+          </div>
+        </div>
+        <div class="prev-body">
+          <div class="prev-tag">Programação</div>
+          <div class="prev-name">Agenda de Operações</div>
+          <div class="prev-desc">Inserção e gestão de programações por fazenda, talhão e piloto com integração ao Google Sheets.</div>
+          <span class="prev-status">Ativo</span>
+        </div>
+      </div>
+
+      <!-- Card 3 — Planejamento KML -->
+      <div class="prev-card">
+        <div class="prev-img no-img" id="prev-img-3">
+          <div class="prev-placeholder">
+            <div class="prev-placeholder-icon">
+              <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>
+            </div>
+            <span class="prev-placeholder-label">Prévia em breve</span>
+          </div>
+        </div>
+        <div class="prev-body">
+          <div class="prev-tag">Ferramentas KML</div>
+          <div class="prev-name">Planejamento de Voo</div>
+          <div class="prev-desc">Geração de linhas paralelas, pontos de missão e mesclagem de talhões com mapa interativo.</div>
+          <span class="prev-status">Ativo</span>
+        </div>
+      </div>
+
+      <!-- Card 4 — Ranking -->
+      <div class="prev-card">
+        <div class="prev-img no-img" id="prev-img-4">
+          <div class="prev-placeholder">
+            <div class="prev-placeholder-icon">
+              <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+            <span class="prev-placeholder-label">Prévia em breve</span>
+          </div>
+        </div>
+        <div class="prev-body">
+          <div class="prev-tag">Admin · Analytics</div>
+          <div class="prev-name">Ranking de Pilotos</div>
+          <div class="prev-desc">Dashboard com desempenho por piloto — área, voos, volume e eficiência com filtros por período.</div>
+          <span class="prev-status">Ativo</span>
+        </div>
+      </div>
+
+      <!-- Card 5 — Status -->
+      <div class="prev-card">
+        <div class="prev-img no-img" id="prev-img-5">
+          <div class="prev-placeholder">
+            <div class="prev-placeholder-icon">
+              <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <span class="prev-placeholder-label">Prévia em breve</span>
+          </div>
+        </div>
+        <div class="prev-body">
+          <div class="prev-tag">Status · Tempo Real</div>
+          <div class="prev-name">Painel de Status</div>
+          <div class="prev-desc">Visualização do andamento de cada operação com atualização em tempo real para toda a equipe.</div>
+          <span class="prev-status">Ativo</span>
+        </div>
+      </div>
+
+      <!-- Card 6 — Mobile -->
+      <div class="prev-card">
+        <div class="prev-img no-img" id="prev-img-6">
+          <div class="prev-placeholder">
+            <div class="prev-placeholder-icon">
+              <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            </div>
+            <span class="prev-placeholder-label">Prévia em breve</span>
+          </div>
+        </div>
+        <div class="prev-body">
+          <div class="prev-tag">Mobile · Campo</div>
+          <div class="prev-name">Interface de Campo</div>
+          <div class="prev-desc">Design responsivo otimizado para uso no campo — toque grande, leitura fácil sob o sol.</div>
+          <span class="prev-status">Ativo</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ WHY ════════════════════════════════════════ -->
+<section class="why-section">
+  <div class="s-inner">
+    <div class="why-grid">
+      <div>
+        <div class="s-eye">Por que Pulvion</div>
+        <h2 class="s-title">Desenvolvido para<br><em>o campo real</em></h2>
+        <p class="s-desc" style="margin-bottom:28px">Criado para operações agrícolas brasileiras — funciona sem servidor, sem instalação e sem upload de dados sensíveis.</p>
+        <div class="why-feats">
+          <div class="wf">
+            <div class="wf-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div><div class="wf-title">100% no navegador</div><div class="wf-desc">Processamento geoespacial local, sem dependência de servidor.</div></div>
+          </div>
+          <div class="wf">
+            <div class="wf-icon"><svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></div>
+            <div><div class="wf-title">KML e Shapefile</div><div class="wf-desc">Importa e exporta nos formatos padrão, compatível com DJI Pilot.</div></div>
+          </div>
+          <div class="wf">
+            <div class="wf-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+            <div><div class="wf-title">Multiplataforma</div><div class="wf-desc">Funciona em desktop, tablet e celular — sem instalar app.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="why-vis">
+        <svg class="vis-svg" viewBox="0 0 300 190" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="36,148 68,38 224,28 272,140 168,162 92,157"
+            stroke="rgba(22,197,94,0.38)" stroke-width="1.4" fill="rgba(22,197,94,0.04)" stroke-dasharray="4 3"/>
+          <line x1="71" y1="48" x2="248" y2="40" stroke="var(--border)" stroke-width="1.1" stroke-dasharray="3 3"/>
+          <line x1="64" y1="66" x2="252" y2="59" stroke="var(--border)" stroke-width="1.1" stroke-dasharray="3 3"/>
+          <line x1="57" y1="84" x2="254" y2="78" stroke="var(--gold-bdr)" stroke-width="1.3" stroke-dasharray="3 3"/>
+          <line x1="50" y1="102" x2="254" y2="97" stroke="var(--gold-bdr)" stroke-width="1.4" stroke-dasharray="3 3"/>
+          <line x1="44" y1="120" x2="249" y2="117" stroke="var(--border)" stroke-width="1.3" stroke-dasharray="3 3"/>
+          <line x1="40" y1="138" x2="238" y2="138" stroke="var(--border)" stroke-width="1.1" stroke-dasharray="3 3"/>
+          <polyline points="71,48 248,40 252,59 57,84 254,97 249,117 40,138"
+            stroke="rgba(184,148,46,0.75)" stroke-width="1.8" fill="none"
+            stroke-linecap="round" stroke-linejoin="round">
+            <animate attributeName="stroke-dashoffset" from="680" to="0" dur="3s" repeatCount="indefinite"/>
+            <animate attributeName="stroke-dasharray" from="680 0" to="680 0" dur="3s" repeatCount="indefinite"/>
+          </polyline>
+          <g>
+            <animateMotion path="M71,48 L248,40 L252,59 L57,84 L254,97 L249,117 L40,138" dur="3s" repeatCount="indefinite" calcMode="linear"/>
+            <circle r="4" fill="rgba(184,148,46,0.95)"/>
+            <circle r="8" fill="none" stroke="rgba(184,148,46,0.25)" stroke-width="1">
+              <animate attributeName="r" values="8;12;8" dur="1s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.4;0;0.4" dur="1s" repeatCount="indefinite"/>
+            </circle>
+          </g>
+          <circle cx="71"  cy="48"  r="2.8" fill="rgba(56,189,248,0.8)" stroke="rgba(56,189,248,0.3)" stroke-width="1"/>
+          <circle cx="248" cy="40"  r="2.8" fill="rgba(56,189,248,0.8)" stroke="rgba(56,189,248,0.3)" stroke-width="1"/>
+          <circle cx="254" cy="97"  r="2.8" fill="rgba(56,189,248,0.8)" stroke="rgba(56,189,248,0.3)" stroke-width="1"/>
+          <circle cx="40"  cy="138" r="2.8" fill="rgba(56,189,248,0.8)" stroke="rgba(56,189,248,0.3)" stroke-width="1"/>
+          <text x="150" y="180" font-family="IBM Plex Mono" font-size="6" fill="rgba(184,148,46,0.38)" text-anchor="middle" letter-spacing="2.5">PULVION · MISSÃO GERADA</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CTA ════════════════════════════════════════ -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <div class="s-eye" style="justify-content:center">Acesso ao Sistema</div>
+    <h2 class="cta-h">Pronto para<br><em>começar?</em></h2>
+    <p class="cta-desc">Entre com suas credenciais e acesse todos os módulos da plataforma.</p>
+    <button class="hero-cta" onclick="openModal()" style="animation:none">
+      <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      Fazer Login
+    </button>
+  </div>
+</section>
+
+<!-- ══ FOOTER ════════════════════════════════════ -->
+<footer>
+  <span class="foot-brand">Pulvion</span>
+  <span class="foot-meta">Sistema de Gestão de Voos Agrícolas · Todos os direitos reservados</span>
+</footer>
+
+<!-- ══ LOGIN MODAL ════════════════════════════════ -->
+<div class="modal-overlay" id="modalOverlay" onclick="overlayClick(event)">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Login Pulvion">
+    <div class="modal-header">
+      <img src="logo_pulvion.png" alt="Pulvion" class="modal-logo"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <span class="modal-logo-fallback" style="display:none">Pulvion</span>
+      <div class="modal-title-block">
+        <div class="modal-title">Acesso ao Sistema</div>
+        <div class="modal-sub">Digite suas credenciais para continuar</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()" aria-label="Fechar">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label for="loginUser">Usuário</label>
+        <div class="field-wrap">
+          <svg class="field-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          <input id="loginUser" type="text" placeholder="Seu usuário" autocomplete="username" autocapitalize="none">
+        </div>
+      </div>
+      <div class="field">
+        <label for="loginPass">Senha</label>
+        <div class="field-wrap">
+          <svg class="field-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input id="loginPass" type="password" placeholder="Sua senha" autocomplete="current-password">
+          <button class="eye-btn" id="eyeBtn" type="button" onclick="toggleEye()" aria-label="Ver senha">
+            <svg id="eyeIcon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="login-error" id="loginError">Usuário ou senha incorretos.</div>
+      <button class="login-btn" id="loginBtn" onclick="doLogin()">
+        <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Entrar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCRIPTS ════════════════════════════════════ -->
+<script>
+/* ── THEME ── */
+(function(){
+  const h = document.documentElement;
+  const saved = localStorage.getItem('pulvion_theme') || 'light';
+  h.setAttribute('data-theme', saved);
+  function apply(t){
+    h.setAttribute('data-theme', t);
+    localStorage.setItem('pulvion_theme', t);
+    const ic = document.getElementById('themeIcon');
+    if(ic) ic.innerHTML = t === 'dark'
+      ? '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>'
+      : '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>';
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('themeBtn');
+    if(btn) btn.addEventListener('click', () =>
+      apply(h.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')
+    );
+  });
+})();
+
+/* ── MODAL ── */
+function openModal(){
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('loginUser').focus(), 280);
+}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.getElementById('loginError').classList.remove('show');
+}
+function overlayClick(e){
+  if(e.target === document.getElementById('modalOverlay')) closeModal();
+}
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') closeModal();
+  if(e.key === 'Enter' && document.getElementById('modalOverlay').classList.contains('open')) doLogin();
+});
+
+/* ── TOGGLE PASSWORD ── */
+function toggleEye(){
+  const inp = document.getElementById('loginPass');
+  const ic  = document.getElementById('eyeIcon');
+  if(inp.type === 'password'){
+    inp.type = 'text';
+    ic.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  } else {
+    inp.type = 'password';
+    ic.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  }
+}
+
+/* ── LOGIN ── */
+
+// URL do Apps Script de usuários (Code_Usuarios.gs)
+// ⚠ Após implantar o Code_Usuarios.gs, cole a URL aqui:
+const AUTH_URL = 'https://script.google.com/macros/s/AKfycbzqL0jofgg8B4viY7NyqWjaE36AwiK2IEqDWM2A5WXwlJb06p_xqo11TdIu4ubl28pl/exec';
+
+/* ── JSONP — funciona com file:// (sem CORS) ── */
+function jsonpGet(url, params) {
+  return new Promise((resolve, reject) => {
+    const cbName = '_pcb' + Date.now();
+    const qs = Object.entries({...params, callback: cbName})
+      .map(([k,v]) => encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
+    const script = document.createElement('script');
+    script.src = url + '?' + qs;
+    window[cbName] = (data) => {
+      delete window[cbName];
+      script.remove();
+      resolve(data);
+    };
+    script.onerror = () => {
+      delete window[cbName];
+      script.remove();
+      reject(new Error('Falha de conexão com o servidor.'));
+    };
+    document.head.appendChild(script);
+  });
+}
+
+async function doLogin(){
+  const user = (document.getElementById('loginUser').value || '').trim().toLowerCase();
+  const pass = document.getElementById('loginPass').value || '';
+  const btn  = document.getElementById('loginBtn');
+  const err  = document.getElementById('loginError');
+
+  err.classList.remove('show');
+
+  if(!user || !pass){
+    err.textContent = 'Preencha usuário e senha.';
+    err.classList.add('show');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<svg class="spinner" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Entrando…';
+
+  try {
+    let userData = null;
+
+    if(AUTH_URL !== 'COLE_AQUI_A_URL_DO_CODE_USUARIOS'){
+      // Autenticação via Apps Script com JSONP (funciona com file://)
+      const data = await jsonpGet(AUTH_URL, { action:'login', usuario:user, senha:pass });
+      if(data.ok) userData = data.user;
+      else throw new Error(data.error || 'Usuário ou senha incorretos.');
+    } else {
+      // Fallback local quando AUTH_URL não está configurada
+      const FALLBACK = {
+        'admin':  { nome:'Administrador', usuario:'admin',  tipo:'admin',  frente:'' },
+        'piloto': { nome:'Piloto',        usuario:'piloto', tipo:'piloto', frente:'' },
+      };
+      const pw = { 'admin':'pulvion123', 'piloto':'piloto123' };
+      if(FALLBACK[user] && pw[user] === pass) userData = FALLBACK[user];
+      else throw new Error('Usuário ou senha incorretos.');
+    }
+
+    if(userData){
+      const redirect = userData.tipo === 'admin' ? 'painel_admin.html' : 'operacional.html';
+      localStorage.setItem('pulvion_session', JSON.stringify({
+        username:  userData.usuario,
+        nome:      userData.nome,
+        role:      userData.tipo,
+        frente:    userData.frente || '',
+        modulos:   userData.tipo === 'admin'
+                     ? 'aplicacao,cotesia,mapeamento'
+                     : (userData.modulos || 'aplicacao,cotesia,mapeamento'),
+        loginTime: Date.now()
+      }));
+      window.location.href = redirect;
+    }
+  } catch(e){
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> Entrar';
+    err.textContent = e.message || 'Erro ao autenticar.';
+    err.classList.add('show');
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+  }
+}
+
+/* ── SCROLL REVEAL ── */
+document.addEventListener('DOMContentLoaded', () => {
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('vis'); io.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.feat-card').forEach((el, i) => {
+    el.style.transitionDelay = (i * 0.06) + 's';
+    io.observe(el);
+  });
+  document.querySelectorAll('.prev-card').forEach((el, i) => {
+    el.style.transitionDelay = (i * 0.07) + 's';
+    io.observe(el);
+  });
+  document.querySelectorAll('.wf').forEach((el, i) => {
+    el.style.transition = `opacity .5s ${i * 0.1}s ease, transform .5s ${i * 0.1}s ease, border-color .2s, background .2s`;
+    io.observe(el);
+  });
+  document.querySelectorAll('.why-vis').forEach(el => io.observe(el));
+});
+</script>
+</body>
+</html>

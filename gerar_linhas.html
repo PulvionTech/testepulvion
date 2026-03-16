@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Criar Linhas Paralelas · Top Gun</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   THEME TOKENS
+============================================================ */
+:root, [data-theme="light"] {
+  --gold:        #b8942e;
+  --gold-light:  #d9b24c;
+  --gold-dim:    rgba(184,148,46,0.10);
+  --gold-border: rgba(184,148,46,0.28);
+
+  --bg:          #f0ede6;
+  --card:        #ffffff;
+  --surface:     #f5f2eb;
+  --surface-2:   #ebe7dd;
+  --input-bg:    #f8f6f1;
+
+  --header-bg:   rgba(240,237,230,0.97);
+  --header-bdr:  rgba(184,148,46,0.22);
+
+  --text:        #0d1117;
+  --text-muted:  #4b5563;
+  --text-label:  #94a3b8;
+
+  --success:     #16a34a;
+  --success-dim: rgba(22,163,74,0.10);
+  --success-bdr: rgba(22,163,74,0.28);
+  --warning:     #d97706;
+  --warning-dim: rgba(217,119,6,0.10);
+  --warning-bdr: rgba(217,119,6,0.32);
+  --danger:      #dc2626;
+  --danger-dim:  rgba(220,38,38,0.08);
+  --danger-bdr:  rgba(220,38,38,0.28);
+
+  --shadow-sm:   0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md:   0 4px 20px rgba(0,0,0,0.08);
+  --radius:      12px;
+  --radius-sm:   8px;
+}
+[data-theme="dark"] {
+  --gold:        #d9b24c;
+  --gold-light:  #f0d078;
+  --gold-dim:    rgba(217,178,76,0.10);
+  --gold-border: rgba(217,178,76,0.28);
+
+  --bg:          #060912;
+  --card:        #0c1224;
+  --surface:     #0f1628;
+  --surface-2:   rgba(255,255,255,0.04);
+  --input-bg:    #0b1425;
+
+  --header-bg:   rgba(10,15,31,0.97);
+  --header-bdr:  rgba(217,178,76,0.22);
+
+  --text:        #f0ece4;
+  --text-muted:  #9ca3af;
+  --text-label:  #6b7280;
+
+  --success:     #22c55e;
+  --success-dim: rgba(34,197,94,0.10);
+  --success-bdr: rgba(34,197,94,0.28);
+  --warning:     #f59e0b;
+  --warning-dim: rgba(245,158,11,0.12);
+  --warning-bdr: rgba(245,158,11,0.35);
+  --danger:      #ef4444;
+  --danger-dim:  rgba(239,68,68,0.10);
+  --danger-bdr:  rgba(239,68,68,0.30);
+
+  --shadow-sm:   0 2px 8px rgba(0,0,0,0.25);
+  --shadow-md:   0 8px 28px rgba(0,0,0,0.35);
+  --radius:      12px;
+  --radius-sm:   8px;
+}
+
+/* ============================================================
+   BASE
+============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Barlow', sans-serif; font-size: 15px; line-height: 1.6;
+  color: var(--text); background: var(--bg); min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+[data-theme="light"] body {
+  background-image: radial-gradient(ellipse 70% 40% at 5% 0%, rgba(184,148,46,0.06) 0%, transparent 55%);
+}
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--gold-border); border-radius: 4px; }
+
+/* ============================================================
+   HEADER
+============================================================ */
+.site-header {
+  position: sticky; top: 0; z-index: 500;
+  background: var(--header-bg); border-bottom: 1px solid var(--header-bdr);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-sm);
+}
+.header-inner {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 16px; height: 58px; max-width: 1500px; margin: 0 auto;
+}
+.header-title {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 1.05rem; font-weight: 800;
+  letter-spacing: 0.05em; text-transform: uppercase; color: var(--gold);
+}
+.header-title svg { color: var(--gold); flex-shrink: 0; }
+.header-grow { flex: 1; }
+
+/* ============================================================
+   BUTTONS
+============================================================ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+  font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase;
+  text-decoration: none; border-radius: var(--radius-sm); padding: 9px 14px;
+  border: 1px solid var(--gold-border); background: var(--gold-dim); color: var(--gold);
+  transition: all 0.18s ease; -webkit-tap-highlight-color: transparent; white-space: nowrap;
+}
+.btn svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.8; fill: none; flex-shrink: 0; }
+.btn:hover:not(:disabled) { background: rgba(184,148,46,0.18); border-color: var(--gold); }
+.btn:disabled { opacity: 0.38; cursor: not-allowed; }
+
+.btn-primary { background: var(--gold); border-color: var(--gold); color: #fff; box-shadow: 0 4px 14px rgba(184,148,46,0.3); }
+[data-theme="dark"] .btn-primary { color: #0b0f1f; }
+.btn-primary:hover:not(:disabled) { background: var(--gold-light); border-color: var(--gold-light); }
+
+.btn-ghost { background: var(--surface); border-color: rgba(0,0,0,0.08); color: var(--text-muted); }
+[data-theme="dark"] .btn-ghost { border-color: rgba(255,255,255,0.08); }
+.btn-ghost:hover:not(:disabled) { background: var(--surface-2); color: var(--text); border-color: var(--gold-border); }
+
+.btn-danger { background: var(--danger-dim); border-color: var(--danger-bdr); color: var(--danger); }
+.btn-danger:hover:not(:disabled) { background: rgba(220,38,38,0.14); }
+
+.btn-sm { padding: 7px 11px; font-size: 0.78rem; }
+
+.theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: var(--radius-sm);
+  border: 1px solid var(--gold-border); background: var(--gold-dim);
+  color: var(--gold); cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+}
+.theme-toggle:hover { background: rgba(184,148,46,0.2); border-color: var(--gold); transform: rotate(20deg); }
+.theme-toggle svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.8; fill: none; }
+
+/* Export link  */
+a.export-btn-link {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+  font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase;
+  text-decoration: none; border-radius: var(--radius-sm); padding: 9px 14px;
+  background: var(--gold); border: 1px solid var(--gold); color: #fff;
+  box-shadow: 0 4px 14px rgba(184,148,46,0.3); transition: all 0.18s ease; white-space: nowrap;
+}
+[data-theme="dark"] a.export-btn-link { color: #0b0f1f; }
+a.export-btn-link:hover { background: var(--gold-light); border-color: var(--gold-light); }
+a.export-btn-link svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.8; fill: none; flex-shrink: 0; }
+
+/* ============================================================
+   PAGE LAYOUT
+============================================================ */
+.page-wrap {
+  max-width: 1500px; margin: 0 auto; padding: 16px;
+  display: grid; grid-template-columns: minmax(340px, 400px) 1fr;
+  gap: 14px; align-items: start;
+}
+@media (max-width: 1100px) { .page-wrap { grid-template-columns: 1fr; } }
+
+/* ============================================================
+   CARDS
+============================================================ */
+.card {
+  background: var(--card); border: 1px solid var(--gold-border);
+  border-radius: var(--radius); box-shadow: var(--shadow-md); overflow: hidden;
+  transition: background 0.3s, border-color 0.3s;
+}
+.card-header {
+  display: flex; align-items: center; gap: 10px; padding: 12px 18px;
+  border-bottom: 1px solid var(--gold-border); background: var(--gold-dim);
+}
+.card-header-icon {
+  width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--gold-border);
+  background: var(--card); display: flex; align-items: center; justify-content: center;
+  color: var(--gold); flex-shrink: 0;
+}
+.card-header-icon svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.8; fill: none; }
+.card-title {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 0.9rem; font-weight: 800;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); flex: 1;
+}
+.card-badge {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; letter-spacing: 0.12em;
+  color: var(--text-label); padding: 3px 8px; border-radius: 999px;
+  border: 1px solid var(--gold-border); background: var(--card);
+}
+.card-body { padding: 18px; }
+
+/* ============================================================
+   FORM FIELDS
+============================================================ */
+.field-group { display: flex; flex-direction: column; gap: 12px; }
+.fields-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.63rem; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-label);
+}
+input[type="number"], input[type="text"], select {
+  width: 100%; background: var(--input-bg); color: var(--text);
+  border: 1px solid var(--gold-border); border-radius: var(--radius-sm);
+  padding: 9px 12px; font-family: 'Barlow', sans-serif; font-size: 0.92rem;
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none;
+}
+input[type="number"]:focus, input[type="text"]:focus, select:focus {
+  border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim);
+}
+select { cursor: pointer; }
+
+/* Section label */
+.section-label {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 0.75rem; font-weight: 800;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted);
+  display: flex; align-items: center; gap: 6px; padding: 4px 0 0;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--gold-border); }
+.section-label svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 1.8; fill: none; flex-shrink: 0; }
+
+/* ============================================================
+   FILE DROP ZONE
+============================================================ */
+#kmlFile { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+.file-drop-zone {
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  padding: 20px 16px; border: 2px dashed var(--gold-border);
+  border-radius: var(--radius-sm); background: var(--surface);
+  cursor: pointer; transition: all 0.2s; text-align: center; position: relative;
+}
+.file-drop-zone:hover { border-color: var(--gold); background: var(--gold-dim); }
+.file-drop-zone.dropping { border-color: var(--gold); background: var(--gold-dim); }
+.file-drop-zone.has-file { border-style: solid; border-color: var(--success-bdr); background: var(--success-dim); }
+.file-drop-icon { color: var(--gold); }
+.file-drop-icon svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 1.5; fill: none; }
+.file-drop-zone.has-file .file-drop-icon { color: var(--success); }
+.file-drop-text {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 0.82rem; font-weight: 700;
+  letter-spacing: 0.04em; text-transform: uppercase; color: var(--gold);
+}
+.file-drop-zone.has-file .file-drop-text { color: var(--success); }
+.file-drop-hint {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.05em; color: var(--text-label);
+}
+.file-name-display {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem;
+  color: var(--success); letter-spacing: 0.04em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+}
+
+/* ============================================================
+   RANGE SLIDER (angle)
+============================================================ */
+input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 4px; background: var(--gold-border);
+  border-radius: 999px; outline: none; padding: 0;
+  border: none !important; cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px;
+  border-radius: 50%; background: var(--gold);
+  border: 2px solid var(--card); box-shadow: 0 0 0 2px var(--gold-border);
+  cursor: pointer; transition: box-shadow 0.15s;
+}
+input[type="range"]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--gold-dim); }
+input[type="range"]::-moz-range-thumb {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--gold); border: 2px solid var(--card); cursor: pointer;
+}
+
+/* ============================================================
+   ACTIONS GRID
+============================================================ */
+.actions-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.actions-grid .span2 { grid-column: 1 / -1; }
+.actions-grid .btn,
+.actions-grid .export-btn-link { width: 100%; justify-content: center; }
+
+/* ============================================================
+   LOG AREA
+============================================================ */
+.log-box {
+  background: var(--input-bg); border: 1px solid var(--gold-border);
+  border-radius: var(--radius-sm); padding: 11px 14px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem;
+  line-height: 1.65; color: var(--text-muted); letter-spacing: 0.02em;
+  min-height: 42px; transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.log-box.success { color: var(--success); border-color: var(--success-bdr); background: var(--success-dim); }
+.log-box.error   { color: var(--danger);  border-color: var(--danger-bdr);  background: var(--danger-dim); }
+
+/* ============================================================
+   MAP CARD (sticky right column)
+============================================================ */
+.map-card-wrap { position: sticky; top: 74px; }
+.map-wrap {
+  position: relative; overflow: hidden;
+  height: calc(100vh - 180px); min-height: 420px;
+}
+#map { height: 100%; width: 100%; }
+
+/* drag-over overlay */
+.drop-target.dropping::after {
+  content: 'Solte o arquivo aqui';
+  position: absolute; inset: 0;
+  background: rgba(184,148,46,0.10);
+  border: 2px dashed var(--gold);
+  border-radius: var(--radius-sm);
+  color: var(--gold); font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200; pointer-events: none;
+}
+
+/* ── Floating generate button ── */
+.map-floating-actions {
+  position: absolute; top: 12px; left: 52px;
+  display: flex; gap: 8px; z-index: 1100; align-items: center;
+}
+.map-floating-actions .btn { box-shadow: var(--shadow-md); }
+
+/* ── Angle overlay ── */
+.angle-overlay {
+  position: absolute; top: 12px; right: 52px;
+  background: var(--card); border: 1px solid var(--gold-border);
+  border-radius: var(--radius-sm); box-shadow: var(--shadow-md);
+  padding: 12px 14px; display: flex; align-items: center; gap: 12px;
+  z-index: 1100; min-width: 196px;
+}
+
+/* Dial */
+.angle-dial {
+  width: 58px; height: 58px; border-radius: 50%; flex-shrink: 0;
+  border: 1px solid var(--gold-border); background: var(--card);
+  position: relative; --needle-rot: 0deg;
+}
+.angle-dial::before {
+  content: ''; position: absolute; inset: 4px;
+  border-radius: 50%; background: var(--gold-dim);
+}
+.angle-dial::after {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  width: 2px; height: 18px; background: var(--gold);
+  transform-origin: bottom center;
+  transform: translate(-50%, -100%) rotate(var(--needle-rot, 0deg));
+  border-radius: 2px 2px 0 0; z-index: 2;
+}
+.angle-value {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; font-weight: 500;
+  color: var(--gold); letter-spacing: 0.04em; z-index: 3;
+}
+.angle-controls { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.angle-ctrl-label {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 0.74rem; font-weight: 800;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted);
+}
+.angle-num-row { display: flex; align-items: center; gap: 6px; }
+.angle-num-row input[type="number"] {
+  width: 62px !important; padding: 5px 8px; font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.82rem; text-align: center; flex-shrink: 0;
+}
+.angle-num-row span {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.63rem;
+  color: var(--text-label); letter-spacing: 0.04em; white-space: nowrap;
+}
+
+/* ============================================================
+   LEAFLET OVERRIDES
+============================================================ */
+.leaflet-bar a {
+  background: var(--card) !important; color: var(--text-muted) !important;
+  border-color: var(--gold-border) !important;
+}
+.leaflet-bar a:hover { background: var(--surface) !important; color: var(--gold) !important; }
+.leaflet-control-layers {
+  background: var(--card) !important; border-color: var(--gold-border) !important;
+  color: var(--text) !important; border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+.leaflet-control-layers label { color: var(--text) !important; font-family: 'Barlow', sans-serif; font-size: 0.82rem; }
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width: 1100px) {
+  .map-card-wrap { position: static; }
+  .map-wrap { height: 62vh; }
+}
+@media (max-width: 640px) {
+  .fields-2col { grid-template-columns: 1fr; }
+  .actions-grid { grid-template-columns: 1fr; }
+  .actions-grid .span2 { grid-column: 1; }
+  .angle-overlay { min-width: 170px; right: 44px; }
+  .map-floating-actions { left: 44px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ───────────────────────────────────────────── -->
+<header class="site-header">
+  <div class="header-inner">
+    <a class="btn btn-ghost btn-sm" href="gerar_linhas.html" title="Voltar">
+      <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+      
+    </a>
+    <div class="header-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+      Criar Linhas Paralelas
+    </div>
+    <div class="header-grow"></div>
+    <a id="downloadLinkFloat" class="export-btn-link" href="#" download style="display:none;">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Exportar KML
+    </a>
+    <button class="theme-toggle" id="themeToggle" title="Alternar tema">
+      <svg id="themeIcon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ── PAGE ─────────────────────────────────────────────── -->
+<div class="page-wrap">
+
+  <!-- LEFT: Form panels -->
+  <div style="display:flex;flex-direction:column;gap:12px;">
+
+    <!-- 1. Arquivo -->
+    <div class="card drop-target" id="formCard">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <span class="card-title">Arquivo de Entrada</span>
+        <span class="card-badge">Etapa 1</span>
+      </div>
+      <div class="card-body">
+        <input id="kmlFile" type="file" accept=".kml,.zip,.shp,application/vnd.google-earth.kml+xml">
+        <label for="kmlFile" class="file-drop-zone" id="fileDropZone">
+          <span class="file-drop-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </span>
+          <span class="file-drop-text">Clique ou arraste o arquivo</span>
+          <span class="file-drop-hint">KML ou Shapefile (.zip) com os talhões</span>
+          <span class="file-name-display" id="fileNameDisplay" style="display:none;"></span>
+        </label>
+        <div style="margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--text-label);letter-spacing:0.04em;">
+          Clique no talhão desejado no mapa para selecionar.
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Parâmetros -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        </div>
+        <span class="card-title">Parâmetros</span>
+        <span class="card-badge">Etapa 2</span>
+      </div>
+      <div class="card-body">
+        <div class="field-group">
+
+          <div class="fields-2col">
+            <div class="field">
+              <label for="espacamento">Espaçamento (m)</label>
+              <input id="espacamento" type="number" min="1" step="1" value="40">
+            </div>
+            <div class="field">
+              <label for="bordadura">Bordadura interna (m)</label>
+              <input id="bordadura" type="number" min="0" step="1" value="10">
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="altura">Altitude das linhas (m)</label>
+            <input id="altura" type="number" min="0" step="1" value="30">
+          </div>
+
+          <div class="section-label">
+            <svg viewBox="0 0 24 24"><path d="M8 3 4 7l4 4"/><path d="M16 3l4 4-4 4"/><path d="M4 7h8a4 4 0 0 1 4 4v10"/></svg>
+            Modo das Linhas
+          </div>
+
+          <div class="fields-2col">
+            <div class="field">
+              <label for="modoLinha">Modo</label>
+              <select id="modoLinha">
+                <option value="normal">Normal (reto)</option>
+                <option value="suavizado">Suavizado (curvas)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="iterSuavizar">Iterações suavização</label>
+              <input id="iterSuavizar" type="number" min="1" max="6" step="1" value="3">
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Ações -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>
+        <span class="card-title">Ações</span>
+        <span class="card-badge">Etapa 3</span>
+      </div>
+      <div class="card-body">
+        <div class="actions-grid">
+          <a id="downloadLink" class="export-btn-link span2" href="#" download style="display:none;">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Exportar Projeto (KML)
+          </a>
+          <button id="btnLimpar" class="btn btn-ghost">
+            <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Limpar Linhas
+          </button>
+          <button id="btnProximo" class="btn" disabled>
+            <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+            Próximo Talhão
+          </button>
+          <button id="btnLimparProjeto" class="btn btn-danger span2" disabled>
+            <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+            Limpar Projeto
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: Map -->
+  <div class="map-card-wrap">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        </div>
+        <span class="card-title">Visualização do Mapa</span>
+      </div>
+
+      <div class="card-body" style="padding:0;position:relative;">
+        <div class="map-wrap drop-target" id="mapWrap">
+
+          <!-- Leaflet map -->
+          <div id="map"></div>
+
+          <!-- Floating: Gerar Linhas -->
+          <div class="map-floating-actions">
+            <button id="btnGerar" class="btn btn-primary" aria-label="Gerar linhas paralelas" disabled>
+              <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+              Gerar Linhas
+            </button>
+          </div>
+
+          <!-- Angle overlay -->
+          <div class="angle-overlay">
+            <div class="angle-dial" id="angleDial">
+              <div class="angle-value" aria-hidden="true">0°</div>
+            </div>
+            <div class="angle-controls">
+              <div class="angle-ctrl-label">Ângulo</div>
+              <input id="angulo" type="range" min="0" max="359" step="1" value="0">
+              <div class="angle-num-row">
+                <input id="anguloBox" type="number" min="0" max="359" step="1" value="0">
+                <span>° relógio</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Log area -->
+        <div id="log" class="log-box hint" aria-live="polite" style="margin:12px;">
+          Carregue um KML ou Shapefile (.zip) de polígono para começar.
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<!-- ── THEME ──────────────────────────────────────────────── -->
+<script>
+(function(){
+  const h = document.documentElement;
+  const stored = localStorage.getItem('pulvion_theme') || 'light';
+  h.setAttribute('data-theme', stored);
+  function applyTheme(t){
+    h.setAttribute('data-theme', t);
+    localStorage.setItem('pulvion_theme', t);
+    const icon = document.getElementById('themeIcon');
+    if(icon){
+      if(t==='dark') icon.innerHTML='<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+      else           icon.innerHTML='<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>';
+    }
+    const btn = document.getElementById('themeToggle');
+    if(btn) btn.title = t==='dark' ? 'Modo claro' : 'Modo escuro';
+  }
+  applyTheme(stored);
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const btn = document.getElementById('themeToggle');
+    if(btn) btn.addEventListener('click', ()=>{
+      applyTheme(h.getAttribute('data-theme')==='dark' ? 'light' : 'dark');
+    });
+  });
+})();
+</script>
+
+<!-- ── LIBS ───────────────────────────────────────────────── -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/shpjs@latest/dist/shp.min.js"></script>
+
+<script>
+    const logEl = document.getElementById('log');
+    const kmlFileEl = document.getElementById('kmlFile');
+    const espEl = document.getElementById('espacamento');
+    const angEl = document.getElementById('angulo');
+    const angBoxEl = document.getElementById('anguloBox');
+    const angleDial = document.getElementById('angleDial');
+    const altEl = document.getElementById('altura');
+    const borderEl = document.getElementById('bordadura');
+    const modoLinhaEl = document.getElementById('modoLinha');
+    const iterSuavizarEl = document.getElementById('iterSuavizar');
+    const btnGerar = document.getElementById('btnGerar');
+    const btnLimpar = document.getElementById('btnLimpar');
+    const btnProximo = document.getElementById('btnProximo');
+    const btnLimparProjeto = document.getElementById('btnLimparProjeto');
+    const dlEl = document.getElementById('downloadLink');
+    const dlFloatEl = document.getElementById('downloadLinkFloat');
+
+    let map, polygons = [], polygonCoords = null, selectedIdx = -1, kmlFileName = '';
+    let polyLayer, linesLayer, projectLayer;
+    let projectPaths = [];
+
+    function logMsg(msg, type='hint'){
+      logEl.className = 'log-box ' + (type === 'error' ? 'error' : type === 'success' ? 'success' : 'hint');
+      logEl.textContent = msg;
+    }
+
+    function buildDownloadName(defaultName){
+      const base = (kmlFileName || '').trim();
+      if (!base) return defaultName;
+      const lower = base.toLowerCase();
+      const clean = lower.endsWith('.kml') ? base.slice(0,-4) : lower.endsWith('.zip') ? base.slice(0,-4) : lower.endsWith('.shp') ? base.slice(0,-4) : base;
+      return `${clean}_Linhas.kml`;
+    }
+
+    function initMap(){
+      map = L.map('map', { zoomControl:true }).setView([-15.78,-47.93], 5);
+      const esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom:20, attribution:'Tiles © Esri' }).addTo(map);
+      const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'OSM' });
+      L.control.layers({ 'Satélite (Esri)': esriSat, 'Ruas (OSM)': osm }).addTo(map);
+      polyLayer = L.layerGroup().addTo(map);
+      linesLayer = L.layerGroup().addTo(map);
+      projectLayer = L.layerGroup().addTo(map);
+    }
+    initMap();
+
+    function updateAngleDial(){
+      const deg = Math.max(0, Math.min(359, parseFloat(angEl.value || '0')));
+      angleDial.style.setProperty('--needle-rot', deg + 'deg');
+      const val = angleDial.querySelector('.angle-value');
+      if (val) val.textContent = `${deg}°`;
+    }
+
+    angEl.addEventListener('input', () => { angBoxEl.value = angEl.value; updateAngleDial(); updatePreview(); });
+    angBoxEl.addEventListener('input', () => {
+      let v = parseInt(angBoxEl.value || '0', 10);
+      if (!Number.isFinite(v)) v = 0;
+      v = Math.max(0, Math.min(359, v));
+      angBoxEl.value = v; angEl.value = v; updateAngleDial(); updatePreview();
+    });
+    espEl.addEventListener('input', updatePreview);
+    borderEl.addEventListener('input', updatePreview);
+    modoLinhaEl.addEventListener('change', updatePreview);
+    iterSuavizarEl.addEventListener('input', updatePreview);
+
+    kmlFileEl.addEventListener('change', async (e) => {
+      const f = e.target.files && e.target.files[0];
+      if (!f) { kmlFileName = ''; return; }
+      const zone = document.getElementById('fileDropZone');
+      const nameEl = document.getElementById('fileNameDisplay');
+      if(zone) zone.classList.add('has-file');
+      if(nameEl){ nameEl.textContent = f.name; nameEl.style.display = ''; }
+      await loadAreaFile(f);
+    });
+
+    btnLimpar.addEventListener('click', () => { linesLayer.clearLayers(); logMsg('Pré-visualização removida.'); });
+    btnProximo.addEventListener('click', () => {
+      if (!polygons || polygons.length === 0) return;
+      const next = (selectedIdx + 1) % polygons.length;
+      selectPolygon(next, true);
+    });
+    btnLimparProjeto.addEventListener('click', () => {
+      projectPaths = [];
+      projectLayer.clearLayers();
+      dlEl.style.display = 'none';
+      btnLimparProjeto.disabled = true;
+      logMsg('Projeto limpo.');
+    });
+
+    btnGerar.addEventListener('click', () => {
+      if (!polygonCoords || polygonCoords.length < 3) { logMsg('Selecione um talhão no mapa primeiro.', 'error'); return; }
+      const spacing = Math.max(1, parseFloat(espEl.value || '40'));
+      const angleDeg = Math.max(0, Math.min(359, parseFloat(angEl.value || '0')));
+      const altitude = Math.max(0, parseFloat(altEl.value || '30'));
+      const baseName = (selectedIdx>=0 && polygons[selectedIdx]?.name ? polygons[selectedIdx].name : 'Talhão');
+      const prefix = (baseName + ' ').trim();
+      const { pathLL, segmentsLL } = buildParallelPathInsidePolygon(polygonCoords, spacing, angleDeg, Math.max(0, parseFloat(borderEl.value || '0')));
+      const finalPath = getProcessedPath(pathLL);
+      drawPath(finalPath);
+      const kml = exportPathToKml(finalPath, altitude, prefix);
+      const blob = new Blob([kml], { type:'application/vnd.google-earth.kml+xml' });
+      const url = URL.createObjectURL(blob);
+      [dlEl, dlFloatEl].forEach(a => {
+        if (!a) return;
+        a.href = url; a.download = buildDownloadName('KML_Linhas.kml'); a.style.display = 'inline-flex';
+      });
+      addPathToProject(prefix || baseName, altitude, finalPath);
+      updateExportLink();
+      logMsg(`Caminho continuo gerado para "${prefix || 'Talhão'}" com ${segmentsLL.length} faixas.`, 'success');
+      updateAngleDial();
+    });
+
+    function drawAllPolygons(items) {
+      linesLayer.clearLayers();
+      polyLayer.clearLayers();
+      if (!items || items.length === 0) return;
+      const defaultStyle = { color: '#34d399', weight: 2, fillOpacity: 0.15 };
+      const selectedStyle = { color: '#f59e0b', weight: 3, fillOpacity: 0.25 };
+      items.forEach((pg, idx) => {
+        const latlngs = pg.coords.map(p => [p.lat, p.lon]);
+        const poly = L.polygon(latlngs, defaultStyle).addTo(polyLayer);
+        poly.bindTooltip((pg.name || `Talhão ${idx+1}`), {sticky: true});
+        poly.on('click', () => selectPolygon(idx, true));
+        pg._leaflet = poly;
+      });
+      if (items.length === 1) selectPolygon(0, true);
+      drawAllPolygons.applyStyles = function(){
+        items.forEach((pg, i) => { if (pg._leaflet) pg._leaflet.setStyle(i === selectedIdx ? selectedStyle : defaultStyle); });
+      };
+      const bounds = L.latLngBounds(items.flatMap(pg => pg.coords.map(p => [p.lat, p.lon])));
+      map.fitBounds(bounds.pad(0.2));
+    }
+
+    function selectPolygon(idx, fit=false){
+      if (!polygons || idx < 0 || idx >= polygons.length) return;
+      selectedIdx = idx;
+      polygonCoords = polygons[idx].coords;
+      btnGerar.disabled = false;
+      linesLayer.clearLayers();
+      if (drawAllPolygons.applyStyles) drawAllPolygons.applyStyles();
+      if (fit) {
+        const b = L.latLngBounds(polygonCoords.map(p => [p.lat, p.lon]));
+        map.fitBounds(b.pad(0.15));
+      }
+      updatePreview();
+      logMsg(`Talhão selecionado: ${(polygons[idx].name || 'Sem Nome')} (#${idx+1}).`);
+    }
+
+    function drawPath(pathLL) {
+      linesLayer.clearLayers();
+      if (!pathLL || pathLL.length < 2) return;
+      L.polyline(pathLL.map(p => [p.lat, p.lon]), { color: '#c62828', weight: 3 }).addTo(linesLayer);
+    }
+
+    function updatePreview() {
+      if (!polygonCoords || polygonCoords.length < 3) return;
+      const spacing = Math.max(1, parseFloat(espEl.value || '40'));
+      const angleDeg = Math.max(0, Math.min(359, parseFloat(angEl.value || '0')));
+      const borderM = Math.max(0, parseFloat(borderEl.value || '0'));
+      const { pathLL } = buildParallelPathInsidePolygon(polygonCoords, spacing, angleDeg, borderM);
+      const previewPath = getProcessedPath(pathLL);
+      drawPath(previewPath);
+    }
+
+    function addPathToProject(name, altitude, pathLL) {
+      if (!pathLL || pathLL.length < 2) return;
+      const idx = projectPaths.findIndex(p => p.name === name);
+      if (idx >= 0) projectPaths.splice(idx, 1);
+      projectPaths.push({ name, altitude, pathLL });
+      projectLayer.clearLayers();
+      const colors = ['#f87171','#fb923c','#fbbf24','#34d399','#60a5fa','#a78bfa','#f472b6'];
+      projectPaths.forEach((p, i) => {
+        L.polyline(p.pathLL.map(pt => [pt.lat, pt.lon]), { color: colors[i % colors.length], weight: 3 })
+          .addTo(projectLayer).bindTooltip(p.name, { sticky: true });
+      });
+      btnLimparProjeto.disabled = projectPaths.length === 0;
+    }
+
+    function exportPathToKml(pathLL, altitude, prefix) {
+      const esc = (s) => String(s == null ? '' : s).replace(/[&<>]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+      let out = '';
+      out += '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n  <Document>\n';
+      out += '    <name>Caminho Boustrophedon</name>\n';
+      out += '    <Style id="lineStyle"><LineStyle><color>ff5fa8fa</color><width>3</width></LineStyle></Style>\n';
+      const name = (prefix ? esc(prefix) : 'Missão ');
+      out += '    <Placemark>\n';
+      out += `      <name>${name}Caminho</name>\n`;
+      out += '      <styleUrl>#lineStyle</styleUrl>\n';
+      out += '      <LineString>\n';
+      out += '        <tessellate>1</tessellate>\n';
+      out += '        <altitudeMode>relativeToGround</altitudeMode>\n';
+      out += '        <coordinates>\n';
+      pathLL.forEach(p => { out += `          ${p.lon.toFixed(7)},${p.lat.toFixed(7)},${altitude}\n`; });
+      out += '        </coordinates>\n';
+      out += '      </LineString>\n';
+      out += '    </Placemark>\n';
+      out += '  </Document>\n</kml>\n';
+      return out;
+    }
+
+    function exportProjectToKml(items) {
+      const esc = (s) => String(s == null ? '' : s).replace(/[&<>]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+      let out = '';
+      out += '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n  <Document>\n';
+      out += '    <name>Projeto Linhas</name>\n';
+      out += '    <Style id="lineStyle"><LineStyle><color>ff5fa8fa</color><width>3</width></LineStyle></Style>\n';
+      items.forEach((it) => {
+        out += '    <Placemark>\n';
+        out += `      <name>${esc(it.name || 'Talhão')}</name>\n`;
+        out += '      <styleUrl>#lineStyle</styleUrl>\n';
+        out += '      <LineString>\n';
+        out += '        <tessellate>1</tessellate>\n';
+        out += '        <altitudeMode>relativeToGround</altitudeMode>\n';
+        out += '        <coordinates>\n';
+        it.pathLL.forEach(p => { out += `          ${p.lon.toFixed(7)},${p.lat.toFixed(7)},${it.altitude|0}\n`; });
+        out += '        </coordinates>\n';
+        out += '      </LineString>\n';
+        out += '    </Placemark>\n';
+      });
+      out += '  </Document>\n</kml>\n';
+      return out;
+    }
+
+    function updateExportLink() {
+      if (!projectPaths || projectPaths.length === 0) { [dlEl, dlFloatEl].forEach(a => { if (a) a.style.display='none'; }); return; }
+      const kml = exportProjectToKml(projectPaths);
+      const blob = new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' });
+      const url = URL.createObjectURL(blob);
+      [dlEl, dlFloatEl].forEach(a => {
+        if (!a) return;
+        a.href = url; a.download = buildDownloadName('KML_Linhas.kml'); a.style.display = 'inline-flex';
+      });
+    }
+
+    function parseCoordinates(text) {
+      const tokens = (text || '').trim().split(/\s+/).filter(Boolean);
+      const coords = [];
+      for (const tok of tokens) {
+        const parts = tok.split(',');
+        if (parts.length >= 2) {
+          const lon = parseFloat(parts[0]);
+          const lat = parseFloat(parts[1]);
+          const alt = parts.length >= 3 ? parseFloat(parts[2]) : 0;
+          if (Number.isFinite(lon) && Number.isFinite(lat)) coords.push({ lon, lat, alt });
+        }
+      }
+      return coords;
+    }
+
+    function extractPolygons(kmlText) {
+      const out = [];
+      try {
+        const doc = new DOMParser().parseFromString(kmlText, 'text/xml');
+        const placemarks = doc.getElementsByTagName('Placemark');
+        const getText = (el, tag) => {
+          const t = el.getElementsByTagName(tag)[0];
+          return t ? (t.textContent || '').trim() : '';
+        };
+        for (let i = 0; i < placemarks.length; i++) {
+          const pm = placemarks[i];
+          const name = getText(pm, 'name') || `Talhão ${i+1}`;
+          const polys = pm.getElementsByTagName('Polygon');
+          for (let j = 0; j < polys.length; j++) {
+            const poly = polys[j];
+            const outer = poly.getElementsByTagName('outerBoundaryIs')[0] || poly;
+            const lr = outer ? outer.getElementsByTagName('LinearRing')[0] : null;
+            const coordsEl = (lr || poly).getElementsByTagName('coordinates')[0];
+            if (!coordsEl) continue;
+            const coords = parseCoordinates(coordsEl.textContent || '');
+            if (coords.length >= 3) {
+              let arr = coords.map(c => ({ lat: c.lat, lon: c.lon }));
+              if (arr.length > 2) {
+                const f = arr[0], l = arr[arr.length-1];
+                if (Math.abs(f.lat - l.lat) < 1e-9 && Math.abs(f.lon - l.lon) < 1e-9) arr = arr.slice(1);
+              }
+              out.push({ name, coords: arr });
+            }
+          }
+        }
+      } catch (e) {}
+      return out;
+    }
+
+    function buildParallelPathInsidePolygon(polyLL, spacingMeters, angleDeg, marginMeters = 0) {
+      const toM = (p) => L.CRS.EPSG3857.project(L.latLng(p.lat, p.lon));
+      const toLL = (pt) => { const latlng = L.CRS.EPSG3857.unproject(L.point(pt.x, pt.y)); return { lat: latlng.lat, lon: latlng.lng }; };
+      const polyM = polyLL.map(toM);
+      const theta = angleDeg * Math.PI / 180;
+      const d = { x: Math.cos(theta), y: Math.sin(theta) };
+      const n = { x: -Math.sin(theta), y: Math.cos(theta) };
+      const dot = (a,b) => a.x*b.x + a.y*b.y;
+      const projN = polyM.map(p => dot(p, n));
+      let minOff = Math.min.apply(null, projN);
+      let maxOff = Math.max.apply(null, projN);
+      const step = Math.max(0.1, spacingMeters);
+      const offsets = [];
+      const lateral = Math.max(0, marginMeters || 0);
+      // centraliza a malha para evitar linha grudada na borda
+      const startOff = minOff + lateral + step/2;
+      const endOff = maxOff - lateral - step/2;
+      if (endOff - startOff >= step/2) {
+        for (let off = startOff; off <= endOff + 1e-6; off += step) {
+          offsets.push(parseFloat(off.toFixed(3)));
+        }
+      }
+      const segments = [];
+      for (const off of offsets) {
+        const ints = [];
+        for (let i = 0; i < polyM.length; i++) {
+          const a = polyM[i];
+          const b = polyM[(i+1) % polyM.length];
+          const fa = dot(a, n) - off;
+          const fb = dot(b, n) - off;
+          if (Math.abs(fa) < 1e-9 && Math.abs(fb) < 1e-9) continue;
+          if ((fa <= 0 && fb >= 0) || (fa >= 0 && fb <= 0)) {
+            const denom = fb - fa;
+            if (Math.abs(denom) < 1e-12) continue;
+            const t = (0 - fa) / denom;
+            if (t >= 0 && t <= 1) {
+              const x = a.x + (b.x - a.x) * t;
+              const y = a.y + (b.y - a.y) * t;
+              const pt = { x, y };
+              const s = dot(pt, d);
+              ints.push({ pt, s });
+            }
+          }
+        }
+        if (ints.length < 2) continue;
+        ints.sort((p, q) => p.s - q.s);
+        for (let k = 0; k + 1 < ints.length; k += 2) {
+          let p0 = ints[k].pt;
+          let p1 = ints[k+1].pt;
+          const trim = Math.max(0, marginMeters || 0);
+          if (trim > 0) {
+            const vx = p1.x - p0.x, vy = p1.y - p0.y;
+            const len = Math.hypot(vx, vy);
+            if (len > 2*trim) {
+              p0 = { x: p0.x + d.x * trim, y: p0.y + d.y * trim };
+              p1 = { x: p1.x - d.x * trim, y: p1.y - d.y * trim };
+            } else {
+              continue;
+            }
+          }
+          const len = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+          if (len >= step * 0.6) segments.push({ a: p0, b: p1 });
+        }
+      }
+      const segmentsLL = segments.map(seg => ({ a: toLL(seg.a), b: toLL(seg.b) }));
+      const pathLL = [];
+      if (segmentsLL.length > 0) {
+        pathLL.push(segmentsLL[0].a, segmentsLL[0].b);
+        let prev = segmentsLL[0].b;
+        const dist2 = (p, q) => { const dx = p.lon - q.lon; const dy = p.lat - q.lat; return dx*dx + dy*dy; };
+        for (let i = 1; i < segmentsLL.length; i++) {
+          const seg = segmentsLL[i];
+          const da = dist2(prev, seg.a);
+          const db = dist2(prev, seg.b);
+          if (da <= db) { pathLL.push(seg.a, seg.b); prev = seg.b; }
+          else { pathLL.push(seg.b, seg.a); prev = seg.a; }
+        }
+      }
+      return { pathLL, segmentsLL };
+    }
+
+    function smoothRounded(points, iter = 2){
+      if(!points || points.length < 3) return points || [];
+      const clamp = (v,mn,mx)=>Math.max(mn,Math.min(mx,v));
+      const dist = (a,b)=>Math.hypot(a.lon-b.lon,a.lat-b.lat);
+      const move = (from,to,d)=>{
+        const len = dist(from,to) || 1e-9;
+        const t = d/len;
+        return { lat: from.lat + (to.lat-from.lat)*t, lon: from.lon + (to.lon-from.lon)*t };
+      };
+      const samples = clamp(iter*3, 3, 12);
+      const alpha = clamp(0.12 + (iter-1)*0.06, 0.12, 0.4);
+      const out=[points[0]];
+      for(let i=1;i<points.length-1;i++){
+        const p0=points[i-1], p1=points[i], p2=points[i+1];
+        const len1=dist(p0,p1), len2=dist(p1,p2);
+        const off = clamp(Math.min(len1,len2)*alpha, 0, Math.min(len1,len2)/2);
+        const a = move(p1,p0,off);
+        const b = move(p1,p2,off);
+        for(let s=0;s<=samples;s++){
+          const t = s/samples;
+          const u = 1-t;
+          const lat = u*u*a.lat + 2*u*t*p1.lat + t*t*b.lat;
+          const lon = u*u*a.lon + 2*u*t*p1.lon + t*t*b.lon;
+          if(s>0) out.push({lat,lon});
+        }
+      }
+      out.push(points[points.length-1]);
+      return out;
+    }
+
+    function getProcessedPath(pathLL) {
+      if (!pathLL || pathLL.length < 2) return pathLL || [];
+      const mode = modoLinhaEl.value;
+      if (mode === 'suavizado') {
+        const iters = Math.max(1, Math.min(6, parseInt(iterSuavizarEl.value || '2', 10)));
+        return smoothRounded(pathLL, iters);
+      }
+      return pathLL;
+    }
+
+    function extractPolygonsFromGeoJSON(gj){
+      if (!gj) return [];
+      const feats = Array.isArray(gj.features) ? gj.features : (gj.type === 'FeatureCollection' ? gj.features : []);
+      const out = [];
+      feats.forEach((f, idx) => {
+        const geom = f && f.geometry;
+        const name = (f && f.properties && (f.properties.name || f.properties.NOME || f.properties.Nome)) || `Talhão ${idx+1}`;
+        if (!geom || !geom.type || !geom.coordinates) return;
+        const pushRing = (coords, nm) => {
+          if (!Array.isArray(coords) || coords.length < 4) return;
+          let arr = coords.map(c => ({ lat: c[1], lon: c[0] }));
+          if (arr.length > 2) {
+            const f0=arr[0], l0=arr[arr.length-1];
+            if (Math.abs(f0.lat-l0.lat)<1e-9 && Math.abs(f0.lon-l0.lon)<1e-9) arr = arr.slice(1);
+          }
+          if (arr.length >= 3) out.push({ name: nm, coords: arr });
+        };
+        if (geom.type === 'Polygon') {
+          pushRing(geom.coordinates[0], name);
+        } else if (geom.type === 'MultiPolygon') {
+          geom.coordinates.forEach((poly, pidx) => pushRing(poly[0], `${name} - P${pidx+1}`));
+        }
+      });
+      return out;
+    }
+
+    async function loadAreaFile(file){
+      if (!file) return;
+      kmlFileName = file.name || '';
+      const lower = (file.name || '').toLowerCase();
+      let res = [];
+      try{
+        if (lower.endsWith('.kml')) {
+          const text = await file.text();
+          res = extractPolygons(text);
+        } else if (lower.endsWith('.zip') || lower.endsWith('.shp')) {
+          const gj = await shp(await file.arrayBuffer());
+          res = extractPolygonsFromGeoJSON(Array.isArray(gj) ? {type:'FeatureCollection',features:gj.flatMap(fc=>fc.features||[])} : gj);
+        } else {
+          logMsg('Formato não suportado. Use .kml ou um Shapefile compactado (.zip).', 'error');
+          return;
+        }
+      } catch (e){
+        console.error(e);
+        logMsg('Erro ao ler o arquivo. Verifique o formato.', 'error');
+        return;
+      }
+
+      if (!res || res.length === 0) { logMsg('Nenhum polígono válido encontrado.', 'error'); btnGerar.disabled = true; btnProximo.disabled = true; return; }
+      polygons = res; selectedIdx = -1; polygonCoords = null; btnGerar.disabled = true; btnProximo.disabled = (polygons.length <= 1); dlEl.style.display = 'none';
+      drawAllPolygons(polygons);
+      const totalVerts = polygons.reduce((s,p)=>s+p.coords.length,0);
+      logMsg(`Carregados ${polygons.length} talhão(ões), ${totalVerts} vértices no total. Clique em um talhão para selecionar.`);
+    }
+
+    updateAngleDial();
+
+    const formCard = document.getElementById('formCard');
+    const mapWrap = document.getElementById('mapWrap');
+    [formCard, mapWrap].forEach(zone => {
+      if (!zone) return;
+      zone.classList.add('drop-target');
+      zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('dropping'); });
+      zone.addEventListener('dragleave', () => zone.classList.remove('dropping'));
+      zone.addEventListener('drop', async (e) => {
+        e.preventDefault(); zone.classList.remove('dropping');
+        const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        if (f) {
+          const dz = document.getElementById('fileDropZone');
+          const nm = document.getElementById('fileNameDisplay');
+          if(dz) dz.classList.add('has-file');
+          if(nm){ nm.textContent = f.name; nm.style.display = ''; }
+          await loadAreaFile(f);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

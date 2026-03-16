@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel de Rendimentos · Pulvion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;600&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ══════════════════════════════════════════════════════════
+   TOKENS
+══════════════════════════════════════════════════════════ */
+[data-theme="light"] {
+  --bg:          #f2ede3;
+  --surface:     #faf8f3;
+  --card:        #ffffff;
+  --border:      rgba(184,148,46,.20);
+  --border-soft: rgba(184,148,46,.10);
+  --text:        #140f00;
+  --text2:       #3a2e00;
+  --muted:       #7a6828;
+  --dim:         #b09a50;
+  --gold:        #b8942e;
+  --gold-l:      #c9a83e;
+  --gold-dim:    rgba(184,148,46,.10);
+  --gold-bdr:    rgba(184,148,46,.28);
+  --success:     #16a34a; --success-dim:rgba(22,163,74,.08);  --success-bdr:rgba(22,163,74,.25);
+  --warn:        #d97706; --warn-dim:   rgba(217,119,6,.08);  --warn-bdr:  rgba(217,119,6,.25);
+  --info:        #0284c7; --info-dim:   rgba(2,132,199,.08);  --info-bdr:  rgba(2,132,199,.25);
+  --danger:      #dc2626; --danger-dim: rgba(220,38,38,.07);  --danger-bdr:rgba(220,38,38,.22);
+  --sh:          0 2px 12px rgba(0,0,0,.06);
+  --r:           14px; --rsm: 9px;
+}
+[data-theme="dark"] {
+  --bg:          #060912;
+  --surface:     #0b1020;
+  --card:        #111828;
+  --border:      rgba(217,178,76,.16);
+  --border-soft: rgba(217,178,76,.07);
+  --text:        #f0e6c6;
+  --text2:       #c8b87a;
+  --muted:       #8a7a40;
+  --dim:         #6a5a2e;
+  --gold:        #d9b24c;
+  --gold-l:      #e8c86a;
+  --gold-dim:    rgba(217,178,76,.10);
+  --gold-bdr:    rgba(217,178,76,.26);
+  --success:     #22c55e; --success-dim:rgba(34,197,94,.08);  --success-bdr:rgba(34,197,94,.22);
+  --warn:        #f59e0b; --warn-dim:   rgba(245,158,11,.08); --warn-bdr:  rgba(245,158,11,.22);
+  --info:        #38bdf8; --info-dim:   rgba(56,189,248,.08); --info-bdr:  rgba(56,189,248,.22);
+  --danger:      #ef4444; --danger-dim: rgba(239,68,68,.08);  --danger-bdr:rgba(239,68,68,.22);
+  --sh:          0 2px 16px rgba(0,0,0,.3);
+  --r:           14px; --rsm: 9px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .25s,color .25s}
+
+/* ══════════════════════════════════════════════════════════
+   LAYOUT
+══════════════════════════════════════════════════════════ */
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px 80px}
+
+/* ── TOPBAR ────────────────────────────────────────────── */
+.topbar{
+  background:var(--card);border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:200;
+  padding:0 20px;height:52px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.tb-left{display:flex;align-items:center;gap:10px}
+.tb-title{
+  font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:900;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--text);
+  display:flex;align-items:center;gap:8px;
+}
+.tb-title svg{width:16px;height:16px;stroke:var(--gold);stroke-width:1.8;fill:none}
+.tb-right{display:flex;align-items:center;gap:8px}
+.icon-btn{
+  width:34px;height:34px;border-radius:8px;border:1px solid var(--border);
+  background:var(--gold-dim);color:var(--gold);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .18s;
+}
+.icon-btn:hover{background:var(--gold);color:#060912;transform:rotate(15deg)}
+.icon-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.8;fill:none}
+.reload-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 13px;border-radius:8px;border:1px solid var(--border);
+  background:var(--gold-dim);color:var(--gold);
+  font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .18s;
+}
+.reload-btn:hover{background:var(--gold);color:#060912}
+.reload-btn svg{width:12px;height:12px;stroke:currentColor;stroke-width:2.5;fill:none;transition:transform .4s}
+.reload-btn.loading svg{animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── FILTER BAR ─────────────────────────────────────────── */
+.filter-bar{
+  display:flex;flex-wrap:wrap;gap:8px;
+  padding:14px 0 4px;
+}
+.flt{
+  display:flex;flex-direction:column;gap:4px;
+  flex:1;min-width:130px;
+}
+.flt-label{
+  font-family:'IBM Plex Mono',monospace;font-size:.56rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--dim);
+}
+.flt select,.flt input{
+  padding:8px 10px;border:1px solid var(--border);border-radius:var(--rsm);
+  background:var(--card);color:var(--text);
+  font-family:'Barlow',sans-serif;font-size:.82rem;outline:none;
+  transition:border-color .18s;cursor:pointer;
+}
+.flt select:focus,.flt input:focus{border-color:var(--gold)}
+.flt-mod{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end}
+.mod-pill{
+  padding:7px 12px;border-radius:999px;border:1px solid var(--border);
+  background:var(--card);color:var(--muted);
+  font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:all .15s;
+  white-space:nowrap;
+}
+.mod-pill.active.cotesia{background:var(--success-dim);border-color:var(--success-bdr);color:var(--success)}
+.mod-pill.active.aplicacao{background:var(--info-dim);border-color:var(--info-bdr);color:var(--info)}
+.mod-pill.active.mapeamento{background:var(--warn-dim);border-color:var(--warn-bdr);color:var(--warn)}
+.mod-pill.active.all{background:var(--gold-dim);border-color:var(--gold-bdr);color:var(--gold)}
+.clear-btn{
+  padding:7px 12px;border-radius:var(--rsm);border:1px solid var(--danger-bdr);
+  background:var(--danger-dim);color:var(--danger);
+  font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:all .15s;
+  white-space:nowrap;align-self:flex-end;
+}
+.clear-btn:hover{background:var(--danger);color:#fff}
+
+/* ── KPI STRIP ──────────────────────────────────────────── */
+.kpi-strip{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+  margin:16px 0;
+}
+.kpi{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:14px 16px;display:flex;flex-direction:column;gap:4px;
+  transition:border-color .2s;
+}
+.kpi:hover{border-color:var(--gold-bdr)}
+.kpi-label{font-family:'IBM Plex Mono',monospace;font-size:.57rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.kpi-val{font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:900;color:var(--text);line-height:1}
+.kpi-sub{font-family:'IBM Plex Mono',monospace;font-size:.6rem;color:var(--muted)}
+.kpi.gold .kpi-val{color:var(--gold)}
+.kpi.green .kpi-val{color:var(--success)}
+.kpi.blue .kpi-val{color:var(--info)}
+.kpi.warn .kpi-val{color:var(--warn)}
+
+/* ── TABS ───────────────────────────────────────────────── */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:20px}
+.tab{
+  padding:10px 18px;font-family:'Barlow Condensed',sans-serif;font-size:.78rem;
+  font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  cursor:pointer;border:none;background:none;
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;
+  display:flex;align-items:center;gap:6px;
+}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none}
+
+/* ── SECTION HEADER ─────────────────────────────────────── */
+.sec-hd{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;
+}
+.sec-title{
+  font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--dim);
+  display:flex;align-items:center;gap:6px;
+}
+.sec-title::before{content:'';width:3px;height:13px;background:var(--gold);border-radius:2px}
+.cnt-chip{
+  font-family:'IBM Plex Mono',monospace;font-size:.62rem;
+  background:var(--gold-dim);border:1px solid var(--gold-bdr);
+  color:var(--gold);border-radius:999px;padding:2px 9px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   TAB: CARDS
+══════════════════════════════════════════════════════════ */
+.day-divider{
+  display:flex;align-items:center;gap:10px;margin:20px 0 10px;
+}
+.day-line{flex:1;height:1px;background:var(--border)}
+.day-label{
+  font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--dim);white-space:nowrap;
+}
+.day-cnt{
+  font-family:'IBM Plex Mono',monospace;font-size:.58rem;
+  background:var(--gold-dim);border:1px solid var(--gold-bdr);
+  color:var(--gold);border-radius:999px;padding:1px 7px;
+}
+/* card */
+.rend-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  margin-bottom:10px;overflow:hidden;box-shadow:var(--sh);
+  animation:fadeUp .3s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.rc-head{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border-soft)}
+.rc-avatar{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  background:var(--gold-dim);border:1.5px solid var(--gold-bdr);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:900;color:var(--gold);
+}
+.rc-info{flex:1;min-width:0}
+.rc-pilot{font-family:'Barlow Condensed',sans-serif;font-size:.92rem;font-weight:700;letter-spacing:.04em;color:var(--text)}
+.rc-sub{font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:var(--dim);margin-top:2px}
+.rc-badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.badge{
+  font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.05em;
+  padding:2px 7px;border-radius:5px;border:1px solid;
+}
+.badge.fin{background:var(--success-dim);border-color:var(--success-bdr);color:var(--success)}
+.badge.and{background:var(--warn-dim);border-color:var(--warn-bdr);color:var(--warn)}
+.badge.frente{background:var(--gold-dim);border-color:var(--gold-bdr);color:var(--gold)}
+.badge.drone{background:var(--surface);border-color:var(--border);color:var(--muted)}
+.badge.unidade{background:var(--surface);border-color:var(--border);color:var(--muted)}
+.badge.mod-cotesia{background:var(--success-dim);border-color:var(--success-bdr);color:var(--success)}
+.badge.mod-aplicacao{background:var(--info-dim);border-color:var(--info-bdr);color:var(--info)}
+.badge.mod-mapeamento{background:var(--warn-dim);border-color:var(--warn-bdr);color:var(--warn)}
+.rc-date{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:700;color:var(--gold);text-align:right}
+.rc-date-sub{font-family:'IBM Plex Mono',monospace;font-size:.55rem;color:var(--dim);text-align:right;margin-top:2px}
+.rc-stats{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--border-soft)}
+.rc-stat{padding:10px 14px;text-align:center;border-right:1px solid var(--border-soft)}
+.rc-stat:last-child{border-right:none}
+.rc-stat-num{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:900;color:var(--text)}
+.rc-stat-label{font-family:'IBM Plex Mono',monospace;font-size:.55rem;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-top:2px}
+.rc-fazendas{padding:4px 0}
+.faz-row{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--border-soft)}
+.faz-row:last-child{border-bottom:none}
+.faz-num{font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:var(--dim);flex-shrink:0;min-width:28px}
+.faz-info{flex:1;min-width:0}
+.faz-nome{font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:600;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.faz-meta{font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:var(--dim);margin-top:2px}
+.faz-meta span{color:var(--text)}
+.faz-status{font-family:'IBM Plex Mono',monospace;font-size:.58rem;padding:2px 7px;border-radius:5px;border:1px solid;white-space:nowrap;flex-shrink:0}
+.faz-status.fin{background:var(--success-dim);border-color:var(--success-bdr);color:var(--success)}
+.faz-status.and{background:var(--warn-dim);border-color:var(--warn-bdr);color:var(--warn)}
+.rc-obs{padding:10px 16px;font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--muted);border-top:1px solid var(--border-soft);line-height:1.6}
+.rc-obs-label{display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-bottom:4px}
+
+/* ══════════════════════════════════════════════════════════
+   TAB: TABELA
+══════════════════════════════════════════════════════════ */
+.table-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border);background:var(--card)}
+table{width:100%;border-collapse:collapse;font-size:.78rem}
+thead tr{background:var(--surface);border-bottom:1px solid var(--border)}
+th{
+  padding:10px 14px;text-align:left;
+  font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--dim);white-space:nowrap;font-weight:600;
+}
+td{padding:10px 14px;border-bottom:1px solid var(--border-soft);color:var(--text);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--gold-dim)}
+.td-mod span{font-family:'IBM Plex Mono',monospace;font-size:.6rem;padding:2px 8px;border-radius:5px;border:1px solid}
+.td-mod .cotesia{background:var(--success-dim);border-color:var(--success-bdr);color:var(--success)}
+.td-mod .aplicacao{background:var(--info-dim);border-color:var(--info-bdr);color:var(--info)}
+.td-mod .mapeamento{background:var(--warn-dim);border-color:var(--warn-bdr);color:var(--warn)}
+.td-id{font-family:'IBM Plex Mono',monospace;font-size:.6rem;color:var(--dim)}
+.td-num{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:700;color:var(--text)}
+.td-status span{font-family:'IBM Plex Mono',monospace;font-size:.58rem;padding:2px 7px;border-radius:5px;border:1px solid}
+.td-status .fin{background:var(--success-dim);border-color:var(--success-bdr);color:var(--success)}
+.td-status .and{background:var(--warn-dim);border-color:var(--warn-bdr);color:var(--warn)}
+
+/* ══════════════════════════════════════════════════════════
+   TAB: GRÁFICOS
+══════════════════════════════════════════════════════════ */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.chart-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:16px;
+}
+.chart-card.full{grid-column:1/-1}
+.chart-title{
+  font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:14px;
+  display:flex;align-items:center;gap:6px;
+}
+.chart-title::before{content:'';width:3px;height:12px;background:var(--gold);border-radius:2px}
+.chart-wrap{position:relative;height:220px}
+.chart-wrap.tall{height:280px}
+
+/* ══════════════════════════════════════════════════════════
+   STATES
+══════════════════════════════════════════════════════════ */
+.state-box{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:40px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;
+}
+.state-box svg{width:32px;height:32px;stroke:var(--gold);stroke-width:1.5;fill:none}
+.state-title{font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text)}
+.state-desc{font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--dim)}
+.loading-dots::after{content:'…';animation:dots 1.2s steps(3,end) infinite}
+@keyframes dots{0%{content:''}33%{content:'.'}66%{content:'..'}100%{content:'…'}}
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════════════ */
+@media(max-width:640px){
+  .kpi-strip{grid-template-columns:repeat(2,1fr)}
+  .charts-grid{grid-template-columns:1fr}
+  .chart-card.full{grid-column:1}
+  th:nth-child(n+6),td:nth-child(n+6){display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="tb-left">
+    <div class="tb-title">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Painel de Rendimentos
+    </div>
+  </div>
+  <div class="tb-right">
+    <button class="reload-btn" id="reloadBtn">
+      <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Atualizar
+    </button>
+    <button class="icon-btn" id="themeBtn" title="Alternar tema">
+      <svg id="themeIcon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <!-- Módulo pills -->
+    <div class="flt" style="flex:none">
+      <div class="flt-label">Módulo</div>
+      <div class="flt-mod" id="modPills">
+        <button class="mod-pill active all" data-mod="all">Todos</button>
+        <button class="mod-pill cotesia" data-mod="cotesia">Cotésia</button>
+        <button class="mod-pill aplicacao" data-mod="aplicacao">Pulverização</button>
+        <button class="mod-pill mapeamento" data-mod="mapeamento">Mapeamento</button>
+      </div>
+    </div>
+    <!-- Piloto -->
+    <div class="flt">
+      <div class="flt-label">Piloto</div>
+      <select id="fltPiloto">
+        <option value="">Todos os pilotos</option>
+      </select>
+    </div>
+    <!-- Frente -->
+    <div class="flt">
+      <div class="flt-label">Frente / Unidade</div>
+      <select id="fltFrente">
+        <option value="">Todas as frentes</option>
+      </select>
+    </div>
+    <!-- Data início -->
+    <div class="flt">
+      <div class="flt-label">De</div>
+      <input type="date" id="fltDe">
+    </div>
+    <!-- Data fim -->
+    <div class="flt">
+      <div class="flt-label">Até</div>
+      <input type="date" id="fltAte">
+    </div>
+    <button class="clear-btn" id="clearBtn">Limpar</button>
+  </div>
+
+  <!-- KPI STRIP -->
+  <div class="kpi-strip">
+    <div class="kpi gold">
+      <div class="kpi-label">Total Registros</div>
+      <div class="kpi-val" id="kpiReg">—</div>
+      <div class="kpi-sub" id="kpiRegSub">aguardando dados</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">Total Hectares</div>
+      <div class="kpi-val" id="kpiHa">—</div>
+      <div class="kpi-sub" id="kpiHaSub">ha pulverizados / liberados</div>
+    </div>
+    <div class="kpi blue">
+      <div class="kpi-label" id="kpiCopLabel">Total Copos / Ha Aplic.</div>
+      <div class="kpi-val" id="kpiCop">—</div>
+      <div class="kpi-sub" id="kpiCopSub">unidades liberadas</div>
+    </div>
+    <div class="kpi warn">
+      <div class="kpi-label">Fazendas Atend.</div>
+      <div class="kpi-val" id="kpiFaz">—</div>
+      <div class="kpi-sub" id="kpiFazSub">fazendas atendidas</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" data-tab="cards">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      Cards
+    </button>
+    <button class="tab" data-tab="tabela">
+      <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Tabela
+    </button>
+    <button class="tab" data-tab="graficos">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Gráficos
+    </button>
+  </div>
+
+  <!-- TAB PANELS -->
+  <div id="panelCards">
+    <div class="sec-hd">
+      <div class="sec-title">Rendimentos</div>
+      <span class="cnt-chip" id="cardCnt">0</span>
+    </div>
+    <div id="cardList">
+      <div class="state-box">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <div class="state-title loading-dots">Carregando</div>
+        <div class="state-desc">Buscando rendimentos no sistema</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="panelTabela" style="display:none">
+    <div class="sec-hd">
+      <div class="sec-title">Resumo Geral</div>
+      <span class="cnt-chip" id="tableCnt">0</span>
+    </div>
+    <div class="table-wrap">
+      <table id="mainTable">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Módulo</th>
+            <th>Piloto</th>
+            <th>Frente / Unidade</th>
+            <th>Fazendas</th>
+            <th>Hectares</th>
+            <th>Copos</th>
+            <th>Status</th>
+            <th>ID</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="panelGraficos" style="display:none">
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Hectares por Piloto</div>
+        <div class="chart-wrap"><canvas id="chartPilotoHa"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Registros por Módulo</div>
+        <div class="chart-wrap"><canvas id="chartModulo"></canvas></div>
+      </div>
+      <div class="chart-card full">
+        <div class="chart-title">Hectares por Data</div>
+        <div class="chart-wrap tall"><canvas id="chartTimeline"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Copos por Piloto</div>
+        <div class="chart-wrap"><canvas id="chartPilotoCop"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Distribuição por Frente</div>
+        <div class="chart-wrap"><canvas id="chartFrente"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   CONFIG — adicione as URLs dos módulos aqui
+══════════════════════════════════════════════════════════ */
+const SOURCES = {
+  cotesia:    'https://script.google.com/macros/s/AKfycbxv7racHVo_fvoVtpyqomokbtanuwPK7jBTMJIDUXnD4RTnUjREzZI-jlqRFFCjRuP4NA/exec',   // cotésia
+  aplicacao:  'https://script.google.com/macros/s/AKfycbzktOqq9Yn525WTZiD3UdiByB2QOqAWhIWrALKUw3u1xBnD0StX3ecuJtwVD9w94N0ezw/exec',   // pulverização — preencher com URL do Code_Aplicacao.gs após implantar
+  mapeamento: 'https://script.google.com/macros/s/AKfycbx14Z2vDYHnj9zFyso3Ettl7AfzUf1uNHnQ8iwTm7Dhjunr727oW8t7Eot6cpQsx7feyA/exec',   // mapeamento
+};
+const MOD_LABELS = { cotesia:'Cotésia', aplicacao:'Pulverização', mapeamento:'Mapeamento' };
+const MOD_ACTIVE = Object.fromEntries(Object.entries(SOURCES).map(([k,v])=>[k,!!v && !v.startsWith('COLE_AQUI')]));
+
+/* ══════════════════════════════════════════════════════════
+   THEME
+══════════════════════════════════════════════════════════ */
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  localStorage.setItem('pulvion_theme',t);
+  document.getElementById('themeIcon').innerHTML = t==='dark'
+    ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
+    : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  if(chartsBuilt) rebuildCharts();
+}
+applyTheme(localStorage.getItem('pulvion_theme')||'light');
+document.getElementById('themeBtn').addEventListener('click',()=>{
+  applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
+});
+
+/* ══════════════════════════════════════════════════════════
+   JSONP
+══════════════════════════════════════════════════════════ */
+function jsonpGet(url,params){
+  return new Promise((res,rej)=>{
+    const cb='cb'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const qs=Object.entries({...params,callback:cb}).map(([k,v])=>k+'='+encodeURIComponent(v)).join('&');
+    const s=document.createElement('script');
+    s.src=url+'?'+qs;
+    let done=false;
+    window[cb]=d=>{done=true;delete window[cb];s.remove();res(d);};
+    s.onerror=()=>{if(!done){delete window[cb];s.remove();rej(new Error('Falha JSONP'));}};
+    setTimeout(()=>{if(!done){delete window[cb];s.remove();rej(new Error('Timeout'));}},12000);
+    document.head.appendChild(s);
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════════ */
+function fmtBR(n,d=2){return Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});}
+function safeHa(v){
+  if(!v&&v!==0) return 0;
+  const s=String(v).trim(); if(!s||s==='-') return 0;
+  if(s.includes(',')) return parseFloat(s.replace(/\./g,'').replace(',','.'))||0;
+  return parseFloat(s)||0;
+}
+function safeNum(v){
+  if(typeof v==='number') return v;
+  const s=String(v||'').trim();
+  if(s.includes(',')) return parseFloat(s.replace(/\./g,'').replace(',','.'))||0;
+  return parseFloat(s)||0;
+}
+function fmtK(n){if(n>=1000) return (n/1000).toFixed(2).replace('.',',')+'k'; return fmtBR(n);}
+function initials(n){return(n||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();}
+function fmtDateBR(iso){
+  if(!iso) return '—';
+  const p=String(iso).split('-');
+  if(p.length===3) return p[2]+'/'+p[1]+'/'+p[0];
+  return iso;
+}
+function normDate(v){
+  if(!v) return '';
+  const s=String(v);
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+  const m=s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  if(m) return m[3]+'-'+m[2]+'-'+m[1];
+  return s;
+}
+function parseFazendas(raw){
+  if(!raw) return [];
+  try{
+    let v=raw;
+    if(typeof v==='string'){
+      if(v.startsWith('"')&&v.endsWith('"')) v=v.slice(1,-1);
+      v=v.replace(/\\"/g,'"');
+      v=JSON.parse(v);
+    }
+    if(typeof v==='string') v=JSON.parse(v);
+    return Array.isArray(v)?v.filter(x=>x&&(x.os||x.fazenda||x.faz)):[];
+  }catch(e){return [];}
+}
+
+/* ══════════════════════════════════════════════════════════
+   DATA LAYER
+══════════════════════════════════════════════════════════ */
+var allItems=[];
+var filtered=[];
+
+async function fetchModule(mod, url){
+  const data = await jsonpGet(url,{action:'getRendimentos',usuario:''});
+  if(!data.ok) throw new Error(data.error||'Erro');
+  return (data.items||[]).map(r=>({...r, _mod:mod}));
+}
+
+async function loadAll(){
+  const btn=document.getElementById('reloadBtn');
+  btn.classList.add('loading');
+  setLoadingState();
+
+  const promises = Object.entries(SOURCES)
+    .filter(([,url])=>url && !url.startsWith('COLE_AQUI'))
+    .map(([mod,url])=>fetchModule(mod,url).catch(e=>{
+      console.warn('['+mod+'] erro:',e.message);
+      return [];
+    }));
+
+  const results = await Promise.all(promises);
+  allItems = results.flat().map(r=>({
+    ...r,
+    _date: normDate(r.data||r.timestamp||''),
+  }));
+
+  // Preenche filtros de piloto e frente
+  buildFilterOptions();
+  applyFilters();
+  btn.classList.remove('loading');
+}
+
+function buildFilterOptions(){
+  const pilots = [...new Set(allItems.map(r=>r.piloto||r.usuario||'').filter(Boolean))].sort();
+  const frentesSet = [...new Set(allItems.map(r=>{
+    const fr = String(r.frente||'').trim();
+    const un = String(r.unidade||'').trim();
+    return [fr,un].filter(Boolean).join(' · ') || '';
+  }).filter(Boolean))].sort();
+
+  const selP = document.getElementById('fltPiloto');
+  const curP = selP.value;
+  selP.innerHTML='<option value="">Todos os pilotos</option>';
+  pilots.forEach(p=>{ const o=document.createElement('option'); o.value=p; o.textContent=p; if(p===curP)o.selected=true; selP.appendChild(o); });
+
+  const selF = document.getElementById('fltFrente');
+  const curF = selF.value;
+  selF.innerHTML='<option value="">Todas as frentes</option>';
+  frentesSet.forEach(f=>{ const o=document.createElement('option'); o.value=f; o.textContent=f; if(f===curF)o.selected=true; selF.appendChild(o); });
+}
+
+/* ══════════════════════════════════════════════════════════
+   FILTERS
+══════════════════════════════════════════════════════════ */
+var activeMod = 'all';
+
+// Desativa pills de módulos sem URL configurada
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('.mod-pill[data-mod]').forEach(p=>{
+    const m=p.dataset.mod;
+    if(m!=='all' && MOD_ACTIVE[m]===false){
+      p.style.opacity='0.4'; p.title='URL não configurada';
+    }
+  });
+});
+
+document.getElementById('modPills').addEventListener('click',e=>{
+  const pill=e.target.closest('.mod-pill');
+  if(!pill) return;
+  const m=pill.dataset.mod;
+  if(m!=='all' && MOD_ACTIVE[m]===false) return; // ignora módulos sem URL
+  activeMod = pill.dataset.mod;
+  document.querySelectorAll('.mod-pill').forEach(p=>p.classList.remove('active'));
+  pill.classList.add('active');
+  applyFilters();
+});
+
+['fltPiloto','fltFrente','fltDe','fltAte'].forEach(id=>{
+  document.getElementById(id).addEventListener('change',applyFilters);
+  document.getElementById(id).addEventListener('input',applyFilters);
+});
+
+function clearFilters(){
+  activeMod='all';
+  document.querySelectorAll('.mod-pill').forEach(p=>p.classList.remove('active'));
+  document.querySelector('.mod-pill[data-mod="all"]').classList.add('active');
+  document.getElementById('fltPiloto').value='';
+  document.getElementById('fltFrente').value='';
+  document.getElementById('fltDe').value='';
+  document.getElementById('fltAte').value='';
+  applyFilters();
+}
+
+function applyFilters(){
+  const pilot  = document.getElementById('fltPiloto').value;
+  const frente = document.getElementById('fltFrente').value;
+  const de     = document.getElementById('fltDe').value;
+  const ate    = document.getElementById('fltAte').value;
+
+  filtered = allItems.filter(r=>{
+    if(activeMod!=='all' && r._mod!==activeMod) return false;
+    if(pilot && (r.piloto||r.usuario||'')!==pilot) return false;
+    if(frente){
+      const rfr = [String(r.frente||'').trim(),String(r.unidade||'').trim()].filter(Boolean).join(' · ');
+      if(rfr!==frente) return false;
+    }
+    if(de && r._date && r._date<de) return false;
+    if(ate && r._date && r._date>ate) return false;
+    return true;
+  });
+
+  // Sort newest first
+  filtered.sort((a,b)=>(b._date||'')>(a._date||'')?1:-1);
+
+  updateKPIs();
+  renderCurrentTab();
+}
+
+/* ══════════════════════════════════════════════════════════
+   KPI
+══════════════════════════════════════════════════════════ */
+function calcTotals(items){
+  let ha=0,cop=0,haAplic=0,faz=0;
+  items.forEach(r=>{
+    const mod=r._mod||'cotesia';
+    const farms=parseFazendas(r.fazendas||r.fazendas_json);
+    // Ha: área OS (todos os módulos)
+    const fHa=farms.reduce((s,f)=>s+safeHa(f.area||f.ha||f.hectares),0);
+    ha += fHa>0 ? fHa : safeHa(r.totalha||r.totalHa);
+    // Copos (Cotesia) / Ha Aplicado (Pulverização) / Ha Mapeado (Mapeamento)
+    if(mod==='cotesia'){
+      const fCp=farms.reduce((s,f)=>s+safeNum(f.copos||f.cop),0);
+      cop += fCp>0 ? fCp : safeNum(r.totalcopos||r.totalCopos);
+    } else if(mod==='aplicacao'){
+      const fHaA=farms.reduce((s,f)=>{const ts=Array.isArray(f.talhoes)?f.talhoes:[];return s+ts.reduce((ss,t)=>ss+safeHa(t.apl),0);},0);
+      haAplic += fHaA>0 ? fHaA : safeHa(r.totalhaaplicado||r.totalHaAplicado);
+    }
+    faz += farms.length>0 ? farms.length : safeNum(r.totalfazendas||r.totalFazendas);
+  });
+  return {ha,cop,haAplic,faz};
+}
+
+function updateKPIs(){
+  const {ha,cop,haAplic,faz}=calcTotals(filtered);
+  document.getElementById('kpiReg').textContent = filtered.length;
+  document.getElementById('kpiRegSub').textContent = allItems.length+' no total';
+  document.getElementById('kpiHa').textContent = fmtK(ha);
+  document.getElementById('kpiHaSub').textContent = fmtBR(ha)+' ha totais';
+  // KPI do meio: copos se cotesia, ha aplic se pulv, ha map se map
+  const isSingleMod = activeMod!=='all';
+  if(isSingleMod && activeMod==='cotesia'){
+    document.getElementById('kpiCopLabel').textContent='Total Copos';
+    document.getElementById('kpiCop').textContent = fmtK(cop);
+    document.getElementById('kpiCopSub').textContent = fmtBR(cop,0)+' copos';
+  } else if(isSingleMod && activeMod==='aplicacao'){
+    document.getElementById('kpiCopLabel').textContent='Ha Aplicado';
+    document.getElementById('kpiCop').textContent = fmtK(haAplic);
+    document.getElementById('kpiCopSub').textContent = fmtBR(haAplic)+' ha aplic.';
+  } else if(isSingleMod && activeMod==='mapeamento'){
+    document.getElementById('kpiCopLabel').textContent='Ha Mapeado';
+    document.getElementById('kpiCop').textContent = fmtK(ha);
+    document.getElementById('kpiCopSub').textContent = fmtBR(ha)+' ha map.';
+  } else {
+    document.getElementById('kpiCopLabel').textContent='Copos / Ha Aplic.';
+    document.getElementById('kpiCop').textContent = fmtK(cop+haAplic);
+    document.getElementById('kpiCopSub').textContent = fmtBR(cop,0)+' copos · '+fmtBR(haAplic)+' ha';
+  }
+  document.getElementById('kpiFaz').textContent = faz;
+  document.getElementById('kpiFazSub').textContent = 'fazendas atendidas';
+}
+
+/* ══════════════════════════════════════════════════════════
+   TABS
+══════════════════════════════════════════════════════════ */
+var activeTab='cards';
+var chartsBuilt=false;
+var chartInstances={};
+
+function switchTab(tab,btn){
+  activeTab=tab;
+  ['cards','tabela','graficos'].forEach(t=>{
+    document.getElementById('panel'+t.charAt(0).toUpperCase()+t.slice(1)).style.display = t===tab?'block':'none';
+  });
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCurrentTab();
+}
+
+function renderCurrentTab(){
+  if(activeTab==='cards')    renderCards();
+  else if(activeTab==='tabela')   renderTable();
+  else if(activeTab==='graficos') renderCharts();
+}
+
+/* ══════════════════════════════════════════════════════════
+   CARDS
+══════════════════════════════════════════════════════════ */
+function buildCard(r,idx){
+  const farms=parseFazendas(r.fazendas||r.fazendas_json);
+  const allFin=farms.length>0&&farms.every(f=>(f.status||'').toLowerCase().includes('finaliz'));
+  const ha=farms.reduce((s,f)=>s+safeHa(f.area||f.ha||f.hectares),0)||safeHa(r.totalha||r.totalHa);
+  const faz=farms.length||safeNum(r.totalfazendas||r.totalFazendas);
+  // Métrica secundária por módulo
+  const mod2=r._mod||'cotesia';
+  let secVal=0, secLabel='Copos';
+  if(mod2==='cotesia'){
+    secVal=farms.reduce((s,f)=>s+safeNum(f.copos||f.cop),0)||safeNum(r.totalcopos||r.totalCopos);
+    secLabel='Copos';
+  } else if(mod2==='aplicacao'){
+    secVal=farms.reduce((s,f)=>{const ts=Array.isArray(f.talhoes)?f.talhoes:[];return s+ts.reduce((ss,t)=>ss+safeHa(t.apl),0);},0)||safeHa(r.totalhaaplicado);
+    secLabel='Ha Aplic.';
+  } else {
+    secVal=ha; secLabel='Ha Map.';
+  }
+  const cop=secVal;
+  const pilot=r.piloto||r.usuario||'—';
+  const frente=String(r.frente||'').padStart(2,'0');
+  const delay=(idx*0.035).toFixed(2);
+  const mod=r._mod||'cotesia';
+  const modLbl=MOD_LABELS[mod]||mod;
+
+  const farmRows=farms.length?farms.map((f,fi)=>{
+    const fSt=(f.status||'').toLowerCase().includes('finaliz')?'fin':'and';
+    const ha2=safeHa(f.area||f.ha||f.hectares);
+    const cop2=safeNum(f.copos||f.cop);
+    const tals=Array.isArray(f.talhoes)?f.talhoes:[];
+    const haApl=tals.reduce((s,t)=>s+safeHa(t.apl),0)||safeHa(f.haAplicado);
+    // Meta por módulo
+    let meta='';
+    if(mod==='cotesia')      meta=`OS: <span>${f.os||'—'}</span> · Área: <span>${fmtBR(ha2)} ha</span>${cop2?` · Copos: <span>${fmtBR(cop2,0)}</span>`:''}${f.objetivo?` · Obj.: <span>${f.objetivo}</span>`:''}`;
+    else if(mod==='aplicacao')meta=`OS: <span>${f.os||'—'}</span> · Área OS: <span>${fmtBR(ha2)} ha</span>${haApl?` · Ha Aplic.: <span>${fmtBR(haApl)} ha</span>`:''}${f.sobrou&&f.sobrou!=='Não sobrou'?` · Sobrou: <span>${f.sobrou}</span>`:''}`;
+    else                      meta=`OS: <span>${f.os||'—'}</span> · Área: <span>${fmtBR(ha2)} ha</span>`;
+    return `<div class="faz-row">
+      <div class="faz-num">#${String(fi+1).padStart(2,'0')}</div>
+      <div class="faz-info">
+        <div class="faz-nome">${f.fazenda||f.faz||'—'}${f.codigo||f.cod?' · Cód. '+( f.codigo||f.cod):''}</div>
+        <div class="faz-meta">${meta}</div>
+      </div>
+      <span class="faz-status ${fSt}">${fSt==='fin'?'Finalizada':'Andamento'}</span>
+    </div>`;
+  }).join(''):`<div style="padding:10px 16px;font-family:'IBM Plex Mono',monospace;font-size:.6rem;color:var(--dim)">Sem fazendas</div>`;
+
+  return `<div class="rend-card" style="animation-delay:${delay}s">
+    <div class="rc-head">
+      <div class="rc-avatar">${initials(pilot)}</div>
+      <div class="rc-info">
+        <div class="rc-pilot">${pilot}</div>
+        <div class="rc-sub">${r.timestamp||'—'} · ${r.id||'—'}</div>
+        <div class="rc-badges">
+          <span class="badge ${allFin?'fin':'and'}">${allFin?'Finalizado':'Em andamento'}</span>
+          <span class="badge mod-${mod}">${modLbl}</span>
+          ${frente&&frente!=='00'?`<span class="badge frente">Frente ${frente}</span>`:''}
+          ${r.drone?`<span class="badge drone">${r.drone}</span>`:''}
+          ${r.unidade?`<span class="badge unidade">${r.unidade}</span>`:''}
+        </div>
+      </div>
+      <div>
+        <div class="rc-date">${fmtDateBR(r._date)}</div>
+        <div class="rc-date-sub">Data op.</div>
+      </div>
+    </div>
+    <div class="rc-stats">
+      <div class="rc-stat"><div class="rc-stat-num">${faz}</div><div class="rc-stat-label">Fazendas</div></div>
+      <div class="rc-stat"><div class="rc-stat-num">${fmtBR(ha)}</div><div class="rc-stat-label">Hectares</div></div>
+      <div class="rc-stat"><div class="rc-stat-num">${secLabel==='Copos'?fmtBR(cop,0):fmtBR(cop)}</div><div class="rc-stat-label">${secLabel}</div></div>
+    </div>
+    <div class="rc-fazendas">${farmRows}</div>
+    ${r.observacoes?`<div class="rc-obs"><span class="rc-obs-label">Observações</span>${r.observacoes}</div>`:''}
+  </div>`;
+}
+
+function renderCards(){
+  const list=document.getElementById('cardList');
+  document.getElementById('cardCnt').textContent=filtered.length;
+  if(!filtered.length){
+    list.innerHTML=`<div class="state-box">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+      <div class="state-title">Nenhum rendimento encontrado</div>
+      <div class="state-desc">Tente ajustar os filtros</div>
+    </div>`;
+    return;
+  }
+  // Group by date
+  const byDate={};
+  filtered.forEach(r=>{
+    const d=r._date||'sem-data';
+    if(!byDate[d]) byDate[d]=[];
+    byDate[d].push(r);
+  });
+  let html='';
+  Object.entries(byDate).forEach(([d,rows])=>{
+    const label=d==='sem-data'?'Sem data':fmtDateBR(d);
+    html+=`<div class="day-divider">
+      <div class="day-line"></div>
+      <div class="day-label">${label}</div>
+      <div class="day-cnt">${rows.length}</div>
+      <div class="day-line"></div>
+    </div>`;
+    rows.forEach((r,i)=>{ html+=buildCard(r,i); });
+  });
+  list.innerHTML=html;
+}
+
+/* ══════════════════════════════════════════════════════════
+   TABLE
+══════════════════════════════════════════════════════════ */
+function renderTable(){
+  document.getElementById('tableCnt').textContent=filtered.length;
+  const tbody=document.getElementById('tableBody');
+  if(!filtered.length){
+    tbody.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:24px;font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--dim)">Nenhum registro</td></tr>`;
+    return;
+  }
+  tbody.innerHTML=filtered.map(r=>{
+    const farms=parseFazendas(r.fazendas||r.fazendas_json);
+    const allFin=farms.length>0&&farms.every(f=>(f.status||'').toLowerCase().includes('finaliz'));
+    const ha=farms.reduce((s,f)=>s+safeHa(f.area||f.ha||f.hectares),0)||safeHa(r.totalha||r.totalHa);
+    const faz=farms.length||safeNum(r.totalfazendas||r.totalFazendas);
+    const mod=r._mod||'cotesia';
+    let sec=0,secLbl='Copos';
+    if(mod==='cotesia'){sec=farms.reduce((s,f)=>s+safeNum(f.copos||f.cop),0)||safeNum(r.totalcopos||r.totalCopos);secLbl='Copos';}
+    else if(mod==='aplicacao'){sec=farms.reduce((s,f)=>{const ts=Array.isArray(f.talhoes)?f.talhoes:[];return s+ts.reduce((ss,t)=>ss+safeHa(t.apl),0);},0)||safeHa(r.totalhaaplicado);secLbl='Ha Aplic.';}
+    else{sec=ha;secLbl='Ha Map.';}
+    const fr=[String(r.frente||'').trim(),String(r.unidade||'').trim()].filter(Boolean).join(' · ')||'—';
+    return `<tr>
+      <td>${fmtDateBR(r._date)}</td>
+      <td class="td-mod"><span class="${mod}">${MOD_LABELS[mod]||mod}</span></td>
+      <td>${r.piloto||r.usuario||'—'}</td>
+      <td>${fr}</td>
+      <td class="td-num">${faz}</td>
+      <td class="td-num">${fmtBR(ha)}</td>
+      <td class="td-num" title="${secLbl}">${secLbl==='Copos'?fmtBR(sec,0):fmtBR(sec)}</td>
+      <td class="td-status"><span class="${allFin?'fin':'and'}">${allFin?'Finalizado':'Andamento'}</span></td>
+      <td class="td-id">${(r.id||'').slice(0,10)}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════════════════
+   CHARTS
+══════════════════════════════════════════════════════════ */
+const GOLD=['#d9b24c','#b8942e','#f0cc70','#8a6e20','#e8c86a','#6a4e10'];
+const MOD_COLORS={cotesia:'#22c55e',aplicacao:'#38bdf8',mapeamento:'#f59e0b'};
+
+function isDark(){return document.documentElement.getAttribute('data-theme')==='dark';}
+function chartDefaults(){
+  return {
+    color: isDark()?'rgba(240,230,200,.55)':'rgba(60,40,0,.5)',
+    grid:  isDark()?'rgba(255,255,255,.06)':'rgba(0,0,0,.07)',
+  };
+}
+
+function destroyChart(id){
+  if(chartInstances[id]){chartInstances[id].destroy();delete chartInstances[id];}
+}
+
+function renderCharts(){
+  const {color,grid}=chartDefaults();
+  const tickCfg={color,font:{family:"'IBM Plex Mono'",size:10}};
+  const gridCfg={color:grid,drawBorder:false};
+
+  // ── 1. Ha por piloto
+  destroyChart('pilotoHa');
+  const pilotMap={};
+  filtered.forEach(r=>{
+    const p=r.piloto||r.usuario||'?';
+    const farms=parseFazendas(r.fazendas||r.fazendas_json);
+    const ha=farms.reduce((s,f)=>s+safeHa(f.area||f.ha||f.hectares),0)||safeHa(r.totalha||r.totalHa);
+    pilotMap[p]=(pilotMap[p]||0)+ha;
+  });
+  const pilotEntries=Object.entries(pilotMap).sort((a,b)=>b[1]-a[1]);
+  chartInstances.pilotoHa=new Chart(document.getElementById('chartPilotoHa'),{
+    type:'bar',
+    data:{labels:pilotEntries.map(e=>e[0]),datasets:[{label:'Ha',data:pilotEntries.map(e=>e[1]),backgroundColor:GOLD,borderRadius:6,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:tickCfg,grid:{display:false}},y:{ticks:{...tickCfg,callback:v=>fmtK(v)},grid:gridCfg}}}
+  });
+
+  // ── 2. Registros por módulo (donut)
+  destroyChart('modulo');
+  const modMap={};
+  filtered.forEach(r=>{ const m=r._mod||'cotesia'; modMap[m]=(modMap[m]||0)+1; });
+  const modEntries=Object.entries(modMap);
+  chartInstances.modulo=new Chart(document.getElementById('chartModulo'),{
+    type:'doughnut',
+    data:{
+      labels:modEntries.map(e=>MOD_LABELS[e[0]]||e[0]),
+      datasets:[{data:modEntries.map(e=>e[1]),backgroundColor:modEntries.map(e=>MOD_COLORS[e[0]]||GOLD[0]),borderWidth:0,hoverOffset:6}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{color,font:{family:"'Barlow Condensed'",size:11},padding:12}}}}
+  });
+
+  // ── 3. Timeline ha por data
+  destroyChart('timeline');
+  const dateMap={};
+  filtered.forEach(r=>{
+    const d=r._date||'?';
+    const farms=parseFazendas(r.fazendas||r.fazendas_json);
+    const ha=farms.reduce((s,f)=>s+safeHa(f.area||f.ha||f.hectares),0)||safeHa(r.totalha||r.totalHa);
+    dateMap[d]=(dateMap[d]||0)+ha;
+  });
+  const dateEntries=Object.entries(dateMap).sort((a,b)=>a[0]>b[0]?1:-1);
+  chartInstances.timeline=new Chart(document.getElementById('chartTimeline'),{
+    type:'line',
+    data:{
+      labels:dateEntries.map(e=>fmtDateBR(e[0])),
+      datasets:[{label:'Hectares',data:dateEntries.map(e=>e[1]),borderColor:GOLD[0],backgroundColor:'rgba(184,148,46,.12)',tension:.35,fill:true,pointBackgroundColor:GOLD[0],pointRadius:4,pointHoverRadius:6}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{...tickCfg,maxRotation:40},grid:{display:false}},y:{ticks:{...tickCfg,callback:v=>fmtK(v)},grid:gridCfg}}}
+  });
+
+  // ── 4. Copos por piloto
+  destroyChart('pilotoCop');
+  const copMap={};
+  filtered.forEach(r=>{
+    const p=r.piloto||r.usuario||'?';
+    const farms=parseFazendas(r.fazendas||r.fazendas_json);
+    const cop=farms.reduce((s,f)=>s+Number(f.copos||f.cop||0),0)||Number(r.totalcopos||r.totalCopos||0);
+    copMap[p]=(copMap[p]||0)+cop;
+  });
+  const copEntries=Object.entries(copMap).sort((a,b)=>b[1]-a[1]);
+  chartInstances.pilotoCop=new Chart(document.getElementById('chartPilotoCop'),{
+    type:'bar',
+    data:{labels:copEntries.map(e=>e[0]),datasets:[{label:'Copos',data:copEntries.map(e=>e[1]),backgroundColor:'#22c55e',borderRadius:6,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:tickCfg,grid:{display:false}},y:{ticks:{...tickCfg,callback:v=>fmtK(v)},grid:gridCfg}}}
+  });
+
+  // ── 5. Fazendas por frente (polar)
+  destroyChart('frente');
+  const frMap={};
+  filtered.forEach(r=>{
+    const fr=[String(r.frente||'').trim(),String(r.unidade||'').trim()].filter(Boolean).join(' · ')||'Sem frente';
+    const farms=parseFazendas(r.fazendas||r.fazendas_json);
+    const faz=farms.length||Number(r.totalfazendas||r.totalFazendas||0);
+    frMap[fr]=(frMap[fr]||0)+faz;
+  });
+  const frEntries=Object.entries(frMap).sort((a,b)=>b[1]-a[1]);
+  chartInstances.frente=new Chart(document.getElementById('chartFrente'),{
+    type:'polarArea',
+    data:{
+      labels:frEntries.map(e=>e[0]),
+      datasets:[{data:frEntries.map(e=>e[1]),backgroundColor:GOLD.map(c=>c+'bb'),borderWidth:0}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color,font:{family:"'Barlow Condensed'",size:10},padding:8}}},scales:{r:{ticks:{display:false},grid:{color:grid}}}}
+  });
+
+  chartsBuilt=true;
+}
+
+function rebuildCharts(){
+  if(activeTab==='graficos') renderCharts();
+}
+
+/* ══════════════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════════════ */
+function setLoadingState(){
+  document.getElementById('cardList').innerHTML=`<div class="state-box">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <div class="state-title loading-dots">Carregando</div>
+    <div class="state-desc">Buscando dados de todos os módulos</div>
+  </div>`;
+  ['kpiReg','kpiHa','kpiCop','kpiFaz'].forEach(id=>document.getElementById(id).textContent='—');
+}
+
+/* ══════════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════════ */
+document.getElementById('reloadBtn').addEventListener('click',loadAll);
+document.getElementById('clearBtn').addEventListener('click',clearFilters);
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click',()=>switchTab(btn.dataset.tab,btn));
+});
+document.addEventListener('DOMContentLoaded',loadAll);
+</script>
+</body>
+</html>
