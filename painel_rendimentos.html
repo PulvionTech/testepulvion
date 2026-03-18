@@ -325,16 +325,12 @@ tr:hover td{background:var(--gold-dim)}
   <div class="tb-left">
     <div class="tb-title">
       <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      Painel de Rendimentos
     </div>
   </div>
   <div class="tb-right">
     <button class="reload-btn" id="reloadBtn">
       <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
       Atualizar
-    </button>
-    <button class="icon-btn" id="themeBtn" title="Alternar tema">
-      <svg id="themeIcon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
     </button>
   </div>
 </header>
@@ -1055,6 +1051,15 @@ document.querySelectorAll('.tab').forEach(btn=>{
   btn.addEventListener('click',()=>switchTab(btn.dataset.tab,btn));
 });
 document.addEventListener('DOMContentLoaded',loadAll);
+</script>
+
+<script>
+/* ── Pulvion: herança de tema do painel pai ── */
+window.addEventListener('storage', function(e){
+  if(e.key === 'pulvion_theme' && e.newValue){
+    document.documentElement.setAttribute('data-theme', e.newValue);
+  }
+});
 </script>
 </body>
 </html>
