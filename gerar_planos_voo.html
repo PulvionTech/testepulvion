@@ -548,6 +548,8 @@ body {
       function applyTheme(theme){
         h.setAttribute('data-theme', theme);
         localStorage.setItem('pulvion_theme', theme);
+        setTimeout(function(){ try{ if(window.map) window.map.invalidateSize(true); }catch(_){} }, 50);
+        setTimeout(function(){ try{ if(window.map) window.map.invalidateSize(true); }catch(_){} }, 350);
         const icon = document.getElementById('themeIcon');
         if(icon){
           icon.setAttribute('viewBox','0 0 24 24');
@@ -638,7 +640,7 @@ body {
     }
 
     function initMap(){
-      map = L.map('map', { zoomControl: true });
+      map = window.map = L.map('map', { zoomControl: true });
       const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap', maxZoom: 19 });
       const esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles &copy; Esri, Maxar', maxZoom: 19 });
       const esriLabels = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { attribution: '&copy; Esri', opacity: .8, maxZoom: 19 });
@@ -1153,6 +1155,13 @@ body {
 window.addEventListener('storage', function(e){
   if(e.key === 'pulvion_theme' && e.newValue){
     document.documentElement.setAttribute('data-theme', e.newValue);
+    // Leaflet perde dimensões quando o layout muda via transição CSS
+    setTimeout(function(){
+      try{ if(window.map) window.map.invalidateSize(true); }catch(_){}
+    }, 50);
+    setTimeout(function(){
+      try{ if(window.map) window.map.invalidateSize(true); }catch(_){}
+    }, 350);
   }
 });
 </script>
