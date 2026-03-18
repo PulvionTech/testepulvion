@@ -424,20 +424,15 @@ input[type="range"]::-moz-range-thumb {
 </head>
 <body>
 
-<!-- ── HEADER ───────────────────────────────────────────── -->
+<!-- ── HEADER ───────────────────────────────────────────── 
 <header class="site-header">
   <div class="header-inner">
-    <a class="btn btn-ghost btn-sm" href="gerar_linhas.html" title="Voltar">
-      <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
-      
-    </a>
     <div class="header-title">
       <svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none">
         <line x1="3" y1="6" x2="21" y2="6"/>
         <line x1="3" y1="12" x2="21" y2="12"/>
         <line x1="3" y1="18" x2="21" y2="18"/>
       </svg>
-      Criar Linhas Paralelas
     </div>
     <div class="header-grow"></div>
     <a id="downloadLinkFloat" class="export-btn-link" href="#" download style="display:none;">
@@ -448,7 +443,7 @@ input[type="range"]::-moz-range-thumb {
       <svg id="themeIcon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
     </button>
   </div>
-</header>
+</header> -->
 
 <!-- ── PAGE ─────────────────────────────────────────────── -->
 <div class="page-wrap">
@@ -1129,5 +1124,14 @@ input[type="range"]::-moz-range-thumb {
       });
     });
   </script>
+
+<script>
+/* ── Pulvion: herança de tema do painel pai ── */
+window.addEventListener('storage', function(e){
+  if(e.key === 'pulvion_theme' && e.newValue){
+    document.documentElement.setAttribute('data-theme', e.newValue);
+  }
+});
+</script>
 </body>
 </html>
