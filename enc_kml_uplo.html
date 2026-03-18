@@ -149,7 +149,7 @@ body {
   flex: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 8px;
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 1rem;
@@ -575,6 +575,7 @@ body {
         <i data-lucide="search" width="15" height="15"></i>
       </div>
       <span class="card-title"></span>
+      Busca OS e visualização de áreas no mapa
       <span class="card-subtitle"></span>
     </div>
     <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
@@ -753,7 +754,7 @@ function initMap() {
     maxZoom: 19, attribution: 'Tiles &copy; Esri'
   });
 
-  osm.addTo(map);
+  esriSat.addTo(map);
   L.control.layers({ 'Mapa (OSM)': osm, 'Satélite (Esri)': esriSat }, null, { collapsed: false }).addTo(map);
 }
 
