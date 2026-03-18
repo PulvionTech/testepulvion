@@ -343,17 +343,7 @@ body {
 <!-- HEADER -->
 <header class="site-header">
   <div class="header-inner">
-    <a class="btn btn-sm" href="upload.kml.html" title="Voltar">
-      <i data-lucide="arrow-left" width="14" height="14"></i>
-     
-    </a>
-    <div class="header-title">
       <i data-lucide="upload-cloud" width="16" height="16"></i>
-      Upload · KML / PDF
-    </div>
-    <button class="theme-toggle" id="themeToggle" title="Alternar tema">
-      <i data-lucide="moon" width="15" height="15" id="themeIcon"></i>
-    </button>
   </div>
 </header>
 
@@ -765,6 +755,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (++attempts < 8) setTimeout(initLucide, 200);
   }
   initLucide();
+});
+</script>
+
+<script>
+/* ── Pulvion: herança de tema do painel pai ── */
+window.addEventListener('storage', function(e){
+  if(e.key === 'pulvion_theme' && e.newValue){
+    document.documentElement.setAttribute('data-theme', e.newValue);
+  }
 });
 </script>
 </body>
