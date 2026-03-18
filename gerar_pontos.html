@@ -399,7 +399,7 @@ input[type="number"]:focus, input[type="text"]:focus, select:focus {
 </head>
 <body>
 
-<!-- ── HEADER ───────────────────────────────────────────── -->
+<!-- ── HEADER ───────────────────────────────────────────── 
 <header class="site-header">
   <div class="header-inner">
     <a class="btn btn-ghost btn-sm" href="gerar_pontos.html" title="Gerar Linhas">
@@ -423,7 +423,7 @@ input[type="number"]:focus, input[type="text"]:focus, select:focus {
       <svg id="themeIcon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
     </button>
   </div>
-</header>
+</header> -->
 
 <!-- ── PAGE ─────────────────────────────────────────────── -->
 <div class="page-wrap">
@@ -538,7 +538,7 @@ input[type="number"]:focus, input[type="text"]:focus, select:focus {
         </div>
         <span class="card-title">Visualização do Mapa</span>
         <span style="font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:var(--text-label);letter-spacing:0.06em;">
-          Use o painel de desenho para marcar áreas de exclusão
+        
         </span>
       </div>
       <div class="card-body" style="padding:0;position:relative;">
@@ -947,5 +947,14 @@ ${xml}`;
         });
       });
     </script>
+
+<script>
+/* ── Pulvion: herança de tema do painel pai ── */
+window.addEventListener('storage', function(e){
+  if(e.key === 'pulvion_theme' && e.newValue){
+    document.documentElement.setAttribute('data-theme', e.newValue);
+  }
+});
+</script>
 </body>
 </html>
