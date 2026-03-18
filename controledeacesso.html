@@ -240,15 +240,15 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-
     <span class="legend-title">Módulos:</span>
     <span class="mod-chip aplicacao">
       <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-      Pulverização
+      
     </span>
     <span class="mod-chip cotesia">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-      Cotesia
+      
     </span>
     <span class="mod-chip mapeamento">
       <svg viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
-      Mapeamento
+      
     </span>
   </div>
 
@@ -458,6 +458,15 @@ async function loadUsers(){
 
 document.getElementById('saveAllBtn').addEventListener('click', saveAll);
 document.addEventListener('DOMContentLoaded', loadUsers);
+</script>
+
+<script>
+/* ── Pulvion: herança de tema do painel pai ── */
+window.addEventListener('storage', function(e){
+  if(e.key === 'pulvion_theme' && e.newValue){
+    document.documentElement.setAttribute('data-theme', e.newValue);
+  }
+});
 </script>
 </body>
 </html>
