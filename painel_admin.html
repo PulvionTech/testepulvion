@@ -208,8 +208,6 @@ body{font-family:'Barlow',sans-serif;font-size:14px;color:var(--text);background
 .mcs-loading{padding:12px 14px;font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--gold);border-top:1px solid var(--border)}
 /* ── IFRAME PANEL ── */
 .frame-panel{display:none;height:100%;flex-direction:column;background:transparent;border-radius:0}
-.frame-panel.active ~ * #mainTopbar,.has-frame #mainTopbar{display:none}
-.frame-active #mainTopbar{display:none!important}
 .frame-panel.active{display:flex}
 
 .frame-panel iframe{flex:1;width:100%;border:none;background:var(--bg)}
@@ -272,7 +270,7 @@ body{font-family:'Barlow',sans-serif;font-size:14px;color:var(--text);background
 <aside class="sidebar" id="sidebar">
   <div class="sb-brand">
     <div class="sb-logo" style="background:transparent;border:none;width:auto;padding:0">
-      <img src="logo_pulvion.png" alt="Pulvion" id="sbLogoImg" style="height:38px;max-width:140px;object-fit:contain" onerror="document.getElementById('sbLogoImg').style.display='none'">
+      <img src="logo_simb.png" alt="Pulvion" id="sbLogoImg" style="height:38px;max-width:140px;object-fit:contain" onerror="document.getElementById('sbLogoImg').style.display='none'">
     </div>
 
   </div>
@@ -571,10 +569,12 @@ function applyTheme(t){
   HTML.setAttribute('data-theme',t);localStorage.setItem('pulvion_theme',t);
   document.getElementById('themeIcon').setAttribute('data-lucide',t==='dark'?'sun':'moon');
   refreshIcons();
-  // Sync to iframe child
+  // Sync to iframe child — postMessage é mais confiável que contentDocument em file://
+  try{frame.contentWindow?.postMessage({type:'pulvion_theme',theme:t},'*');}catch(_){}
+  // Fallback direto caso postMessage não seja suficiente
   try{
     const doc=frame.contentDocument||frame.contentWindow?.document;
-    if(doc&&doc.documentElement){doc.documentElement.setAttribute('data-theme',t);injectFrameStyle();}
+    if(doc&&doc.documentElement){doc.documentElement.setAttribute('data-theme',t);}
   }catch(_){}
 }
 (function(){applyTheme(localStorage.getItem('pulvion_theme')||'light');})();
@@ -611,7 +611,9 @@ document.getElementById('mobileMenuBtn').addEventListener('click',()=>{
   if(mobileOpen)closeMobile(); else openMobile();
 });
 backdrop.addEventListener('click',closeMobile);
-window.addEventListener('resize',()=>{if(window.innerWidth>900)closeMobile();});
+window.addEventListener('resize',()=>{
+  if(window.innerWidth>900) closeMobile();
+});
 
 /* ── MODULE ACCORDION ── */
 document.querySelectorAll('.mod-toggle').forEach(btn=>{
@@ -651,21 +653,30 @@ function injectFrameStyle(){
     const t=HTML.getAttribute('data-theme')||'light';
     doc.documentElement.setAttribute('data-theme',t);
     doc.documentElement.setAttribute('data-iframe','1');
-    // Ensure pages that don't have self-detection still hide their headers
     if(!doc.getElementById('_panelInject')){
       const st=doc.createElement('style'); st.id='_panelInject';
-      st.textContent='[data-iframe="1"] header,[data-iframe="1"] .site-header,[data-iframe="1"] .header,[data-iframe="1"] .topbar{display:none!important}[data-iframe="1"] body{padding-top:0!important}[data-iframe="1"] .wrap,[data-iframe="1"] .page{padding-top:8px!important}';
+      st.textContent='[data-iframe="1"] header,[data-iframe="1"] .site-header,[data-iframe="1"] .header,[data-iframe="1"] .topbar{display:none!important}[data-iframe="1"] body{padding-top:0!important}[data-iframe="1"] .wrap,[data-iframe="1"] .page{padding-top:8px!important}[data-iframe="1"] #themeToggle,[data-iframe="1"] .theme-toggle{display:none!important}';
       doc.head.appendChild(st);
+    }
+    // Injeta listener de postMessage para troca de tema em tempo real
+    if(!doc.getElementById('_panelThemeListener')){
+      const sc=doc.createElement('script'); sc.id='_panelThemeListener';
+      sc.textContent=`window.addEventListener('message',function(e){if(e.data&&e.data.type==='pulvion_theme'){document.documentElement.setAttribute('data-theme',e.data.theme);}});`;
+      doc.head.appendChild(sc);
     }
   }catch(_){}
 }
-frame.addEventListener('load', injectFrameStyle);
+frame.addEventListener('load', ()=>{
+  injectFrameStyle();
+  setTimeout(injectFrameStyle, 80);
+  setTimeout(injectFrameStyle, 350);
+});
 
 function loadPage(src,label){
   frame.src=src;
   framePanel.classList.add('active');
   dashSection.style.display='none';
-  document.getElementById('mainTopbar').style.display='none';
+  document.getElementById('topbarTitle').textContent=label||'Conteúdo';
   setActive(src);
   location.hash=encodeURIComponent(src)+'|'+encodeURIComponent(label);
   if(window.innerWidth<=900)closeMobile();
@@ -675,7 +686,7 @@ function loadPage(src,label){
 function showDash(){
   framePanel.classList.remove('active');
   dashSection.style.display='';
-  document.getElementById('mainTopbar').style.display='';
+  document.getElementById('topbarTitle').textContent='Dashboard';
   history.pushState('',document.title,window.location.pathname+window.location.search);
   frame.src='about:blank';
   setActive(null);
