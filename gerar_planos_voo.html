@@ -107,7 +107,6 @@
 ============================================================ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
-[data-iframe="1"] html, [data-iframe="1"] body { height: 100% !important; overflow: hidden !important; }
 body {
   font-family: 'Barlow', sans-serif; font-size: 15px; line-height: 1.5;
   color: var(--text); background: var(--bg);
@@ -122,10 +121,10 @@ body {
 /* ============================================================
    LAYOUT
 ============================================================ */
-.app { display: grid; grid-template-rows: auto 1fr; height: 100%; overflow: hidden; }
+.app { display: flex; flex-direction: column; min-height: 100vh; }
 .body-layout {
   display: grid; grid-template-columns: 300px 1fr;
-  gap: 10px; padding: 10px; min-height: 0; overflow: hidden;
+  gap: 10px; padding: 10px;
 }
 @media (max-width: 900px) {
   .body-layout { grid-template-columns: 1fr; grid-template-rows: 40vh 1fr; }
@@ -311,9 +310,9 @@ body {
 #mapWrap {
   border-radius: var(--radius); overflow: hidden;
   border: 1px solid var(--gold-border); box-shadow: var(--shadow-md);
-  position: relative; min-height: 300px;
+  position: relative;
 }
-#map { height: 100%; width: 100%; }
+#map { width: 100%; height: calc(100vh - 130px); min-height: 400px; }
 .leaflet-container { background: var(--surface); }
 
 /* ============================================================
@@ -403,7 +402,8 @@ body {
 ============================================================ */
 @media (max-width: 900px) {
   .header-inner { height: auto; padding: 8px 12px; }
-  .body-layout { grid-template-columns: 1fr; grid-template-rows: 220px 1fr; padding: 8px; }
+  .body-layout { grid-template-columns: 1fr; padding: 8px; }
+  #map { height: 55vw; min-height: 280px; }
 }
 @media (max-width: 640px) {
   .header-group.export-group { display: none; }
@@ -1152,8 +1152,8 @@ body {
 <script>
 /* ── Pulvion: herança de tema do painel pai ── */
 function _fixMap(){
-  setTimeout(function(){ try{ if(window.map) window.map.invalidateSize(true); }catch(_){} }, 50);
-  setTimeout(function(){ try{ if(window.map) window.map.invalidateSize(true); }catch(_){} }, 400);
+  setTimeout(function(){ try{ if(window.map) window.map.invalidateSize(true); }catch(_){} }, 100);
+  setTimeout(function(){ try{ if(window.map) window.map.invalidateSize(true); }catch(_){} }, 500);
 }
 window.addEventListener('storage', function(e){
   if(e.key === 'pulvion_theme' && e.newValue){
