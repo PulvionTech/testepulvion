@@ -54,7 +54,7 @@ body{font-family:'Barlow',sans-serif;font-size:14px;color:var(--text);background
 /* ── SIDEBAR ── */
 .sidebar{width:240px;flex-shrink:0;background:var(--sidebar);border-right:1px solid var(--sidebar-bdr);display:flex;flex-direction:column;height:100vh;transition:width .25s ease;position:relative;z-index:100}
 .sidebar.mini{width:60px}
-.sb-brand{display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--sidebar-bdr);min-height:60px;overflow:hidden;transition:padding .25s}
+.sb-brand{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid var(--sidebar-bdr);min-height:60px;overflow:hidden;transition:padding .25s}
 .sb-logo-wrap{flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .sb-logo-img{height:36px;max-width:140px;object-fit:contain;filter:brightness(0) invert(1);transition:height .25s,max-width .25s,opacity .2s}
 [data-theme="light"] .sidebar .sb-logo-img{filter:none}
@@ -250,11 +250,12 @@ body{font-family:'Barlow',sans-serif;font-size:14px;color:var(--text);background
   .right-col{display:none}
 }
 @media(min-width:901px){.mobile-toggle{display:none!important}}
+@media(max-width:900px){#toggleSidebar{display:none!important}}
 @media(max-width:900px){.mobile-toggle{display:flex!important}}
 
 /* cfg dropdown */
 .cfg-wrap{position:relative}
-.cfg-dropdown{display:none;position:absolute;bottom:100%;left:8px;right:8px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-lg);overflow:hidden;z-index:300;margin-bottom:4px}
+.cfg-dropdown{display:none;position:absolute;top:100%;left:8px;right:8px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-lg);overflow:hidden;z-index:300;margin-top:4px}
 .cfg-dropdown.open{display:block}
 .cfg-item{display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;border:none;background:none;color:var(--text);cursor:pointer;font-family:'Barlow',sans-serif;font-size:.82rem;transition:background .12s}
 .cfg-item:hover{background:var(--surface2);color:var(--gold)}
@@ -272,7 +273,9 @@ body{font-family:'Barlow',sans-serif;font-size:14px;color:var(--text);background
     <div class="sb-logo" style="background:transparent;border:none;width:auto;padding:0">
       <img src="logo_simb.png" alt="Pulvion" id="sbLogoImg" style="height:38px;max-width:140px;object-fit:contain" onerror="document.getElementById('sbLogoImg').style.display='none'">
     </div>
-
+    <button class="sb-mini-btn" id="toggleSidebar" title="Recolher menu" style="margin-left:auto;width:auto;padding:4px 6px">
+      <i data-lucide="chevrons-left" width="14" height="14" id="toggleIcon"></i>
+    </button>
   </div>
 
   <nav class="sb-nav" id="sbNav">
@@ -321,40 +324,36 @@ body{font-family:'Barlow',sans-serif;font-size:14px;color:var(--text);background
       </div>
     </div>
 
-  </nav>
 
-  <div class="sb-foot">
-    <!-- Configurações -->
-    <div class="cfg-wrap" id="cfgWrap">
-      <button class="sb-link" id="cfgBtn" data-tip="Configurações">
-        <i data-lucide="settings" style="width:15px;height:15px;flex-shrink:0"></i>
-        <span class="sb-link-label">Configurações</span>
-      </button>
-      <div class="cfg-dropdown" id="cfgDropdown">
-        <button class="cfg-item" id="cfgUsuarios">
-          <i data-lucide="users" style="width:14px;height:14px"></i> Usuários
+    <!-- CONFIGURAÇÕES + SAIR (dentro do nav para scroll no mobile) -->
+    <div style="border-top:1px solid var(--sidebar-bdr);margin-top:8px;padding-top:4px">
+      <div class="cfg-wrap" id="cfgWrap">
+        <button class="sb-link" id="cfgBtn" data-tip="Configurações">
+          <i data-lucide="settings" style="width:15px;height:15px;flex-shrink:0"></i>
+          <span class="sb-link-label">Configurações</span>
         </button>
-        <button class="cfg-item" id="cfgClientes">
-          <i data-lucide="building-2" style="width:14px;height:14px"></i> Clientes
-        </button>
-        <button class="cfg-item" id="cfgAcesso">
-          <i data-lucide="shield" style="width:14px;height:14px"></i> Controle de Acesso
-        </button>
-        <button class="cfg-item" id="cfgUpload">
-          <i data-lucide="upload-cloud" style="width:14px;height:14px"></i> Upload Dados
-        </button>
+        <div class="cfg-dropdown" id="cfgDropdown">
+          <button class="cfg-item" id="cfgUsuarios">
+            <i data-lucide="users" style="width:14px;height:14px"></i> Usuários
+          </button>
+          <button class="cfg-item" id="cfgClientes">
+            <i data-lucide="building-2" style="width:14px;height:14px"></i> Clientes
+          </button>
+          <button class="cfg-item" id="cfgAcesso">
+            <i data-lucide="shield" style="width:14px;height:14px"></i> Controle de Acesso
+          </button>
+          <button class="cfg-item" id="cfgUpload">
+            <i data-lucide="upload-cloud" style="width:14px;height:14px"></i> Upload Dados
+          </button>
+        </div>
       </div>
+      <a class="sb-exit" href="index.html" data-tip="Sair">
+        <i data-lucide="log-out" style="width:15px;height:15px;flex-shrink:0"></i>
+        <span>Sair do painel</span>
+      </a>
     </div>
-    <!-- Mini toggle -->
-    <button class="sb-mini-btn" id="toggleSidebar" title="Recolher menu">
-      <i data-lucide="chevrons-left" width="14" height="14" id="toggleIcon"></i>
-    </button>
-    <!-- Sair -->
-    <a class="sb-exit" href="index.html" data-tip="Sair">
-      <i data-lucide="log-out" style="width:15px;height:15px;flex-shrink:0"></i>
-      <span>Sair do painel</span>
-    </a>
-  </div>
+
+  </nav>
 </aside>
 
 <div class="backdrop" id="backdrop"></div>
@@ -612,7 +611,14 @@ document.getElementById('mobileMenuBtn').addEventListener('click',()=>{
 });
 backdrop.addEventListener('click',closeMobile);
 window.addEventListener('resize',()=>{
-  if(window.innerWidth>900) closeMobile();
+  if(window.innerWidth>900){
+    closeMobile();
+  } else {
+    // Se há frame ativo e estamos em mobile, garantir que a topbar aparece
+    if(framePanel.classList.contains('active')){
+      document.getElementById('mainTopbar').style.display='';
+    }
+  }
 });
 
 /* ── MODULE ACCORDION ── */
@@ -676,7 +682,13 @@ function loadPage(src,label){
   frame.src=src;
   framePanel.classList.add('active');
   dashSection.style.display='none';
-  document.getElementById('topbarTitle').textContent=label||'Conteúdo';
+  // No mobile mantemos a topbar visível para o botão hamburger funcionar
+  if(window.innerWidth>900){
+    document.getElementById('mainTopbar').style.display='none';
+  } else {
+    document.getElementById('mainTopbar').style.display='';
+    document.getElementById('topbarTitle').textContent=label||'Conteúdo';
+  }
   setActive(src);
   location.hash=encodeURIComponent(src)+'|'+encodeURIComponent(label);
   if(window.innerWidth<=900)closeMobile();
@@ -686,6 +698,7 @@ function loadPage(src,label){
 function showDash(){
   framePanel.classList.remove('active');
   dashSection.style.display='';
+  document.getElementById('mainTopbar').style.display='';
   document.getElementById('topbarTitle').textContent='Dashboard';
   history.pushState('',document.title,window.location.pathname+window.location.search);
   frame.src='about:blank';
