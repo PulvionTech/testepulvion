@@ -557,17 +557,9 @@ body {
 ============================================================ -->
 <header class="site-header">
   <div class="header-inner">
-    <button class="btn btn-sm" onclick="(function(){try{var s=JSON.parse(localStorage.getItem('pulvion_session')||'{}');window.location.href=s.role==='admin'?'painel_admin.html':'operacional.html';}catch(_){window.location.href='operacional.html';}})()" title="Voltar">
-      <i data-lucide="arrow-left" width="14" height="14"></i>
-      Voltar
-    </button>
     <div class="header-title">
-      <i data-lucide="map" width="16" height="16"></i>
-      Visualizador KML · OS
+      <i data-lucide="map" width="14" height="14"></i>
     </div>
-    <button class="theme-toggle" id="themeToggle" title="Alternar tema">
-      <i data-lucide="moon" width="15" height="15" id="themeIcon"></i>
-    </button>
   </div>
 </header>
 
@@ -582,8 +574,8 @@ body {
       <div class="card-header-icon">
         <i data-lucide="search" width="15" height="15"></i>
       </div>
-      <span class="card-title">Buscar OS</span>
-      <span class="card-subtitle">KML + PDF via Google Drive</span>
+      <span class="card-title"></span>
+      <span class="card-subtitle"></span>
     </div>
     <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
 
@@ -606,7 +598,7 @@ body {
         <div class="action-cluster">
           <button class="btn btn-ghost" id="btnLimpar" type="button" title="Limpar mapa">
             <i data-lucide="trash-2" width="14" height="14"></i>
-            Limpar
+            
           </button>
           <button class="btn btn-ghost" id="btnDownload" type="button" disabled title="Baixar KML">
             <i data-lucide="download-cloud" width="14" height="14"></i>
@@ -614,11 +606,10 @@ body {
           </button>
           <button class="btn btn-success" id="btnNavigate" type="button" disabled title="Navegar até a área">
             <i data-lucide="navigation" width="14" height="14"></i>
-            Navegar
+            
           </button>
           <button class="btn btn-info" id="btnLocate" type="button" title="Minha posição">
             <i data-lucide="locate" width="14" height="14"></i>
-            Minha posição
           </button>
         </div>
       </div>
@@ -653,7 +644,7 @@ body {
       <div class="map-footer">
         <span class="map-hint">
           <i data-lucide="satellite" width="11" height="11" style="display:inline;vertical-align:middle;margin-right:4px;"></i>
-          Zoom automático na área · polígonos com popup de nome + área (ha)
+          Zoom automático na área ·
         </span>
         <span class="map-hint" id="areaInfo" style="color:var(--gold);"></span>
       </div>
@@ -661,7 +652,7 @@ body {
 
     <!-- Tab: PDF -->
     <div class="tab-content pdf-wrap" id="tab-pdf">
-      <div class="pdf-placeholder" id="pdfPlaceholder">Busque uma OS para carregar a pré-visualização do PDF.</div>
+      <div class="pdf-placeholder" id="pdfPlaceholder">Busque uma OS para visualização do PDF.</div>
       <iframe id="pdfFrame" title="Pré-visualização PDF da OS"></iframe>
     </div>
 
@@ -1078,6 +1069,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Garante que todos os ícones estejam renderizados
   refreshIcons();
+});
+</script>
+
+<script>
+/* ── Pulvion: herança de tema do painel pai ── */
+window.addEventListener('storage', function(e){
+  if(e.key === 'pulvion_theme' && e.newValue){
+    document.documentElement.setAttribute('data-theme', e.newValue);
+  }
 });
 </script>
 </body>
