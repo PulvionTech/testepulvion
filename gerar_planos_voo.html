@@ -419,14 +419,7 @@ body {
     <div class="header-inner">
 
       <!-- Back + Title -->
-      <a class="btn btn-ghost" href="gerar_planos_voo.html" title="Voltar">
-        <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
-      </a>
       <div class="header-title">
-        <svg style="width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none" viewBox="0 0 24 24">
-          <path d="M8 3 4 7l4 4"/><path d="M16 3l4 4-4 4"/><path d="M4 7h8a4 4 0 0 1 4 4v10"/><path d="M12 21h8"/>
-        </svg>
-        Mesclar Talhões
       </div>
 
       <div class="header-divider"></div>
@@ -440,7 +433,6 @@ body {
         </label>
         <button id="btnClear" class="btn btn-danger" title="Limpar tudo">
           <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          Limpar
         </button>
       </div>
 
@@ -460,7 +452,7 @@ body {
       <div class="header-group edit-group">
         <button id="btnEdit" class="btn" title="Editar polígonos selecionados">
           <svg viewBox="0 0 24 24"><path d="m15 3 6 6-9.5 9.5H5.5V12.5Z"/><path d="m13 5 6 6"/></svg>
-          Editar
+          
         </button>
         <button id="btnSaveEdits" class="btn btn-success" title="Confirmar edições" style="display:none;">
           <svg viewBox="0 0 24 24"><path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h7"/></svg>
@@ -487,11 +479,6 @@ body {
       </div>
 
       <div class="header-grow"></div>
-
-      <!-- Theme toggle -->
-      <button class="theme-toggle" id="themeToggle" title="Alternar tema">
-        <svg id="themeIcon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-      </button>
 
     </div>
   </header>
@@ -1160,5 +1147,14 @@ body {
       document.getElementById('btnSelectNone').addEventListener('click', () => { for(const id of Array.from(selectedIds)) deselect(id); for(const idx of Array.from(selectedResultIds)) deselectResult(idx); });
     });
   </script>
+
+<script>
+/* ── Pulvion: herança de tema do painel pai ── */
+window.addEventListener('storage', function(e){
+  if(e.key === 'pulvion_theme' && e.newValue){
+    document.documentElement.setAttribute('data-theme', e.newValue);
+  }
+});
+</script>
 </body>
 </html>
