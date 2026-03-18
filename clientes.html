@@ -183,15 +183,15 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-
 <header class="topbar">
   <div class="tb-title">
     <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    Clientes
+   
   </div>
   <div class="tb-right">
+
     <button class="icon-btn" id="themeBtn" title="Tema">
       <svg id="themeIcon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-    </button>
+    </button> 
     <button class="add-btn" id="addBtn">
       <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Novo Cliente
     </button>
   </div>
 </header>
@@ -563,6 +563,15 @@ async function deleteCliente(id,nome){
 
 // ── INIT ────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',loadClientes);
+</script>
+
+<script>
+/* ── Pulvion: herança de tema do painel pai ── */
+window.addEventListener('storage', function(e){
+  if(e.key === 'pulvion_theme' && e.newValue){
+    document.documentElement.setAttribute('data-theme', e.newValue);
+  }
+});
 </script>
 </body>
 </html>
