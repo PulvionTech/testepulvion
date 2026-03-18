@@ -612,7 +612,14 @@ document.getElementById('mobileMenuBtn').addEventListener('click',()=>{
 });
 backdrop.addEventListener('click',closeMobile);
 window.addEventListener('resize',()=>{
-  if(window.innerWidth>900) closeMobile();
+  if(window.innerWidth>900){
+    closeMobile();
+  } else {
+    // Se há frame ativo e estamos em mobile, garantir que a topbar aparece
+    if(framePanel.classList.contains('active')){
+      document.getElementById('mainTopbar').style.display='';
+    }
+  }
 });
 
 /* ── MODULE ACCORDION ── */
@@ -655,7 +662,7 @@ function injectFrameStyle(){
     doc.documentElement.setAttribute('data-iframe','1');
     if(!doc.getElementById('_panelInject')){
       const st=doc.createElement('style'); st.id='_panelInject';
-      st.textContent='[data-iframe="1"] header,[data-iframe="1"] .site-header,[data-iframe="1"] .header,[data-iframe="1"] .topbar{display:none!important}[data-iframe="1"] body{padding-top:0!important}[data-iframe="1"] .wrap,[data-iframe="1"] .page{padding-top:8px!important}[data-iframe="1"] #themeToggle,[data-iframe="1"] .theme-toggle{display:none!important}';
+      st.textContent='[data-iframe="1"] header,[data-iframe="1"] .header,[data-iframe="1"] .topbar{display:none!important}[data-iframe="1"] body{padding-top:0!important}[data-iframe="1"] .wrap,[data-iframe="1"] .page{padding-top:8px!important}[data-iframe="1"] #themeToggle,[data-iframe="1"] .theme-toggle{display:none!important}';
       doc.head.appendChild(st);
     }
     // Injeta listener de postMessage para troca de tema em tempo real
@@ -676,7 +683,13 @@ function loadPage(src,label){
   frame.src=src;
   framePanel.classList.add('active');
   dashSection.style.display='none';
-  document.getElementById('topbarTitle').textContent=label||'Conteúdo';
+  // No mobile mantemos a topbar visível para o botão hamburger funcionar
+  if(window.innerWidth>900){
+    document.getElementById('mainTopbar').style.display='none';
+  } else {
+    document.getElementById('mainTopbar').style.display='';
+    document.getElementById('topbarTitle').textContent=label||'Conteúdo';
+  }
   setActive(src);
   location.hash=encodeURIComponent(src)+'|'+encodeURIComponent(label);
   if(window.innerWidth<=900)closeMobile();
@@ -686,6 +699,7 @@ function loadPage(src,label){
 function showDash(){
   framePanel.classList.remove('active');
   dashSection.style.display='';
+  document.getElementById('mainTopbar').style.display='';
   document.getElementById('topbarTitle').textContent='Dashboard';
   history.pushState('',document.title,window.location.pathname+window.location.search);
   frame.src='about:blank';
