@@ -107,6 +107,7 @@
 ============================================================ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
+[data-iframe="1"] html, [data-iframe="1"] body { height: 100% !important; overflow: hidden !important; }
 body {
   font-family: 'Barlow', sans-serif; font-size: 15px; line-height: 1.5;
   color: var(--text); background: var(--bg);
@@ -121,7 +122,7 @@ body {
 /* ============================================================
    LAYOUT
 ============================================================ */
-.app { display: grid; grid-template-rows: auto 1fr; height: 100vh; overflow: hidden; }
+.app { display: grid; grid-template-rows: auto 1fr; height: 100%; overflow: hidden; }
 .body-layout {
   display: grid; grid-template-columns: 300px 1fr;
   gap: 10px; padding: 10px; min-height: 0; overflow: hidden;
@@ -310,7 +311,7 @@ body {
 #mapWrap {
   border-radius: var(--radius); overflow: hidden;
   border: 1px solid var(--gold-border); box-shadow: var(--shadow-md);
-  position: relative;
+  position: relative; min-height: 300px;
 }
 #map { height: 100%; width: 100%; }
 .leaflet-container { background: var(--surface); }
@@ -548,8 +549,6 @@ body {
       function applyTheme(theme){
         h.setAttribute('data-theme', theme);
         localStorage.setItem('pulvion_theme', theme);
-        setTimeout(function(){ try{ if(window.map) window.map.invalidateSize(true); }catch(_){} }, 50);
-        setTimeout(function(){ try{ if(window.map) window.map.invalidateSize(true); }catch(_){} }, 350);
         const icon = document.getElementById('themeIcon');
         if(icon){
           icon.setAttribute('viewBox','0 0 24 24');
@@ -1152,18 +1151,17 @@ body {
 
 <script>
 /* ── Pulvion: herança de tema do painel pai ── */
+function _fixMap(){
+  setTimeout(function(){ try{ if(window.map) window.map.invalidateSize(true); }catch(_){} }, 50);
+  setTimeout(function(){ try{ if(window.map) window.map.invalidateSize(true); }catch(_){} }, 400);
+}
 window.addEventListener('storage', function(e){
   if(e.key === 'pulvion_theme' && e.newValue){
     document.documentElement.setAttribute('data-theme', e.newValue);
-    // Leaflet perde dimensões quando o layout muda via transição CSS
-    setTimeout(function(){
-      try{ if(window.map) window.map.invalidateSize(true); }catch(_){}
-    }, 50);
-    setTimeout(function(){
-      try{ if(window.map) window.map.invalidateSize(true); }catch(_){}
-    }, 350);
+    _fixMap();
   }
 });
+window.addEventListener('resize', _fixMap);
 </script>
 </body>
 </html>
