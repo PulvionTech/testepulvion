@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mesclar Talhões · Top Gun</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.pm@latest/dist/leaflet.pm.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.pm@latest/dist/leaflet.pm.min.js"></script>
+<script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+<script src="https://unpkg.com/@tmcw/togeojson@5.8.0/dist/togeojson.umd.js"></script>
+<script src="https://unpkg.com/tokml@0.4.0/tokml.js"></script>
+<script src="https://unpkg.com/geotiff/dist-browser/geotiff.min.js"></script>
+<script src="https://unpkg.com/georaster/dist/georaster.browser.min.js"></script>
+<script src="https://unpkg.com/georaster-layer-for-leaflet/dist/georaster-layer-for-leaflet.min.js"></script>
+<script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/shp-write@0.4.4/dist/shpwrite.js"></script>
+
+<style>
+/* ============================================================
+   THEME TOKENS
+============================================================ */
+:root, [data-theme="light"] {
+  --gold:        #b8942e;
+  --gold-light:  #d9b24c;
+  --gold-dim:    rgba(184,148,46,0.10);
+  --gold-border: rgba(184,148,46,0.28);
+
+  --bg:          #f0ede6;
+  --card:        #ffffff;
+  --surface:     #f5f2eb;
+  --surface-2:   #ebe7dd;
+  --input-bg:    #f8f6f1;
+
+  --header-bg:   rgba(240,237,230,0.97);
+  --header-bdr:  rgba(184,148,46,0.22);
+
+  --text:        #0d1117;
+  --text-muted:  #4b5563;
+  --text-label:  #94a3b8;
+
+  --success:     #16a34a;
+  --success-dim: rgba(22,163,74,0.10);
+  --success-bdr: rgba(22,163,74,0.28);
+  --warning:     #d97706;
+  --warning-dim: rgba(217,119,6,0.10);
+  --warning-bdr: rgba(217,119,6,0.32);
+  --danger:      #dc2626;
+  --danger-dim:  rgba(220,38,38,0.08);
+  --danger-bdr:  rgba(220,38,38,0.28);
+  --info-dim:    rgba(59,130,246,0.10);
+  --info-bdr:    rgba(59,130,246,0.28);
+  --info:        #3b82f6;
+
+  --shadow-sm:   0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md:   0 4px 20px rgba(0,0,0,0.08);
+  --radius:      12px;
+  --radius-sm:   8px;
+}
+[data-theme="dark"] {
+  --gold:        #d9b24c;
+  --gold-light:  #f0d078;
+  --gold-dim:    rgba(217,178,76,0.10);
+  --gold-border: rgba(217,178,76,0.28);
+
+  --bg:          #060912;
+  --card:        #0c1224;
+  --surface:     #0f1628;
+  --surface-2:   rgba(255,255,255,0.04);
+  --input-bg:    #0b1425;
+
+  --header-bg:   rgba(10,15,31,0.97);
+  --header-bdr:  rgba(217,178,76,0.22);
+
+  --text:        #f0ece4;
+  --text-muted:  #9ca3af;
+  --text-label:  #6b7280;
+
+  --success:     #22c55e;
+  --success-dim: rgba(34,197,94,0.10);
+  --success-bdr: rgba(34,197,94,0.28);
+  --warning:     #f59e0b;
+  --warning-dim: rgba(245,158,11,0.12);
+  --warning-bdr: rgba(245,158,11,0.35);
+  --danger:      #ef4444;
+  --danger-dim:  rgba(239,68,68,0.10);
+  --danger-bdr:  rgba(239,68,68,0.30);
+  --info-dim:    rgba(99,102,241,0.12);
+  --info-bdr:    rgba(99,102,241,0.35);
+  --info:        #818cf8;
+
+  --shadow-sm:   0 2px 8px rgba(0,0,0,0.25);
+  --shadow-md:   0 8px 28px rgba(0,0,0,0.35);
+  --radius:      12px;
+  --radius-sm:   8px;
+}
+
+/* ============================================================
+   BASE
+============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: 'Barlow', sans-serif; font-size: 15px; line-height: 1.5;
+  color: var(--text); background: var(--bg);
+  transition: background 0.3s, color 0.3s;
+}
+[data-theme="light"] body {
+  background-image: radial-gradient(ellipse 60% 35% at 5% 0%, rgba(184,148,46,0.06) 0%, transparent 55%);
+}
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--gold-border); border-radius: 4px; }
+
+/* ============================================================
+   LAYOUT
+============================================================ */
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+.body-layout {
+  display: grid; grid-template-columns: 300px 1fr;
+  gap: 10px; padding: 10px;
+}
+@media (max-width: 900px) {
+  .body-layout { grid-template-columns: 1fr; grid-template-rows: 40vh 1fr; }
+}
+
+/* ============================================================
+   HEADER
+============================================================ */
+.site-header {
+  position: sticky; top: 0; z-index: 500;
+  background: var(--header-bg); border-bottom: 1px solid var(--header-bdr);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-sm);
+}
+.header-inner {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 14px; height: 56px; flex-wrap: wrap;
+}
+.header-title {
+  display: flex; align-items: center; gap: 7px;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 800;
+  letter-spacing: 0.05em; text-transform: uppercase; color: var(--gold);
+  margin-right: 6px;
+}
+.header-divider {
+  width: 1px; height: 24px; background: var(--gold-border); flex-shrink: 0;
+}
+.header-group {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.header-grow { flex: 1; }
+
+/* ============================================================
+   BUTTONS
+============================================================ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+  font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase;
+  text-decoration: none; border-radius: var(--radius-sm); padding: 7px 12px;
+  border: 1px solid var(--gold-border); background: var(--gold-dim); color: var(--gold);
+  transition: all 0.18s ease; -webkit-tap-highlight-color: transparent;
+  white-space: nowrap; line-height: 1;
+}
+.btn:hover:not(:disabled) { background: rgba(184,148,46,0.18); border-color: var(--gold); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.8; fill: none; flex-shrink: 0; }
+
+.btn-primary { background: var(--gold); border-color: var(--gold); color: #fff; box-shadow: 0 4px 14px rgba(184,148,46,0.28); }
+[data-theme="dark"] .btn-primary { color: #0b0f1f; }
+.btn-primary:hover:not(:disabled) { background: var(--gold-light); border-color: var(--gold-light); }
+
+.btn-ghost { background: var(--surface); border-color: rgba(0,0,0,0.08); color: var(--text-muted); }
+[data-theme="dark"] .btn-ghost { border-color: rgba(255,255,255,0.08); }
+.btn-ghost:hover:not(:disabled) { background: var(--surface-2); color: var(--text); border-color: var(--gold-border); }
+
+.btn-success { background: var(--success-dim); border-color: var(--success-bdr); color: var(--success); }
+.btn-success:hover:not(:disabled) { background: rgba(22,163,74,0.16); }
+
+.btn-danger { background: var(--danger-dim); border-color: var(--danger-bdr); color: var(--danger); }
+.btn-danger:hover:not(:disabled) { background: rgba(220,38,38,0.14); }
+
+.btn-info { background: var(--info-dim); border-color: var(--info-bdr); color: var(--info); }
+.btn-info:hover:not(:disabled) { background: rgba(59,130,246,0.16); }
+
+.btn-icon { padding: 7px; flex-shrink: 0; }
+
+.theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: var(--radius-sm);
+  border: 1px solid var(--gold-border); background: var(--gold-dim);
+  color: var(--gold); cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+}
+.theme-toggle:hover { background: rgba(184,148,46,0.2); border-color: var(--gold); transform: rotate(20deg); }
+.theme-toggle svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.8; fill: none; }
+
+/* File input hidden, label acts as button */
+#fileInput { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+
+/* Tolerance inline input */
+.tol-wrap {
+  display: flex; align-items: stretch;
+  background: var(--input-bg); border: 1px solid var(--gold-border);
+  border-radius: var(--radius-sm); overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.tol-wrap:focus-within { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim); }
+.tol-label {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-label); background: var(--surface);
+  padding: 0 8px; border-right: 1px solid var(--gold-border);
+  display: flex; align-items: center; white-space: nowrap;
+}
+.tol-wrap input {
+  border: none; outline: none; background: transparent;
+  font-family: 'IBM Plex Mono', monospace; font-weight: 500; font-size: 0.85rem;
+  color: var(--text); width: 60px; padding: 6px 8px; text-align: center;
+  -moz-appearance: textfield;
+}
+.tol-wrap input::-webkit-inner-spin-button,
+.tol-wrap input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+/* Edit group — shown/hidden based on state */
+.edit-group { display: flex; gap: 5px; }
+
+/* ============================================================
+   SIDEBAR / ASIDE
+============================================================ */
+.sidebar {
+  background: var(--card); border: 1px solid var(--gold-border);
+  border-radius: var(--radius); box-shadow: var(--shadow-md);
+  display: flex; flex-direction: column; overflow: hidden;
+  min-height: 0;
+}
+.sidebar-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; border-bottom: 1px solid var(--gold-border);
+  background: var(--gold-dim); flex-shrink: 0;
+}
+.sidebar-title {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 0.88rem; font-weight: 800;
+  letter-spacing: 0.07em; text-transform: uppercase; color: var(--text);
+}
+.stats-row { display: flex; gap: 5px; align-items: center; }
+.stat-chip {
+  display: inline-flex; flex-direction: column; align-items: center;
+  padding: 4px 8px; border-radius: 7px;
+  border: 1px solid var(--gold-border); background: var(--card);
+  font-family: 'IBM Plex Mono', monospace; min-width: 42px;
+}
+.stat-num { font-size: 0.82rem; font-weight: 500; color: var(--gold); line-height: 1.1; }
+.stat-lbl { font-size: 0.55rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-label); line-height: 1; }
+
+.layer-list { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 5px; min-height: 0; }
+.layer-empty {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.66rem;
+  letter-spacing: 0.05em; color: var(--text-label);
+  text-align: center; padding: 24px 16px;
+  border: 1px dashed var(--gold-border); border-radius: var(--radius-sm);
+  background: var(--surface); margin-top: 4px;
+}
+
+.item {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--gold-border);
+  border-radius: var(--radius-sm); padding: 8px 10px;
+  transition: border-color 0.15s, background 0.15s; cursor: pointer;
+}
+.item:hover { border-color: rgba(184,148,46,0.5); background: var(--surface-2); }
+.item.selected { border-color: var(--success-bdr); background: var(--success-dim); }
+.item-check { accent-color: var(--success); width: 14px; height: 14px; flex-shrink: 0; cursor: pointer; }
+.item-info { flex: 1; min-width: 0; }
+.item-name {
+  font-size: 0.82rem; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.item-file {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem;
+  color: var(--text-label); letter-spacing: 0.04em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.item-badge {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; font-weight: 500;
+  letter-spacing: 0.08em; padding: 3px 7px; border-radius: 999px;
+  border: 1px solid var(--gold-border); background: var(--card);
+  color: var(--gold); flex-shrink: 0;
+}
+.item-badge.result-badge {
+  border-color: var(--danger-bdr); color: var(--danger); background: var(--danger-dim);
+}
+
+.sidebar-footer {
+  padding: 8px 10px; border-top: 1px solid var(--gold-border);
+  background: var(--card); flex-shrink: 0;
+  display: flex; gap: 6px;
+}
+.sidebar-footer .btn { flex: 1; justify-content: center; font-size: 0.76rem; padding: 6px 8px; }
+
+/* ============================================================
+   MAP CONTAINER
+============================================================ */
+#mapWrap {
+  border-radius: var(--radius); overflow: hidden;
+  border: 1px solid var(--gold-border); box-shadow: var(--shadow-md);
+  position: relative;
+}
+#map { width: 100%; height: calc(100vh - 130px); min-height: 400px; }
+.leaflet-container { background: var(--surface); }
+
+/* ============================================================
+   FLOATING MAP BUTTONS
+============================================================ */
+.floating-toolbar {
+  position: absolute; right: 12px; top: 12px; z-index: 1200;
+  display: flex; gap: 6px; align-items: center;
+  pointer-events: auto;
+}
+.floating-toolbar .btn { box-shadow: var(--shadow-md); }
+/* #btnMerge always visible in floating toolbar */
+
+/* ============================================================
+   AREA LABEL (on map)
+============================================================ */
+.area-label { color: var(--text); font-weight: 700; font-size: .82rem; text-shadow: none; }
+.area-badge {
+  background: var(--card); color: var(--text);
+  border: 1px solid var(--gold-border); border-radius: 10px;
+  padding: 5px 10px; box-shadow: var(--shadow-md);
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.area-num { font-size: .82rem; font-weight: 600; color: var(--gold); }
+.area-unit { font-size: .72rem; font-weight: 500; color: var(--text-muted); }
+
+/* ============================================================
+   LEAFLET OVERRIDES
+============================================================ */
+.leaflet-bar a {
+  font-family: 'Barlow Condensed', sans-serif;
+  background: var(--card) !important;
+  color: var(--text-muted) !important;
+  border-color: var(--gold-border) !important;
+}
+.leaflet-bar a:hover { background: var(--surface) !important; color: var(--gold) !important; }
+.leaflet-control-layers { background: var(--card) !important; border-color: var(--gold-border) !important; color: var(--text) !important; border-radius: var(--radius-sm) !important; box-shadow: var(--shadow-md) !important; }
+.leaflet-control-layers label { color: var(--text) !important; font-family: 'Barlow', sans-serif; font-size: 0.82rem; }
+
+/* leaflet.pm controls */
+.button-container .leaflet-buttons-control-button { background: var(--card) !important; }
+
+/* ============================================================
+   NOTIFICATION TOAST
+============================================================ */
+.notify-toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(12px);
+  background: var(--card); color: var(--text);
+  border: 1px solid var(--gold-border); border-radius: var(--radius-sm);
+  padding: 9px 18px; box-shadow: var(--shadow-md); z-index: 9999;
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.76rem; letter-spacing: 0.04em;
+  opacity: 0; transition: opacity 0.18s ease, transform 0.18s ease;
+  pointer-events: none; white-space: nowrap;
+}
+.notify-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.notify-toast.success { border-color: var(--success-bdr); color: var(--success); background: var(--success-dim); }
+.notify-toast.error   { border-color: var(--danger-bdr);  color: var(--danger);  background: var(--danger-dim); }
+.notify-toast.warn    { border-color: var(--warning-bdr); color: var(--warning); background: var(--warning-dim); }
+
+/* ============================================================
+   CONFIRM MODAL
+============================================================ */
+.confirm-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center; z-index: 10000;
+}
+.confirm-card {
+  background: var(--card); border-radius: var(--radius);
+  border: 1px solid var(--gold-border); box-shadow: var(--shadow-md);
+  padding: 20px 22px; width: min(420px, 92vw);
+}
+.confirm-card h3 {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 800;
+  letter-spacing: 0.05em; text-transform: uppercase; color: var(--gold);
+  margin-bottom: 8px;
+}
+.confirm-card p {
+  font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;
+}
+.confirm-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.confirm-actions .btn { min-width: 90px; justify-content: center; }
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width: 900px) {
+  .header-inner { height: auto; padding: 8px 12px; }
+  .body-layout { grid-template-columns: 1fr; padding: 8px; }
+  #map { height: 55vw; min-height: 280px; }
+}
+@media (max-width: 640px) {
+  .header-group.export-group { display: none; }
+  .header-inner { gap: 5px; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── HEADER ─────────────────────────────────────────── -->
+  <header class="site-header">
+    <div class="header-inner">
+
+      <!-- Back + Title -->
+      <div class="header-title">
+      </div>
+
+      <div class="header-divider"></div>
+
+      <!-- File input -->
+      <div class="header-group">
+        <input id="fileInput" type="file" accept=".kml" multiple />
+        <label for="fileInput" class="btn" title="Abrir arquivo KML" style="cursor:pointer;">
+          <svg viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><path d="m7 11 5-5 5 5"/><path d="M12 6v12"/></svg>
+          Abrir KML
+        </label>
+        <button id="btnClear" class="btn btn-danger" title="Limpar tudo">
+          <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </div>
+
+      <div class="header-divider"></div>
+
+      <!-- Tolerance -->
+      <div class="header-group">
+        <div class="tol-wrap" title="Tolerância de mesclagem em metros">
+          <span class="tol-label">Tol (m)</span>
+          <input id="tol" type="number" min="0" step="1" value="10" />
+        </div>
+      </div>
+
+      <div class="header-divider"></div>
+
+      <!-- Edit group -->
+      <div class="header-group edit-group">
+        <button id="btnEdit" class="btn" title="Editar polígonos selecionados">
+          <svg viewBox="0 0 24 24"><path d="m15 3 6 6-9.5 9.5H5.5V12.5Z"/><path d="m13 5 6 6"/></svg>
+          
+        </button>
+        <button id="btnSaveEdits" class="btn btn-success" title="Confirmar edições" style="display:none;">
+          <svg viewBox="0 0 24 24"><path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h7"/></svg>
+          Salvar
+        </button>
+        <button id="btnCancelEdits" class="btn btn-ghost" title="Cancelar edições" style="display:none;">
+          <svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          Cancelar
+        </button>
+      </div>
+
+      <div class="header-divider"></div>
+
+      <!-- Export group -->
+      <div class="header-group export-group">
+        <button id="btnExportKML" class="btn btn-info" title="Exportar resultado como KML">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15.3 15.3 0 0 0 0 18"/><path d="M12 3a15.3 15.3 0 0 1 0 18"/></svg>
+          Exp. KML
+        </button>
+        <button id="btnExportSHP" class="btn btn-info" title="Exportar resultado como Shapefile">
+          <svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v11a2 2 0 0 1-2 2H7Z"/><path d="M14 3v5h5"/><path d="M9 12h3"/><path d="M9 16h6"/></svg>
+          Exp. SHP
+        </button>
+      </div>
+
+      <div class="header-grow"></div>
+
+    </div>
+  </header>
+
+  <!-- ── BODY ───────────────────────────────────────────── -->
+  <div class="body-layout">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-title">Camadas</span>
+        <div class="stats-row">
+          <div class="stat-chip">
+            <span class="stat-num" id="countSelected">0</span>
+            <span class="stat-lbl">sel</span>
+          </div>
+          <div class="stat-chip">
+            <span class="stat-num" id="haSelected">0.00</span>
+            <span class="stat-lbl">ha sel</span>
+          </div>
+          <div class="stat-chip">
+            <span class="stat-num" id="totalHa">0.00</span>
+            <span class="stat-lbl">ha total</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="list" class="layer-list">
+        <div class="layer-empty" id="listEmpty">Nenhuma camada carregada.<br>Abra um arquivo KML para começar.</div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button id="btnSelectAll"  class="btn btn-ghost">Sel. todos</button>
+        <button id="btnSelectNone" class="btn btn-ghost">Limpar sel.</button>
+      </div>
+    </div>
+
+    <!-- Map -->
+    <div id="mapWrap">
+      <div id="map"></div>
+
+      <!-- Floating toolbar inside map -->
+      <div class="floating-toolbar">
+        <button id="btnUndoFloating" class="btn btn-ghost btn-icon" title="Desfazer" disabled>
+          ⬅️
+        </button>
+        <button id="btnRedoFloating" class="btn btn-ghost btn-icon" title="Refazer" disabled>
+          ➡️
+        </button>
+        <button id="btnMerge" class="btn btn-primary" title="Mesclar selecionados">
+          Mesclar
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+    // ── THEME ──────────────────────────────────────────────
+    (function(){
+      const h = document.documentElement;
+      const t = localStorage.getItem('pulvion_theme') || 'light';
+      h.setAttribute('data-theme', t);
+      function applyTheme(theme){
+        h.setAttribute('data-theme', theme);
+        localStorage.setItem('pulvion_theme', theme);
+        const icon = document.getElementById('themeIcon');
+        if(icon){
+          icon.setAttribute('viewBox','0 0 24 24');
+          if(theme==='dark') icon.innerHTML='<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+          else icon.innerHTML='<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>';
+        }
+      }
+      applyTheme(t);
+      document.addEventListener('DOMContentLoaded', ()=>{
+        const btn = document.getElementById('themeToggle');
+        if(btn) btn.addEventListener('click', ()=>{
+          const cur = h.getAttribute('data-theme');
+          applyTheme(cur==='dark' ? 'light' : 'dark');
+        });
+      });
+    })();
+
+    // Estado
+    let map;
+    let nextId = 1;
+    const allItems = new Map(); // id -> { id, layer, feature, name, fileName }
+    const selectedIds = new Set();
+    const resultLayers = [];
+    const resultFeatures = [];
+    const resultColors = [];
+    const resultLabels = [];
+    let lastResult = null; // FeatureCollection com todos os resultados
+    let editActive = false;
+    let fillMode = false;
+    let fillControlBtn = null;
+    const selectedResultIds = new Set(); // índices dos resultFeatures/layers
+    let lastInputBaseName = 'talhoes';
+    const undoStack = [];
+    const redoStack = [];
+
+    // Estilos
+    const basePalette = ['#3b82f6','#10b981','#f59e0b','#a855f7','#14b8a6','#ef4444','#6366f1','#84cc16','#f97316','#0ea5e9','#d946ef','#06b6d4'];
+    const baseStyle = { color: '#3b82f6', weight: 2, fillColor: '#3b82f6', fillOpacity: 0.3 };
+    const selectedStyle = { color: '#22c55e', weight: 3, fillColor: '#22c55e', fillOpacity: 0.25 };
+    const ICONS = {
+      merge: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3 4 7l4 4" /><path d="M16 3l4 4-4 4" /><path d="M4 7h8a4 4 0 0 1 4 4v10" /><path d="M12 21h8" /></svg>',
+      edit: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 3 6 6-9.5 9.5H5.5V12.5Z" /><path d="m13 5 6 6" /><path d="M3 21h6" /></svg>',
+      save: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7Z" /><path d="M17 21v-8H7v8" /><path d="M7 3v5h7" /></svg>',
+      cancel: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>',
+      kml: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M3 12h18" /><path d="M12 3a15.3 15.3 0 0 0 0 18" /><path d="M12 3a15.3 15.3 0 0 1 0 18" /></svg>',
+      shapefile: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v11a2 2 0 0 1-2 2H7Z" /><path d="M14 3v5h5" /><path d="M9 12h3" /><path d="M9 16h6" /></svg>',
+      patch: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2" /><path d="M4 10h6v10" /><path d="M14 4v6h6" /></svg>',
+      clear: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><path d="M10 11v6" /><path d="M14 11v6" /></svg>',
+      undo: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5" /><path d="M20 20v-2a6 6 0 0 0-6-6H4" /></svg>',
+      redo: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 9 5 5-5 5" /><path d="M4 4v2a6 6 0 0 0 6 6h10" /></svg>'
+    };
+
+    // Toast notification (Pulvion style)
+    function notifyCenter(message, type = 'success', ms = 1800){
+      try {
+        const el = document.createElement('div');
+        const typeMap = { success:'success', error:'error', warn:'warn' };
+        el.className = 'notify-toast ' + (typeMap[type] || '');
+        el.textContent = String(message);
+        document.body.appendChild(el);
+        requestAnimationFrame(() => el.classList.add('show'));
+        setTimeout(() => { el.classList.remove('show'); setTimeout(() => { try { el.remove(); } catch {} }, 220); }, ms);
+      } catch {}
+    }
+    // ConfirmaÇõÇœo inline para evitar o alerta do navegador
+    function inlineConfirm(message, title = 'Confirmacao'){
+      return new Promise(resolve => {
+        const overlay = document.createElement('div'); overlay.className = 'confirm-overlay';
+        const card = document.createElement('div'); card.className = 'confirm-card';
+        const h3 = document.createElement('h3'); h3.textContent = title;
+        const p = document.createElement('p'); p.textContent = message;
+        const actions = document.createElement('div'); actions.className = 'confirm-actions';
+        const btnCancel = document.createElement('button'); btnCancel.className = 'btn btn-ghost'; btnCancel.textContent = 'Cancelar';
+        const btnOk = document.createElement('button'); btnOk.className = 'btn btn-danger'; btnOk.textContent = 'OK';
+        actions.appendChild(btnCancel); actions.appendChild(btnOk);
+        card.appendChild(h3); card.appendChild(p); card.appendChild(actions);
+        overlay.appendChild(card); document.body.appendChild(overlay);
+        const cleanup = () => { try { overlay.remove(); } catch {} document.removeEventListener('keydown', onKey); };
+        const resolveFalse = () => { cleanup(); resolve(false); };
+        const resolveTrue = () => { cleanup(); resolve(true); };
+        const onKey = e => { if(e.key === 'Escape'){ resolveFalse(); } if(e.key === 'Enter'){ resolveTrue(); } };
+        btnCancel.addEventListener('click', resolveFalse);
+        btnOk.addEventListener('click', resolveTrue);
+        overlay.addEventListener('click', e => { if(e.target === overlay) resolveFalse(); });
+        document.addEventListener('keydown', onKey);
+        btnOk.focus();
+      });
+    }
+
+    function initMap(){
+      map = window.map = L.map('map', { zoomControl: true });
+      const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap', maxZoom: 19 });
+      const esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles &copy; Esri, Maxar', maxZoom: 19 });
+      const esriLabels = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { attribution: '&copy; Esri', opacity: .8, maxZoom: 19 });
+      let esriFailed = 0; esriSat.on('tileerror', () => { esriFailed++; if(esriFailed>=3){ if(map.hasLayer(esriSat)) map.removeLayer(esriSat); osm.addTo(map); } });
+      esriSat.addTo(map); esriLabels.addTo(map);
+      L.control.layers({ 'Satélite (Esri)': esriSat, 'Rua (OSM)': osm }, { 'Rótulos (Esri)': esriLabels }, { collapsed: true, position: 'topleft' }).addTo(map);
+      map.setView([-15.78,-47.93], 4);
+      map.whenReady(() => { try { map.invalidateSize(true); } catch {} }); setTimeout(() => { try { map.invalidateSize(true); } catch {} }, 300);
+
+      if(map.pm){
+        map.pm.addControls({ position:'topleft', drawMarker:false, drawPolyline:false, drawRectangle:false, drawCircle:false, drawCircleMarker:false, drawPolygon:false, editMode:true, dragMode:false, cutPolygon:true, removalMode:true });
+      }
+      addFillHoleControl();
+    }
+
+    function addFeatureToMap(feature, name, fileName){
+      const id = nextId++;
+      const color = basePalette[(id-1)%basePalette.length];
+      const layer = L.geoJSON(feature, { style: () => ({ ...baseStyle, color, fillColor: color }) }).addTo(map);
+      layer.eachLayer(l => { l.on('click', () => toggleSelect(id)); l.options.pmIgnore = true; });
+      const item = { id, layer, feature, name, fileName, color };
+      allItems.set(id, item);
+      appendListItem(item);
+    }
+
+    function appendListItem(item){
+      const list = document.getElementById('list');
+      // Hide empty state
+      const empty = document.getElementById('listEmpty');
+      if(empty) empty.style.display = 'none';
+      const el = document.createElement('div'); el.className = 'item'; el.id = 'item-'+item.id;
+      el.innerHTML = `
+        <input type="checkbox" class="item-check" id="chk-${item.id}" />
+        <div class="item-info">
+          <div class="item-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>
+          <div class="item-file">${escapeHtml(item.fileName)}</div>
+        </div>
+        <span class="item-badge">#${item.id}</span>`;
+      list.appendChild(el);
+      document.getElementById('chk-'+item.id).addEventListener('change', e => { if(e.target.checked) select(item.id); else deselect(item.id); });
+    }
+    function appendResultItem(idx, feature){
+      const list = document.getElementById('list');
+      const empty = document.getElementById('listEmpty');
+      if(empty) empty.style.display = 'none';
+      const ha = computeAreaHa(feature);
+      const haStr = ha !== null ? ha.toFixed(2) + ' ha' : '';
+      const el = document.createElement('div');
+      el.className = 'item'; el.id = 'result-item-'+idx;
+      el.innerHTML = `
+        <input type="checkbox" class="item-check" id="rchk-${idx}" />
+        <div class="item-info">
+          <div class="item-name">Resultado #${idx+1}</div>
+          <div class="item-file">${haStr}</div>
+        </div>
+        <span class="item-badge result-badge">mescl.</span>`;
+      list.appendChild(el);
+      document.getElementById('rchk-'+idx).addEventListener('change', e => {
+        if(e.target.checked) selectResult(idx); else deselectResult(idx);
+      });
+    }
+
+
+    function select(id){ if(!allItems.has(id) || selectedIds.has(id)) return; selectedIds.add(id); const {layer}=allItems.get(id); layer.setStyle({...selectedStyle}); const chk=document.getElementById('chk-'+id); if(chk && !chk.checked) chk.checked = true; updateSelectedCount(); }
+    function deselect(id){ if(!allItems.has(id) || !selectedIds.has(id)) return; selectedIds.delete(id); const it=allItems.get(id); if(it&&it.layer){ const color=it.color||baseStyle.color; it.layer.setStyle({ ...baseStyle, color, fillColor: color }); } const chk=document.getElementById('chk-'+id); if(chk && chk.checked) chk.checked = false; updateSelectedCount(); }
+    function toggleSelect(id){ selectedIds.has(id) ? deselect(id) : select(id); }
+
+    function setResultLayerStyle(idx, selected){
+      const lyr = resultLayers[idx]; const color = resultColors[idx] || '#c62828';
+      if(!lyr) return;
+      const style = selected ? { color:'#22c55e', weight:4, fillColor:'#22c55e', fillOpacity:0.28 } : { color, weight:3, fillColor:color, fillOpacity:.25 };
+      try { lyr.setStyle ? lyr.setStyle(style) : null; lyr.eachLayer && lyr.eachLayer(l=>l.setStyle && l.setStyle(style)); } catch {}
+    }
+    function selectResult(idx){ if(idx<0 || idx>=resultLayers.length || selectedResultIds.has(idx)) return; selectedResultIds.add(idx); setResultLayerStyle(idx,true); updateSelectedCount(); }
+    function deselectResult(idx){ if(!selectedResultIds.has(idx)) return; selectedResultIds.delete(idx); setResultLayerStyle(idx,false); updateSelectedCount(); }
+    function toggleResult(idx){ selectedResultIds.has(idx) ? deselectResult(idx) : selectResult(idx); }
+
+    function computeSelectedAreaHa(){
+      try {
+        let totalM2=0;
+        for(const id of selectedIds){
+          const it=allItems.get(id); if(!it||!it.feature) continue;
+          const a=turf.area(it.feature); if(Number.isFinite(a)) totalM2+=a;
+        }
+        for(const idx of selectedResultIds){
+          const f=resultFeatures[idx]; if(!f) continue;
+          const a=turf.area(f); if(Number.isFinite(a)) totalM2+=a;
+        }
+        return Math.round((totalM2/10000)*100)/100;
+      } catch { return 0; }
+    }
+    function computeTotalAreaHa(){
+      try{
+        let totalM2=0;
+        for(const it of allItems.values()){
+          if(!it||!it.feature) continue;
+          const a=turf.area(it.feature); if(Number.isFinite(a)) totalM2+=a;
+        }
+        for(const f of resultFeatures){
+          if(!f) continue;
+          const a=turf.area(f); if(Number.isFinite(a)) totalM2+=a;
+        }
+        return Math.round((totalM2/10000)*100)/100;
+      }catch{return 0;}
+    }
+    function updateSelectedCount(){
+      const n = selectedIds.size + selectedResultIds.size;
+      const ha = computeSelectedAreaHa();
+      const elN=document.getElementById('countSelected'); const elHa=document.getElementById('haSelected');
+      if(elN) elN.textContent=String(n);
+      if(elHa) elHa.textContent=ha.toFixed(2);
+      const totalHa=document.getElementById('totalHa');
+      if(totalHa) totalHa.textContent = computeTotalAreaHa().toFixed(2);
+    }
+
+    function clearAll(){ stopFillMode(); for(const {layer} of allItems.values()){ try{ map.removeLayer(layer);}catch{} } allItems.clear(); selectedIds.clear(); selectedResultIds.clear(); updateSelectedCount(); const list=document.getElementById('list'); list.innerHTML=''; const empty=document.getElementById('listEmpty'); if(empty){ list.appendChild(empty); empty.style.display=''; } for(const l of resultLayers){ try{ map.removeLayer(l);}catch{} } for(const lbl of resultLabels){ try{ map.removeLayer(lbl);}catch{} } resultLayers.length=0; resultFeatures.length=0; resultColors.length=0; resultLabels.length=0; lastResult=null; updateSelectedCount(); }
+
+    function fitAllBounds(){ const group = L.featureGroup([...Array.from(allItems.values()).map(it=>it.layer)]); if(group.getLayers().length){ map.fitBounds(group.getBounds().pad(0.15)); } }
+
+    async function readKmlText(file){ try { return await file.text(); } catch {} try { const ab=await file.arrayBuffer(); return new TextDecoder('utf-8').decode(ab); } catch {} try { const ab=await file.arrayBuffer(); return new TextDecoder('windows-1252').decode(ab); } catch {} return ''; }
+    function extractPolygonFeaturesFromFeature(src){ const props=(src&&src.properties)||{}; const name=props.name||props.NOME||props.Nome; const g=src&&src.geometry; const makeF=geom=>({ type:'Feature', properties:{ ...props, name }, geometry: geom }); if(!g) return []; if(g.type==='Polygon'||g.type==='MultiPolygon') return [makeF(g)]; if(g.type==='GeometryCollection'&&Array.isArray(g.geometries)){ const out=[]; g.geometries.forEach(gg=>{ if(gg&&(gg.type==='Polygon'||gg.type==='MultiPolygon')) out.push(makeF(gg)); }); return out; } return []; }
+
+    async function handleFiles(files){
+      const fileArr = Array.from(files || []);
+      if(fileArr.length){ const nm = fileArr[0].name || ''; const idx = nm.lastIndexOf('.'); lastInputBaseName = (idx>0 ? nm.slice(0,idx) : nm) || 'talhoes'; }
+      for(const file of fileArr){ if(!file.name.toLowerCase().endsWith('.kml')) continue; const text = await readKmlText(file); if(!text.trim()) continue; const xml = new DOMParser().parseFromString(text, 'text/xml'); if(!toGeoJSON || !toGeoJSON.kml){ alert('toGeoJSON indisponível.'); return; } const gj = toGeoJSON.kml(xml); if(!gj || !gj.features) continue; let count=0; gj.features.forEach((f,idx)=>{ const list = extractPolygonFeaturesFromFeature(f); list.forEach((pf,k)=>{ const nm = pf.properties && pf.properties.name ? pf.properties.name : `${file.name} #${idx+1}${list.length>1?'-'+(k+1):''}`; addFeatureToMap(pf,nm,file.name); count++; }); }); console.log(`Carregado: ${file.name} (${count} polígonos)`); }
+      fitAllBounds();
+      updateSelectedCount();
+    }
+
+    function safeClean(feature){ try { const cleaned = turf.buffer(feature, 0, { units:'meters' }); if(cleaned && cleaned.geometry) return cleaned; } catch {} return feature; }
+    function safeUnion(a,b){ try { const u=turf.union(a,b); if(u) return u; } catch {} try { const fc={ type:'FeatureCollection', features:[a,b] }; const c=turf.combine(fc); if(c&&c.features&&c.features[0]) return c.features[0]; } catch {} return a; }
+    function toSingleFeature(geo){ if(!geo) return null; if(geo.type==='Feature') return geo; if(geo.type==='FeatureCollection'){ if(!geo.features||!geo.features.length) return null; let acc=geo.features[0]; for(let i=1;i<geo.features.length;i++) acc=safeUnion(acc,geo.features[i]); return acc; } return { type:'Feature', properties:{}, geometry: geo.geometry||geo } }
+    function makeAreaLabel(feature, text){
+      try{
+        const center = (turf.centroid(feature).geometry && turf.centroid(feature).geometry.coordinates) || null;
+        const coords = center ? [center[1],center[0]] : null;
+        if(!coords) return null;
+        const html = `<div class="area-badge"><span class="area-num">${escapeHtml(text)}</span><span class="area-unit">ha</span></div>`;
+        return L.marker(coords,{ interactive:false, icon:L.divIcon({ className:'area-label', html })});
+      }catch{return null;}
+    }
+    function addResultLabel(idx, feature){
+      const ha = computeAreaHa(feature);
+      const text = ha!==null ? `${ha.toFixed(2)}` : '';
+      const lbl = makeAreaLabel(feature,text);
+      if(lbl){ lbl.addTo(map); resultLabels[idx]=lbl; }
+    }
+    function removeResultLabel(idx){ const lbl=resultLabels[idx]; if(lbl){ try{ map.removeLayer(lbl);}catch{} } resultLabels[idx]=undefined; }
+
+    function getSelectedFeatures(){
+      const feats=[];
+      for(const id of selectedIds){ const it=allItems.get(id); if(it) feats.push(it.feature); }
+      for(const idx of selectedResultIds){ const f=resultFeatures[idx]; if(f) feats.push(f); }
+      return feats;
+    }
+
+    function captureState(){
+      const deep = obj => JSON.parse(JSON.stringify(obj));
+      return {
+        nextId,
+        lastInputBaseName,
+        items: Array.from(allItems.values()).map(it => ({
+          id: it.id,
+          name: it.name,
+          fileName: it.fileName,
+          color: it.color,
+          feature: deep(it.feature)
+        })),
+        results: resultFeatures.map((f,i)=>({ feature: deep(f), color: resultColors[i] || null })),
+        selectedIds: Array.from(selectedIds),
+        selectedResultIds: Array.from(selectedResultIds)
+      };
+    }
+    function restoreState(snapshot){
+      if(!snapshot) return;
+      clearAll();
+      nextId = 1;
+      lastInputBaseName = snapshot.lastInputBaseName || 'talhoes';
+      for(const it of snapshot.items || []){
+        const id = it.id || nextId++;
+        const color = it.color || basePalette[(id-1)%basePalette.length];
+        const layer=L.geoJSON(it.feature,{ style:()=>({ ...baseStyle, color, fillColor: color }) }).addTo(map);
+        layer.eachLayer(l=>{ l.on('click',()=>toggleSelect(id)); l.options.pmIgnore=true; });
+        allItems.set(id,{ id, layer, feature: it.feature, name: it.name, fileName: it.fileName, color });
+        nextId = Math.max(nextId, id+1);
+      }
+      for(let i=0;i<(snapshot.results||[]).length;i++){
+        const r = snapshot.results[i];
+        if(!r || !r.feature) continue;
+        const color = r.color || '#c62828';
+        const layer=L.geoJSON(r.feature,{ style:()=>({ color, weight:3, fillColor: color, fillOpacity:.25 }) }).addTo(map);
+        layer.eachLayer && layer.eachLayer(l=>{ l.on('click',()=>toggleResult(i)); });
+        resultFeatures.push(r.feature);
+        resultLayers.push(layer);
+        resultColors.push(color);
+        addResultLabel(i, r.feature);
+      }
+      selectedIds.clear(); (snapshot.selectedIds||[]).forEach(id=>select(id));
+      selectedResultIds.clear(); (snapshot.selectedResultIds||[]).forEach(idx=>selectResult(idx));
+      lastResult = { type:'FeatureCollection', features:[...resultFeatures] };
+      // Rebuild result items in sidebar
+      for(let i=0;i<resultFeatures.length;i++){
+        if(document.getElementById('result-item-'+i)) continue;
+        appendResultItem(i, resultFeatures[i]);
+      }
+      updateSelectedCount();
+    }
+    function pushUndo(){
+      undoStack.push(captureState());
+      if(undoStack.length>30) undoStack.shift();
+      redoStack.length = 0;
+      updateUndoButtons();
+    }
+    function undo(){
+      if(!undoStack.length) return;
+      const snap = undoStack.pop();
+      redoStack.push(captureState());
+      restoreState(snap);
+      updateUndoButtons();
+      notifyCenter('Desfeito','success',1000);
+    }
+    function redo(){
+      if(!redoStack.length) return;
+      const snap = redoStack.pop();
+      undoStack.push(captureState());
+      restoreState(snap);
+      updateUndoButtons();
+      notifyCenter('Refeito','success',1000);
+    }
+    function updateUndoButtons(){
+      const undoBtn = document.getElementById('btnUndoFloating');
+      const redoBtn = document.getElementById('btnRedoFloating');
+      if(undoBtn) undoBtn.disabled = undoStack.length===0;
+      if(redoBtn) redoBtn.disabled = redoStack.length===0;
+    }
+
+    function mergeSelected(){
+      const feats = getSelectedFeatures(); if(!feats.length){ alert('Selecione ao menos um talhão.'); return; }
+      const tolM = Number(document.getElementById('tol').value||0);
+      try {
+        pushUndo();
+        const cleaned = feats.map(safeClean);
+        let merged = null;
+        if(tolM>0){ const buffered = cleaned.map(f => turf.buffer(f,tolM,{units:'meters'})); merged = buffered.reduce((acc,cur)=>acc?safeUnion(acc,cur):cur,null); try{ const shr = turf.buffer(merged,-tolM,{units:'meters'}); if(shr&&shr.geometry) merged = shr; } catch{} } else { merged = cleaned.reduce((acc,cur)=>acc?safeUnion(acc,cur):cur,null); }
+        if(!merged){ alert('Falha ao mesclar.'); return; }
+        const one = toSingleFeature(merged); if(!one){ alert('Falha ao normalizar.'); return; }
+        // remove originais selecionados
+        for(const id of Array.from(selectedIds)){ const it = allItems.get(id); if(it){ try{ map.removeLayer(it.layer);}catch{} const row=document.getElementById('item-'+id); if(row&&row.parentNode) row.parentNode.removeChild(row); allItems.delete(id); } }
+        selectedIds.clear(); updateSelectedCount();
+        // remover resultados selecionados (para não duplicar)
+        const toRemove = Array.from(selectedResultIds).sort((a,b)=>b-a);
+        for(const idx of toRemove){
+          const lyr=resultLayers[idx]; try{ map.removeLayer(lyr);}catch{}
+          removeResultLabel(idx);
+          resultLayers.splice(idx,1); resultFeatures.splice(idx,1); resultColors.splice(idx,1); resultLabels.splice(idx,1);
+        }
+        selectedIds.clear(); selectedResultIds.clear(); updateSelectedCount();
+        // adicionar resultado com cor distinta
+        resultFeatures.push(one);
+        const palette=['#ef4444','#22c55e','#3b82f6','#f59e0b','#a855f7','#14b8a6','#e11d48','#10b981','#6366f1','#84cc16'];
+        const color = palette[(resultFeatures.length-1)%palette.length]; resultColors.push(color);
+        const idxNew = resultFeatures.length-1;
+        const rLayer = L.geoJSON(one, { style: ()=>({ color, weight:3, fillColor:color, fillOpacity:.25 }) }).addTo(map);
+        rLayer.eachLayer && rLayer.eachLayer(l=>{ l.on('click',()=>toggleResult(idxNew)); });
+        resultLayers.push(rLayer);
+        addResultLabel(idxNew, one);
+        try{ map.fitBounds(rLayer.getBounds().pad(0.15)); }catch{}
+        lastResult = { type:'FeatureCollection', features:[...resultFeatures] };
+        appendResultItem(idxNew, one);
+        notifyCenter('Mescla concluída','success',1600);
+      } catch(e){ console.error(e); alert('Erro durante a mescla.'); }
+    }
+
+    function computeAreaHa(feature){ try{ const a=turf.area(feature); if(Number.isFinite(a)) return Number((a/10000).toFixed(4)); }catch{} return null; }
+    function sanitizeForKml(fc){ try{ const out={ type:'FeatureCollection', features:[] }; (fc.features||[]).forEach((f,i)=>{ if(!f||!f.geometry) return; const src=f.properties||{}; const props={}; for(const k in src){ if(!Object.prototype.hasOwnProperty.call(src,k)) continue; const v=src[k]; if(v===undefined||v===null) props[k]=''; else if(typeof v==='object'){ try{ props[k]=JSON.stringify(v);}catch{ props[k]=String(v);} } else props[k]=String(v); } if(props.name===undefined) props.name='resultado_'+(i+1); const ha = computeAreaHa(f); if(ha!==null) props.ha = ha; out.features.push({ type:'Feature', properties:props, geometry:f.geometry }); }); return out; } catch { return fc; } }
+
+    async function ensureToKml(){ if(typeof window.tokml!=='undefined') return true; try{ await loadScriptOnce('https://cdn.jsdelivr.net/npm/tokml@0.4.0/tokml.js'); }catch{} return typeof window.tokml!=='undefined'; }
+    function basicGeoJsonToKml(fc){ if(!fc||!fc.features) return ''; const header='<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document>'; const footer='</Document></kml>'; function ringToStr(r){ return r.map(([x,y])=>`${x},${y},0`).join(' ');} const placemarks = fc.features.map((f,i)=>{ if(!f||!f.geometry) return ''; const nm=(f.properties&&(f.properties.name||f.properties.NOME||f.properties.Nome))||`feature_${i+1}`; const g=f.geometry; if(g.type==='Polygon'){ const rings=g.coordinates||[]; if(!rings.length) return ''; const outer=`<outerBoundaryIs><LinearRing><coordinates>${ringToStr(rings[0])}</coordinates></LinearRing></outerBoundaryIs>`; const inners=rings.slice(1).map(r=>`<innerBoundaryIs><LinearRing><coordinates>${ringToStr(r)}</coordinates></LinearRing></innerBoundaryIs>`).join(''); return `<Placemark><name>${nm}</name><Polygon><tessellate>1</tessellate>${outer}${inners}</Polygon></Placemark>`; } if(g.type==='MultiPolygon'){ const polys=(g.coordinates||[]).map(poly=>{ if(!poly||!poly.length) return ''; const outer=`<outerBoundaryIs><LinearRing><coordinates>${ringToStr(poly[0])}</coordinates></LinearRing></outerBoundaryIs>`; const inners=poly.slice(1).map(r=>`<innerBoundaryIs><LinearRing><coordinates>${ringToStr(r)}</coordinates></LinearRing></innerBoundaryIs>`).join(''); return `<Polygon><tessellate>1</tessellate>${outer}${inners}</Polygon>`; }).join(''); return `<Placemark><name>${nm}</name>${polys}</Placemark>`; } return ''; }).join(''); return header+placemarks+footer; }
+
+    function applyRedStyleToKml(kmlString){
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(kmlString, 'text/xml');
+        const kml = doc.getElementsByTagName('kml')[0] || doc.documentElement;
+        const documentNode = doc.getElementsByTagName('Document')[0] || (()=>{ const d=doc.createElement('Document'); kml.appendChild(d); return d;})();
+        const styleId = 'talhaoStyle';
+        let style = doc.getElementById(styleId);
+        if(!style){
+          style = doc.createElement('Style'); style.setAttribute('id', styleId);
+          const line = doc.createElement('LineStyle');
+          const lineColor = doc.createElement('color'); lineColor.textContent = 'ff0000ff'; // KML usa AABBGGRR
+          const width = doc.createElement('width'); width.textContent = '2.5';
+          line.appendChild(lineColor); line.appendChild(width);
+          const poly = doc.createElement('PolyStyle');
+          const polyColor = doc.createElement('color'); polyColor.textContent = '4d0000ff'; // semi-transparente
+          poly.appendChild(polyColor);
+          style.appendChild(line); style.appendChild(poly);
+          documentNode.insertBefore(style, documentNode.firstChild);
+        }
+        const placemarks = Array.from(doc.getElementsByTagName('Placemark'));
+        placemarks.forEach(pm => {
+          let su = pm.getElementsByTagName('styleUrl')[0];
+          if(!su){ su = doc.createElement('styleUrl'); pm.insertBefore(su, pm.firstChild); }
+          su.textContent = `#${styleId}`;
+        });
+        return new XMLSerializer().serializeToString(doc);
+      } catch { return kmlString; }
+    }
+
+    function exportKML(){
+      if(!lastResult || !lastResult.features || !lastResult.features.length){ alert('Nada para exportar. Faça uma mescla.'); return; }
+      (async ()=>{
+        try{
+          let kmlString=''; const ok = await ensureToKml(); if(ok){ kmlString = tokml(sanitizeForKml(lastResult), { name:'name' }); } else { kmlString = basicGeoJsonToKml(sanitizeForKml(lastResult)); }
+          if(!kmlString) throw new Error('KML vazio');
+          const styled = applyRedStyleToKml(kmlString);
+          const outName = `${lastInputBaseName || 'talhoes'}_talhoes_mesclados.kml`;
+          const blob = new Blob([styled], { type:'application/vnd.google-earth.kml+xml' }); saveAs(blob,outName);
+        }catch(e){ console.error(e); alert('Falha ao exportar KML.'); }
+      })();
+    }
+
+    // Loader dinâmico (reuso)
+    const _loadedScripts = new Set();
+    function loadScriptOnce(src){ return new Promise((resolve,reject)=>{ if(_loadedScripts.has(src)) return resolve(); const s=document.createElement('script'); s.src=src; s.async=true; s.onload=()=>{ _loadedScripts.add(src); resolve(); }; s.onerror=reject; document.head.appendChild(s); }); }
+
+    async function ensureShpWrite(){
+      if(typeof window.shpwrite !== 'undefined') return true;
+      const sources = [
+        'lib/shpwrite.min.js',
+        'https://unpkg.com/shp-write@0.3.2/shpwrite.js',
+        'https://cdn.jsdelivr.net/gh/mapbox/shp-write@0.3.2/shpwrite.js'
+      ];
+      for(const src of sources){
+        try { await loadScriptOnce(src); if(typeof window.shpwrite !== 'undefined') return true; } catch {}
+      }
+      return typeof window.shpwrite !== 'undefined';
+    }
+    async function exportSHP(){
+      if(!lastResult || !lastResult.features || !lastResult.features.length){ alert('Nada para exportar. Faça uma mescla.'); return; }
+      if(typeof JSZip==='undefined'){ alert('Biblioteca JSZip indisponível.'); return; }
+      try {
+        const ok = await ensureShpWrite(); if(!ok){ alert('Biblioteca shpwrite indisponível.'); return; }
+        const rows=[]; const geometries=[]; (lastResult.features||[]).forEach(f=>{ if(!f||!f.geometry) return; const t=f.geometry.type; if(t!=='Polygon'&&t!=='MultiPolygon') return; const props={...(f.properties||{})}; const ha = computeAreaHa(f); if(ha!==null) props.ha = ha; props.stroke='#c62828'; props['stroke-width']=2.5; props.fill='#c62828'; props['fill-opacity']=0.3; rows.push(props); geometries.push(f.geometry.coordinates); }); if(!geometries.length){ alert('Sem polígonos para exportar.'); return; }
+        await new Promise((resolve,reject)=>{ shpwrite.write(rows,'POLYGON',geometries,(err,files)=>{ if(err) return reject(err); try{ const zip=new JSZip(); const folder=zip.folder('export'); const base=`${lastInputBaseName || 'talhoes'}_talhoes_mesclados`; folder.file(base+'.shp', files.shp.buffer, {binary:true}); folder.file(base+'.shx', files.shx.buffer, {binary:true}); folder.file(base+'.dbf', files.dbf.buffer, {binary:true}); folder.file(base+'.prj', files.prj); const qml = `<!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>\n<qgis version=\"3\" styleCategories=\"Symbology\">\n  <renderer-v2 type=\"singleSymbol\">\n    <symbols>\n      <symbol type=\"fill\" alpha=\"1\" name=\"0\">\n        <layer class=\"SimpleFill\" enabled=\"1\">\n          <prop k=\"color\" v=\"198,40,40,76\"/>\n          <prop k=\"outline_color\" v=\"198,40,40,255\"/>\n          <prop k=\"outline_width\" v=\"0.8\"/>\n        </layer>\n      </symbol>\n    </symbols>\n  </renderer-v2>\n</qgis>`; folder.file(base+'.qml', qml); zip.generateAsync({type:'blob',compression:'STORE'}).then(blob=>{ saveAs(blob,base+'.zip'); resolve(); }).catch(reject); }catch(e){ reject(e); } }); });
+      } catch(e){ console.error(e); alert('Falha ao exportar Shapefile.'); }
+    }
+
+    // Edição
+    function setEditableForItem(item, enabled){ try{ item.layer.eachLayer(l=>{ l.options.pmIgnore=!enabled; if(!l.pm) return; if(enabled) l.pm.enable({ allowSelfIntersection:false, snappable:true, snapDistance:20 }); else l.pm.disable(); }); }catch{} }
+    function setEditableForResultIndex(idx, enabled){ const lyr=resultLayers[idx]; if(!lyr) return; try{ lyr.eachLayer?lyr.eachLayer(l=>{ if(l.pm){ if(enabled) l.pm.enable(); else l.pm.disable(); } l.options.pmIgnore=!enabled; }):(lyr.pm?(enabled?lyr.pm.enable():lyr.pm.disable()):null); }catch{} }
+    function enableEditSelected(){
+      for(const [id,item] of allItems){ setEditableForItem(item, selectedIds.has(id)); }
+      for(let i=0;i<resultLayers.length;i++){ setEditableForResultIndex(i,true); }
+      editActive=true;
+      const btnSave=document.getElementById('btnSaveEdits'), btnCancel=document.getElementById('btnCancelEdits'), btnEditEl=document.getElementById('btnEdit');
+      if(btnSave) btnSave.style.display=''; if(btnCancel) btnCancel.style.display=''; if(btnEditEl) btnEditEl.style.display='none';
+      notifyCenter('Edição ativada','success',1200);
+    }
+    function disableAllEditing(){
+      for(const [,item] of allItems){ setEditableForItem(item,false); }
+      for(let i=0;i<resultLayers.length;i++){ setEditableForResultIndex(i,false); }
+      editActive=false;
+      const btnSave=document.getElementById('btnSaveEdits'), btnCancel=document.getElementById('btnCancelEdits'), btnEditEl=document.getElementById('btnEdit');
+      if(btnSave) btnSave.style.display='none'; if(btnCancel) btnCancel.style.display='none'; if(btnEditEl) btnEditEl.style.display='';
+    }
+    function toSingleFeatureFromLayer(layer){ try{ const gj=layer.toGeoJSON(); if(!gj) return null; if(gj.type==='Feature') return gj; if(gj.type==='FeatureCollection'){ if(!gj.features||!gj.features.length) return null; let acc=gj.features[0]; for(let i=1;i<gj.features.length;i++) acc=safeUnion(acc,gj.features[i]); return acc; } return { type:'Feature', properties:{}, geometry:(gj.geometry||gj) }; } catch { return null; } }
+    function saveEdits(){  pushUndo(); for(const id of selectedIds){ const it=allItems.get(id); if(!it) continue; const one=toSingleFeatureFromLayer(it.layer); if(one&&one.geometry){ it.feature=one; } setEditableForItem(it,false);} for(let i=0;i<resultLayers.length;i++){ const lyr=resultLayers[i]; const one=toSingleFeatureFromLayer(lyr); if(one&&one.geometry){ resultFeatures[i]=one; removeResultLabel(i); addResultLabel(i,one); } setEditableForResultIndex(i,false);} lastResult={ type:'FeatureCollection', features:[...resultFeatures] }; editActive=false; updateSelectedCount(); notifyCenter('Edições salvas','success',1200); }
+    function cancelEdits(){
+      for(const id of selectedIds){
+        const it=allItems.get(id); if(!it) continue;
+        try{ map.removeLayer(it.layer);}catch{}
+        const color = it.color || baseStyle.color;
+        const layer=L.geoJSON(it.feature,{ style:()=>({ ...baseStyle, color, fillColor: color }) }).addTo(map);
+        layer.eachLayer(l=>{ l.on('click',()=>toggleSelect(id)); l.options.pmIgnore=true; });
+        it.layer=layer;
+      }
+      for(let i=0;i<resultLayers.length;i++){
+        const feat=resultFeatures[i]; const old=resultLayers[i];
+        try{ map.removeLayer(old);}catch{}
+        removeResultLabel(i);
+        const layer=L.geoJSON(feat,{ style:()=>({ color: resultColors[i]||'#f97316', weight:3, fillColor: resultColors[i]||'#f97316', fillOpacity:.25 }) }).addTo(map);
+        layer.eachLayer && layer.eachLayer(l=>{ l.on('click',()=>toggleResult(i)); });
+        addResultLabel(i, feat);
+        if(selectedResultIds.has(i)) setResultLayerStyle(i,true);
+        resultLayers[i]=layer;
+      }
+      disableAllEditing(); stopFillMode(); notifyCenter('Edições canceladas','success',1200);
+    }
+
+    // Preencher buracos desenhando um patch e unindo ao polígono alvo
+    function stopFillMode(){ if(!fillMode) return; fillMode=false; if(fillControlBtn) fillControlBtn.classList.remove('active'); try{ map.pm.disableDraw('Polygon'); }catch{} }
+    function startFillMode(){
+      if(!map.pm){ alert('Ferramenta de desenho indisponível.'); return; }
+      stopFillMode();
+      fillMode = true;
+      if(fillControlBtn) fillControlBtn.classList.add('active');
+      try { map.pm.enableDraw('Polygon', { snappable:true, snapDistance:20, templineStyle:{color:'#c62828'}, hintlineStyle:{color:'#c62828',dashArray:[5,5]} }); } catch {}
+      notifyCenter('Desenhe o polígono que deseja preencher e finalize o desenho.','success',1800);
+    }
+    function applyPatchToLayer(layer, color, style){
+      pushUndo();
+      const patch = toSingleFeatureFromLayer(layer); try{ map.removeLayer(layer);}catch{}
+      if(!patch||!patch.geometry){ notifyCenter('Falha ao capturar o desenho.','error',1500); return false; }
+      let target=null; let targetId=null; let targetType='result'; // result|item
+      // Prioriza itens selecionados
+      for(const id of selectedIds){ const it=allItems.get(id); if(!it||!it.feature) continue; try{ if(turf.booleanIntersects(it.feature, patch)){ target=it; targetId=id; targetType='item'; break; } }catch{} if(!target){ target=it; targetId=id; targetType='item'; break; }
+      }
+      // Senão, tenta resultados
+      if(!target && resultFeatures.length){
+        for(let i=0;i<resultFeatures.length;i++){
+          const f=resultFeatures[i]; if(!f||!f.geometry) continue;
+          try{ if(turf.booleanIntersects(f,patch)){ target=i; targetType='result'; break; } }catch{}
+        }
+        if(target===null) target = resultFeatures.length-1 >=0 ? resultFeatures.length-1 : null;
+      }
+      if(target===null){ notifyCenter('Nenhum polígono para aplicar o preenchimento. Selecione um alvo.','error',1800); return false; }
+      if(targetType==='item'){
+        const it = target;
+        const merged = safeUnion(safeClean(it.feature), safeClean(patch));
+        if(!merged||!merged.geometry){ notifyCenter('Não foi possível unir ao talhão.','error',1600); return false; }
+        it.feature = merged;
+        try{ map.removeLayer(it.layer);}catch{}
+        const newLayer=L.geoJSON(merged,{ style:()=>({...selectedStyle}) }).addTo(map);
+        newLayer.eachLayer(l=>{ l.on('click',()=>toggleSelect(it.id)); l.options.pmIgnore=true; });
+        it.layer=newLayer;
+      } else {
+        const idx = typeof target==='number'?target:0;
+        const merged = safeUnion(safeClean(resultFeatures[idx]), safeClean(patch));
+        if(!merged||!merged.geometry){ notifyCenter('Não foi possível unir ao resultado.','error',1600); return false; }
+        resultFeatures[idx]=merged;
+        const oldLayer=resultLayers[idx];
+        try{ map.removeLayer(oldLayer);}catch{}
+        removeResultLabel(idx);
+        const newLayer=L.geoJSON(merged,{ style:()=>({ color: resultColors[idx]||color||'#c62828', weight:3, fillColor: resultColors[idx]||color||'#c62828', fillOpacity:.25 }) }).addTo(map);
+        resultLayers[idx]=newLayer;
+        addResultLabel(idx, merged);
+        try{ map.fitBounds(newLayer.getBounds().pad(0.05)); }catch{}
+      }
+      lastResult={ type:'FeatureCollection', features:[...resultFeatures] };
+      updateSelectedCount();
+      notifyCenter('Preenchimento aplicado','success',1400);
+      return true;
+    }
+    function onPmCreate(e){
+      if(!fillMode) return;
+      stopFillMode();
+      applyPatchToLayer(e.layer, '#c62828', selectedStyle);
+    }
+
+    function applyButtonIcons(){
+      // Icons are already inline in HTML — nothing to inject
+    }
+
+    function addFillHoleControl(){
+      if(!map || !L || !L.control) return;
+      const ctrl = L.control({ position:'topleft' });
+      ctrl.onAdd = function(){
+        const container = L.DomUtil.create('div','leaflet-bar');
+        const btn = L.DomUtil.create('a','leaflet-bar-part leaflet-bar-part-single icon-btn', container);
+        btn.href = '#';
+        btn.title = 'Preencher buraco';
+        btn.setAttribute('aria-label','Preencher buraco');
+        btn.innerHTML = '<svg style="width:14px;height:14px;stroke:currentColor;stroke-width:1.8;fill:none" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h6v10"/><path d="M14 4v6h6"/></svg>';
+        L.DomEvent.on(btn,'click', L.DomEvent.stop)
+          .on(btn,'mousedown', L.DomEvent.stopPropagation)
+          .on(btn,'dblclick', L.DomEvent.stopPropagation)
+          .on(btn,'click', () => startFillMode());
+        fillControlBtn = btn;
+        return container;
+      };
+      ctrl.addTo(map);
+    }
+
+    function addFloatingMergeButton(){
+      // Floating buttons are already in HTML (inside #mapWrap .floating-toolbar)
+      // Just wire up the undo/redo event listeners
+      const btnUndo = document.getElementById('btnUndoFloating');
+      const btnRedo = document.getElementById('btnRedoFloating');
+      if(btnUndo) btnUndo.addEventListener('click', undo);
+      if(btnRedo) btnRedo.addEventListener('click', redo);
+      updateUndoButtons();
+    }
+
+    function escapeHtml(str){ return String(str).replace(/[&<>"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s])); }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initMap();
+      if(map && map.on){ map.on('pm:create', onPmCreate); }
+      applyButtonIcons();
+      addFloatingMergeButton();
+      updateUndoButtons();
+      document.getElementById('fileInput').addEventListener('change', e => handleFiles(e.target.files));
+      document.getElementById('btnClear').addEventListener('click', async () => {
+        const ok = await inlineConfirm('Remover todas as camadas e seleções?','Limpar mapa');
+        if(ok){ pushUndo(); clearAll(); updateUndoButtons(); }
+      });
+      document.getElementById('btnMerge').addEventListener('click', mergeSelected);
+      document.getElementById('btnEdit').addEventListener('click', () => { if(!editActive) enableEditSelected(); else disableAllEditing(); });
+      document.getElementById('btnSaveEdits').addEventListener('click', saveEdits);
+      document.getElementById('btnCancelEdits').addEventListener('click', cancelEdits);
+      document.getElementById('btnExportKML').addEventListener('click', exportKML);
+      document.getElementById('btnExportSHP').addEventListener('click', exportSHP);
+      document.getElementById('btnSelectAll').addEventListener('click', () => { for(const id of allItems.keys()) select(id); for(let i=0;i<resultLayers.length;i++) selectResult(i); });
+      document.getElementById('btnSelectNone').addEventListener('click', () => { for(const id of Array.from(selectedIds)) deselect(id); for(const idx of Array.from(selectedResultIds)) deselectResult(idx); });
+    });
+  </script>
+
+<script>
+/* ── Pulvion: herança de tema do painel pai ── */
+function _fixMap(){
+  setTimeout(function(){ try{ if(window.map) window.map.invalidateSize(true); }catch(_){} }, 100);
+  setTimeout(function(){ try{ if(window.map) window.map.invalidateSize(true); }catch(_){} }, 500);
+}
+window.addEventListener('storage', function(e){
+  if(e.key === 'pulvion_theme' && e.newValue){
+    document.documentElement.setAttribute('data-theme', e.newValue);
+    _fixMap();
+  }
+});
+window.addEventListener('resize', _fixMap);
+</script>
+</body>
+</html>
