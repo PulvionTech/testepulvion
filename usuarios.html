@@ -32,7 +32,7 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-tap-highlight-color:transparent}
-body{font-family:'Barlow',sans-serif;font-size:15px;color:var(--text);background:var(--bg);min-height:100vh;transition:background .28s,color .28s;padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+body{font-family:'Barlow',sans-serif;font-size:15px;color:var(--text);background:var(--bg);min-height:100vh;transition:background .28s,color .28s;padding-bottom:32px}
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-thumb{background:var(--gold-bdr);border-radius:3px}
 
@@ -67,9 +67,11 @@ body{font-family:'Barlow',sans-serif;font-size:15px;color:var(--text);background
 .fc-body{padding:16px;display:flex;flex-direction:column;gap:11px}
 .field{display:flex;flex-direction:column;gap:5px}
 .field label{font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.field input[type=number]::-webkit-inner-spin-button,
+.field input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .field input,.field select{width:100%;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rsm);font-family:'Barlow',sans-serif;font-size:.9rem;color:var(--text);outline:none;transition:border-color .2s;-webkit-appearance:none}
 .field input:focus,.field select:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim)}
-[data-theme="dark"] .field input,[data-theme="dark"] .field select{background:rgba(255,255,255,.04)}
+[data-theme="dark"] .field input,[data-theme="dark"] .field select{background:var(--surface);color:var(--text);color-scheme:dark}
 .fields-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .form-actions{display:flex;gap:8px;margin-top:4px}
 .btn-save-form{flex:1;padding:11px;border-radius:var(--rsm);background:var(--success);border:none;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.82rem;letter-spacing:.07em;text-transform:uppercase;color:#fff;cursor:pointer;transition:all .18s}
@@ -139,18 +141,19 @@ body{font-family:'Barlow',sans-serif;font-size:15px;color:var(--text);background
 .state-desc{font-size:.8rem;color:var(--muted);max-width:240px;line-height:1.65}
 
 /* SAVE BAR */
-.save-bar{position:fixed;bottom:0;left:0;right:0;z-index:9999;display:none;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px;padding-bottom:calc(12px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--border);box-shadow:0 -4px 20px rgba(0,0,0,.1);-webkit-transform:translateZ(0);transform:translateZ(0)}
+.save-bar{display:none;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;background:var(--gold-dim);border:1px solid var(--gold-bdr);border-radius:var(--r);box-shadow:0 4px 16px rgba(184,148,46,.15);margin-bottom:4px;position:sticky;top:62px;z-index:100}
 .save-bar.visible{display:flex}
-.save-bar-info{font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--dim)}
+.save-bar-info{font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--text2);flex:1}
 .save-bar-info span{color:var(--gold);font-weight:600}
-.save-bar-btns{display:flex;gap:8px}
-.btn-save-all{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:var(--rsm);background:var(--gold);border:none;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.8rem;letter-spacing:.07em;text-transform:uppercase;color:#050810;cursor:pointer;transition:all .18s;box-shadow:0 3px 12px rgba(184,148,46,.28)}
+.save-bar-btns{display:flex;gap:8px;flex-shrink:0}
+.btn-save-all{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:var(--rsm);background:var(--gold);border:none;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.07em;text-transform:uppercase;color:#050810;cursor:pointer;transition:all .18s;white-space:nowrap}
 .btn-save-all:hover{filter:brightness(1.08)}
 .btn-save-all svg{width:13px;height:13px;stroke:currentColor;stroke-width:2.5;fill:none}
-.btn-discard{padding:10px 14px;border-radius:var(--rsm);background:var(--surface);border:1px solid var(--border);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);cursor:pointer}
+.btn-discard{padding:9px 12px;border-radius:var(--rsm);background:rgba(0,0,0,.08);border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);cursor:pointer;white-space:nowrap}
+[data-theme="dark"] .btn-discard{background:rgba(255,255,255,.08)}
 
 /* TOAST */
-#toast{position:fixed;bottom:calc(72px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);padding:10px 18px;border-radius:999px;font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:#fff;opacity:0;transition:opacity .3s;pointer-events:none;z-index:10000;white-space:nowrap}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:10px 18px;border-radius:999px;font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:#fff;opacity:0;transition:opacity .3s;pointer-events:none;z-index:500;white-space:nowrap}
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -211,14 +214,10 @@ body{font-family:'Barlow',sans-serif;font-size:15px;color:var(--text);background
           </select>
         </div>
         <div class="field">
-          <label>Frente</label>
-          <select id="fFrente">
-            <option value="">— Sem frente —</option>
-            <option value="01">01</option>
-            <option value="02">02</option>
-            <option value="03">03</option>
-            <option value="04">04</option>
-          </select>
+          <label>Frente <span id="fFrenteHint" style="font-family:'IBM Plex Mono',monospace;font-size:.5rem;color:var(--dim);font-weight:400;letter-spacing:.04em"></span></label>
+          <input id="fFrente" type="number" min="1" max="99" placeholder="Ex: 1, 5, 12…" autocomplete="off"
+            style="-moz-appearance:textfield"
+            oninput="checkFrenteConflict()">
         </div>
       </div>
       <div class="log-box" id="formLog"></div>
@@ -229,22 +228,23 @@ body{font-family:'Barlow',sans-serif;font-size:15px;color:var(--text);background
     </div>
   </div>
 
+  <div class="save-bar" id="saveBar">
+    <div class="save-bar-info"><span id="pendingCount">0</span> módulo(s) com alteração pendente</div>
+    <div class="save-bar-btns">
+      <button class="btn-discard" onclick="discardChanges()">Descartar</button>
+      <button class="btn-save-all" id="saveAllBtn" onclick="saveAll()">
+        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Salvar acesso
+      </button>
+    </div>
+  </div>
   <div class="log-box" id="pageLog"></div>
   <div class="sect" id="listSect" style="display:none">Usuários cadastrados</div>
   <div id="userList"></div>
 
 </main>
 
-<div class="save-bar" id="saveBar">
-  <div class="save-bar-info"><span id="pendingCount">0</span> alteração(ões) de acesso pendente(s)</div>
-  <div class="save-bar-btns">
-    <button class="btn-discard" onclick="discardChanges()">Descartar</button>
-    <button class="btn-save-all" id="saveAllBtn" onclick="saveAll()">
-      <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-      Salvar acesso
-    </button>
-  </div>
-</div>
+
 
 <div id="toast"></div>
 
@@ -424,6 +424,50 @@ async function saveAll(){
   else showToast(`${saved} salvo(s), ${failed} falhou`,'warn');
 }
 
+/* FRENTE — normaliza valor para comparação (ex: "1" → "01") */
+function normFrente(v){ return v ? String(v).trim().padStart(2,'0') : ''; }
+
+/* Retorna o id do usuário sendo editado atualmente */
+function currentEditId(){ return document.getElementById('editId').value||null; }
+
+/* FRENTE — valida em tempo real e mostra frentes em uso */
+function checkFrenteConflict(){
+  const input = document.getElementById('fFrente');
+  const hint  = document.getElementById('fFrenteHint');
+  const val   = input.value.trim();
+  if(!val){ input.style.borderColor=''; hint.textContent=''; return; }
+
+  const editId = currentEditId();
+  const conflict = allUsers.find(u => u.id !== editId && normFrente(u.frente) === normFrente(val));
+  if(conflict){
+    input.style.borderColor='var(--danger)';
+    hint.textContent='· em uso por ' + conflict.nome.split(' ')[0];
+    hint.style.color='var(--danger)';
+  } else {
+    input.style.borderColor='var(--success)';
+    hint.textContent='· disponível';
+    hint.style.color='var(--success)';
+  }
+}
+
+/* Mostra resumo de frentes ocupadas na label */
+function updateFrenteOptions(editingUserId=null){
+  const hint = document.getElementById('fFrenteHint');
+  const used = allUsers
+    .filter(u => u.frente && u.id !== editingUserId)
+    .map(u => normFrente(u.frente))
+    .sort();
+  if(used.length){
+    hint.textContent = '· em uso: ' + used.join(', ');
+    hint.style.color = 'var(--dim)';
+  } else {
+    hint.textContent = '';
+  }
+  // Resetar borda do input
+  const input = document.getElementById('fFrente');
+  if(input) input.style.borderColor='';
+}
+
 /* FORM */
 function openForm(user=null){
   editMode=!!user;
@@ -433,7 +477,9 @@ function openForm(user=null){
   document.getElementById('fUsuario').value=user?.usuario||'';
   document.getElementById('fSenha').value=user?.senha||'';
   document.getElementById('fTipo').value=user?.tipo||'piloto';
-  document.getElementById('fFrente').value=user?.frente||'';
+  // Atualizar opções de frente antes de setar o valor
+  updateFrenteOptions(user?.id||null);
+  document.getElementById('fFrente').value=user?.frente ? parseInt(user.frente,10) : '';
   setLog('formLog','','');
   document.getElementById('formCard').classList.add('show');
   setTimeout(()=>document.getElementById('fNome').focus(),50);
@@ -447,9 +493,16 @@ async function saveUser(){
   const usuario=document.getElementById('fUsuario').value.trim().toLowerCase();
   const senha=document.getElementById('fSenha').value.trim();
   const tipo=document.getElementById('fTipo').value;
-  const frente=document.getElementById('fFrente').value;
+  const frenteRaw=document.getElementById('fFrente').value.trim();
+  const frente=frenteRaw?normFrente(frenteRaw):'';
   const editId=document.getElementById('editId').value;
   if(!nome||!usuario||!senha){setLog('formLog','⚠ Preencha nome, usuário e senha.','err');return;}
+  // Validar frente duplicada
+  if(frente){
+    const editId2=document.getElementById('editId').value;
+    const conflict=allUsers.find(u=>u.id!==editId2&&normFrente(u.frente)===normFrente(frente));
+    if(conflict){setLog('formLog','⚠ Frente '+frente+' já está com '+conflict.nome.split(' ')[0]+'.','err');return;}
+  }
   const btn=document.getElementById('btnSaveUser');
   btn.disabled=true;setLog('formLog','Salvando…','loading');
   const payload=editMode
